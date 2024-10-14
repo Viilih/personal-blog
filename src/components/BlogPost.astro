@@ -1,0 +1,39 @@
+---
+interface Props {
+  postTitle: string;
+  url: string | undefined;
+}
+const { postTitle, url } = Astro.props;
+const formatDate = (date: Date) => {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${month}-${day}-${year}`;
+};
+
+const today = new Date();
+const formattedDate = formatDate(today);
+---
+
+<li>
+  <a href={url}>
+    {postTitle}
+  </a>
+  <h3>{formattedDate}</h3>
+</li>
+
+<style>
+  li {
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  a {
+    color: black;
+    font-weight: 400;
+  }
+</style>
