@@ -6,15 +6,17 @@ interface Props {
 }
 const { postTitle, url, pubDate } = Astro.props;
 const formatDate = (date: Date) => {
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const year = date.getFullYear();
-
+  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  const month = String(utcDate.getMonth() + 1).padStart(2, "0");
+  const day = String(utcDate.getDate()).padStart(2, "0");
+  const year = utcDate.getFullYear();
   return `${month}-${day}-${year}`;
 };
 
 const publishDate = new Date(pubDate);
+console.log(publishDate)
 const formattedDate = formatDate(publishDate);
+console.log(formattedDate)
 ---
 
 <li>

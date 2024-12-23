@@ -3,7 +3,7 @@ layout: "../../layouts/MarkdownLayout.astro"
 title: Intro to my vault
 author: Astro Learner
 description: "After learning some Astro, I couldn't stop!"
-pubDate: 2024-07-08
+pubDate: 2024-12-22
 tags: ["astro", "blogging", "learning in public", "successes"]
 ---
 ## What is this blog?
