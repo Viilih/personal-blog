@@ -2,8 +2,9 @@
 interface Props {
   postTitle: string;
   url: string | undefined;
+  pubDate: string;
 }
-const { postTitle, url } = Astro.props;
+const { postTitle, url, pubDate } = Astro.props;
 const formatDate = (date: Date) => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -12,8 +13,8 @@ const formatDate = (date: Date) => {
   return `${month}-${day}-${year}`;
 };
 
-const today = new Date();
-const formattedDate = formatDate(today);
+const publishDate = new Date(pubDate);
+const formattedDate = formatDate(publishDate);
 ---
 
 <li>
@@ -27,13 +28,17 @@ const formattedDate = formatDate(today);
   li {
     display: flex;
     width: 100%;
-    height: fit-content;
+    height: 30px;
     justify-content: space-between;
     align-items: center;
   }
 
   a {
-    color: black;
-    font-weight: 400;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  a:hover {
+    color: #0077cc;
   }
 </style>

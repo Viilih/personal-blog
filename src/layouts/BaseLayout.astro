@@ -1,28 +1,47 @@
 ---
-import "../components/global.css";
-import Navigation from "../components/Navigation.astro";
+import Sidebar from "../components/Sidebar.astro";
+import "../components/global.css"
 ---
 
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Astro</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{Astro.props.title || "My Blog"}</title>
+    <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <div>
-      <Navigation />
-      <slot />
+    <div class="container">
+      <aside>
+        <Sidebar>
+      </aside>
+      <main>
+        <slot />
+      </main>
     </div>
   </body>
 </html>
 
-<style>
-  div {
-    display: flex;
-    width: 100%;
-    gap: 2.5rem;
-  }
+<style is:global>
+.container {
+  display: flex;
+  max-width: 45vw;
+  margin: 0 auto;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+aside {
+  width: 4vw;
+  height: 156px;
+  border-right: 1px solid black;
+}
+
+main {
+  flex: 3;
+}
+
+h1,h2,h3{
+  margin-bottom: 0px;
+}
 </style>
