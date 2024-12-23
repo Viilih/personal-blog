@@ -14,9 +14,7 @@ const formatDate = (date: Date) => {
 };
 
 const publishDate = new Date(pubDate);
-console.log(publishDate)
 const formattedDate = formatDate(publishDate);
-console.log(formattedDate)
 ---
 
 <li>
@@ -34,7 +32,9 @@ console.log(formattedDate)
     justify-content: space-between;
     align-items: center;
   }
-
+  li > h3 {
+    margin: 0;
+  }
   a {
     text-decoration: none;
     color: #333;

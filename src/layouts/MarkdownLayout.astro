@@ -1,22 +1,106 @@
 ---
 import GoBackButton from "../components/GoBackButton.astro";
 import BaseLayout from "./BaseLayout.astro";
-const { frontmatter } = Astro.props;
----
-<BaseLayout pageTitle={frontmatter.title}>
-  <div class="postContainer">
-    <GoBackButton />
-    <h3>{new Date(frontmatter.pubDate).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).replace(/\//g, '-')}</h3>
-    <slot />
-  </div>
-</BaseLayout>
-<style>
-   .postContainer{
-    width: 40vw;
-   }
-</style>
 
+const { frontmatter } = Astro.props;
+
+const formatDate = (date: Date) => {
+  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  const month = String(utcDate.getMonth() + 1).padStart(2, "0");
+  const day = String(utcDate.getDate()).padStart(2, "0");
+  const year = utcDate.getFullYear();
+  return `${month}-${day}-${year}`;
+};
+
+const publishDate = new Date(frontmatter.pubDate);
+const formattedDate = formatDate(publishDate);
+---
+
+<BaseLayout pageTitle={frontmatter.title}>
+    <article class="post">
+      <GoBackButton />
+        <header class="post__header">
+            <h1 class="post__title">{frontmatter.title}</h1>
+            <div class="post__meta">
+                <h3>Created at:</h3>
+                <span class="post__date">
+                    {formattedDate}
+                </span>
+            </div>
+        </header>
+        <div class="post__content">
+            <slot />
+        </div>
+    </article>
+</BaseLayout>
+
+<style>
+.post {
+    width: 100%;
+    max-width: 65ch;
+    margin: 0 auto;
+}
+
+.post__title {
+    font-size: 2rem;
+    color: #333;
+}
+
+.post__meta {
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.post__date {
+    color: #666;
+    font-size: 1rem;
+}
+
+.post__content {
+    line-height: 1.5;
+    text-align: justify;
+}
+
+.post__content h2 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    color: #333;
+}
+
+.post__content p {
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .post {
+        padding: 0 1rem;
+    }
+
+    .post__header {
+        margin-bottom: 2rem;
+    }
+
+    .post__title {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .post__meta {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .post {
+        padding: 0 0.75rem;
+    }
+
+    .post__title {
+        font-size: 1.5rem;
+    }
+}
+</style>
