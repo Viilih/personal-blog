@@ -1,143 +1,147 @@
 ---
 import Sidebar from "../components/Sidebar.astro";
-import "../components/global.css"
+import "../components/global.css";
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{Astro.props.title || "Vili's vault"}</title>
-    <link rel="icon" type="image/x-icon" href="/public/favicon.png"/>
+    <link rel="icon" type="image/x-icon" href="/public/favicon.png" />
     <link rel="stylesheet" href="/components/global.css" />
-</head>
-<body>
+  </head>
+  <body>
     <div class="layout">
-        <div class="layout__sidebar">
-            <aside>
-                <Sidebar />
-            </aside>
-            <div class="layout__divider" role="separator" aria-orientation="vertical"></div>
+      <div class="layout__sidebar">
+        <aside>
+          <Sidebar />
+        </aside>
+        <div
+          class="layout__divider"
+          role="separator"
+          aria-orientation="vertical"
+        >
         </div>
-        <main class="layout__main">
-            <div class="content-wrapper">
-                <slot />
-            </div>
-        </main>
+      </div>
+      <main class="layout__main">
+        <div class="content-wrapper">
+          <slot />
+        </div>
+      </main>
     </div>
-</body>
+  </body>
 </html>
 
 <style is:global>
-.layout {
+  .layout {
     display: flex;
-    max-width: 800px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 1.5rem;
     gap: 2rem;
-}
+  }
 
-.layout__sidebar {
+  .layout__sidebar {
     display: flex;
     align-items: flex-start;
     gap: 1rem;
     position: sticky;
     top: 1.5rem;
-}
+  }
 
-.layout__divider {
+  .layout__divider {
     width: 1px;
     height: 120px;
     background-color: rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
-}
+  }
 
-.layout__main {
+  .layout__main {
     flex: 1;
     min-width: 0;
-}
+  }
 
-.content-wrapper {
-    max-width: 65ch;
+  .content-wrapper {
+    max-width: 85vw;
     line-height: 1.6;
-}
+  }
 
-
-h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     margin: 1rem 0 1rem;
     color: #1a1a1a;
-}
+  }
 
-p {
+  p {
     margin-bottom: 1.5rem;
-}
+  }
 
-
-a {
+  a {
     color: #0066cc;
     text-decoration: none;
-}
+  }
 
-a:hover {
+  a:hover {
     text-decoration: underline;
-}
+  }
 
-
-.meta-info {
+  .meta-info {
     font-size: 0.9rem;
     color: #666;
     margin: 1rem 0;
-}
+  }
 
-
-.table-of-contents {
+  .table-of-contents {
     margin: 2rem 0;
     padding-left: 1rem;
-}
+  }
 
-@media (max-width: 1024px) {
+  @media (max-width: 1024px) {
     .layout {
-        max-width: 90%;
+      max-width: 90%;
     }
-}
+  }
 
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
     .layout {
-        flex-direction: column;
-        padding: 1rem;
-        gap: 1.5rem;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1.5rem;
     }
 
     .layout__sidebar {
-        flex-direction: column;
-        width: 100%;
-        gap: 0.75rem;
-        position: static;
+      flex-direction: column;
+      width: 100%;
+      gap: 0.75rem;
+      position: static;
     }
 
     .layout__divider {
-        width: 80px;
-        height: 1px;
-        margin: 0.5rem 0;
+      width: 80px;
+      height: 1px;
+      margin: 0.5rem 0;
     }
 
     .content-wrapper {
-        max-width: 90%;
+      max-width: 90%;
     }
-}
+  }
 
-@media (max-width: 480px) {
+  @media (max-width: 480px) {
     .layout {
-        padding: 0.75rem;
-        gap: 1rem;
+      padding: 0.75rem;
+      gap: 1rem;
     }
 
     .layout__sidebar {
-        gap: 0.5rem;
+      gap: 0.5rem;
     }
 
     .layout__divider {
-        width: 40px;
+      width: 40px;
     }
-}
+  }
 </style>

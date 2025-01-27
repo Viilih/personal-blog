@@ -17,90 +17,90 @@ const formattedDate = formatDate(publishDate);
 ---
 
 <BaseLayout pageTitle={frontmatter.title}>
-    <article class="post">
-      <GoBackButton />
-        <header class="post__header">
-            <h1 class="post__title">{frontmatter.title}</h1>
-            <div class="post__meta">
-                <h3>Created at:</h3>
-                <span class="post__date">
-                    {formattedDate}
-                </span>
-            </div>
-        </header>
-        <div class="post__content">
-            <slot />
-        </div>
-    </article>
+  <article class="post">
+    <GoBackButton />
+    <header class="post__header">
+      <h1 class="post__title">{frontmatter.title}</h1>
+      <div class="post__meta">
+        <h3>Created at:</h3>
+        <span class="post__date">
+          {formattedDate}
+        </span>
+      </div>
+    </header>
+    <div class="post__content">
+      <slot />
+    </div>
+  </article>
 </BaseLayout>
 
 <style>
-.post {
+  .post {
     width: 100%;
-    max-width: 65ch;
+    max-width: 40vw;
     margin: 0 auto;
-}
+  }
 
-.post__title {
+  .post__title {
     font-size: 2rem;
     color: #333;
-}
+  }
 
-.post__meta {
+  .post__meta {
     display: flex;
     gap: 0.7rem;
     align-items: center;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
+  }
 
-.post__date {
+  .post__date {
     color: #666;
     font-size: 1rem;
-}
+  }
 
-.post__content {
+  .post__content {
     line-height: 1.5;
     text-align: justify;
-}
+  }
 
-.post__content h2 {
+  .post__content h2 {
     font-size: 1.5rem;
     margin: 2rem 0 1rem;
     color: #333;
-}
+  }
 
-.post__content p {
+  .post__content p {
     margin-bottom: 1.5rem;
-}
+  }
 
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
     .post {
-        padding: 0 1rem;
+      padding: 0 1rem;
     }
 
     .post__header {
-        margin-bottom: 2rem;
+      margin-bottom: 2rem;
     }
 
     .post__title {
-        font-size: 1.75rem;
-        margin-bottom: 1rem;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
     }
 
     .post__meta {
-        flex-direction: row;
-        align-items: center;
-        gap: 1rem;
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
     }
-}
+  }
 
-@media (max-width: 480px) {
+  @media (max-width: 480px) {
     .post {
-        padding: 0 0.75rem;
+      padding: 0 0.75rem;
     }
 
     .post__title {
-        font-size: 1.5rem;
+      font-size: 1.5rem;
     }
-}
+  }
 </style>
