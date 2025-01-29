@@ -11,20 +11,28 @@ import "../components/global.css";
     <title>{Astro.props.title || "Vili's vault"}</title>
     <link rel="icon" type="image/x-icon" href="/public/favicon.png" />
     <link rel="stylesheet" href="/components/global.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="layout">
-      <div class="layout__sidebar">
-        <aside>
+      <aside class="layout__sidebar">
+        <div class="sidebar-content">
           <Sidebar />
-        </aside>
-        <div
-          class="layout__divider"
-          role="separator"
-          aria-orientation="vertical"
-        >
+          <div
+            class="layout__divider"
+            role="separator"
+            aria-orientation="vertical"
+          >
+          </div>
         </div>
-      </div>
+      </aside>
       <main class="layout__main">
         <div class="content-wrapper">
           <slot />
@@ -37,18 +45,22 @@ import "../components/global.css";
 <style is:global>
   .layout {
     display: flex;
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 1.5rem;
     gap: 2rem;
   }
 
   .layout__sidebar {
+    position: relative;
+  }
+
+  .sidebar-content {
+    position: sticky;
+    top: 1.5rem;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    position: sticky;
-    top: 1.5rem;
   }
 
   .layout__divider {
@@ -113,10 +125,14 @@ import "../components/global.css";
     }
 
     .layout__sidebar {
-      flex-direction: column;
-      width: 100%;
-      gap: 0.75rem;
-      position: static;
+      position: relative;
+      min-height: auto;
+    }
+
+    .sidebar {
+      position: relative;
+      top: 0;
+      max-height: none;
     }
 
     .layout__divider {

@@ -1,106 +1,121 @@
 ---
 import GoBackButton from "../components/GoBackButton.astro";
 import BaseLayout from "./BaseLayout.astro";
+import TableOfContents from "../components/TableOfContents.astro";
 
-const { frontmatter } = Astro.props;
-
+const { frontmatter, headings } = Astro.props;
+const { minutesRead } = Astro.props.frontmatter;
 const formatDate = (date: Date) => {
-  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-  const month = String(utcDate.getMonth() + 1).padStart(2, "0");
-  const day = String(utcDate.getDate()).padStart(2, "0");
-  const year = utcDate.getFullYear();
-  return `${month}-${day}-${year}`;
+  return date.toLocaleDateString("en-us", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 };
 
 const publishDate = new Date(frontmatter.pubDate);
 const formattedDate = formatDate(publishDate);
+
+function buildToc(headings) {
+  const toc = [];
+  const parentHeadings = new Map();
+  headings.forEach((h) => {
+    const heading = { ...h, subheadings: [] };
+    parentHeadings.set(heading.depth, heading);
+    if (heading.depth === 2) {
+      toc.push(heading);
+    } else {
+      parentHeadings.get(heading.depth - 1).subheadings.push(heading);
+    }
+  });
+  return toc;
+}
+
+const toc = buildToc(headings);
 ---
 
 <BaseLayout pageTitle={frontmatter.title}>
-  <article class="post">
-    <GoBackButton />
-    <header class="post__header">
-      <h1 class="post__title">{frontmatter.title}</h1>
-      <div class="post__meta">
-        <h3>Created at:</h3>
-        <span class="post__date">
-          {formattedDate}
-        </span>
+  <div class="layout">
+    <article class="post">
+      <GoBackButton />
+      <header class="post__header">
+        <h1 class="post__title">{frontmatter.title}</h1>
+        <div class="post__meta">
+          <span class="post__date">
+            {formattedDate}
+          </span>
+          <p>{minutesRead}</p>
+          <span class="post__author">
+            By {frontmatter.author}
+          </span>
+        </div>
+      </header>
+      <div class="post__content-wrapper">
+        <div class="post__content">
+          <slot />
+        </div>
       </div>
-    </header>
-    <div class="post__content">
-      <slot />
-    </div>
-  </article>
+    </article>
+    <aside class="toc-sidebar">
+      <TableOfContents toc={toc} />
+    </aside>
+  </div>
 </BaseLayout>
 
 <style>
+  .layout {
+    display: flex;
+    gap: 3rem;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
   .post {
     width: 100%;
     max-width: 40vw;
-    margin: 0 auto;
-  }
-
-  .post__title {
-    font-size: 2rem;
-    color: #333;
-  }
-
-  .post__meta {
-    display: flex;
-    gap: 0.7rem;
-    align-items: center;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
-  .post__date {
-    color: #666;
-    font-size: 1rem;
-  }
-
-  .post__content {
-    line-height: 1.5;
+    position: relative;
     text-align: justify;
+    height: 100%;
+    overflow: scroll;
   }
 
-  .post__content h2 {
-    font-size: 1.5rem;
-    margin: 2rem 0 1rem;
-    color: #333;
+  .toc-sidebar {
+    position: relative;
+    width: 280px;
+    margin-left: auto;
   }
 
-  .post__content p {
-    margin-bottom: 1.5rem;
+  .toc-content {
+    position: sticky;
+    top: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .toc-divider {
+    width: 1px;
+    height: 120px;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  /* Rest of your existing post styles... */
+
+  @media (max-width: 1024px) {
+    .layout {
+      max-width: 90%;
+    }
   }
 
   @media (max-width: 768px) {
-    .post {
-      padding: 0 1rem;
+    .layout {
+      flex-direction: column;
     }
 
-    .post__header {
-      margin-bottom: 2rem;
-    }
-
-    .post__title {
-      font-size: 1.75rem;
-      margin-bottom: 1rem;
-    }
-
-    .post__meta {
-      flex-direction: row;
-      align-items: center;
-      gap: 1rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .post {
-      padding: 0 0.75rem;
-    }
-
-    .post__title {
-      font-size: 1.5rem;
+    .toc-sidebar {
+      width: 100%;
     }
   }
 </style>

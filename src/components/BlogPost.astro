@@ -1,4 +1,6 @@
 ---
+import type { MarkdownInstance } from "astro";
+
 interface Props {
   postTitle: string;
   url: string | undefined;
@@ -39,7 +41,7 @@ const formattedDate = formatDate(publishDate);
     text-decoration: none;
     color: #333;
   }
-  
+
   a:hover {
     color: #0077cc;
   }

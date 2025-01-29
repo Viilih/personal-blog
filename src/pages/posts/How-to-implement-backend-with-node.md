@@ -1,7 +1,7 @@
 ---
 layout: "../../layouts/MarkdownLayout.astro"
 title: How to implement a simple backend application with NodeJS and Typescript?
-author: Guilherme
+author: Guilherme Nascimento
 description: "After learning some Astro, I couldn't stop!"
 pubDate: 2025-01-27
 tags: ["astro", "blogging", "learning in public", "successes"]
@@ -68,13 +68,13 @@ An ORM, or Object Relational Mapper, is a database tool to help identify and tra
 
 To start our project:
 
-```
+```ts
 npm init -y
 ```
 
 And then install some dependencies for this initial setup:
 
-```
+```ts
 npm install typeorm --save
 npm install reflect-metadata --save
 npm install @types/node --save-dev
@@ -83,7 +83,7 @@ npm install pg --save
 
 Or
 
-```
+```ts
 
 npx typeorm init --name MyProject --database postgres
 
@@ -91,7 +91,7 @@ npx typeorm init --name MyProject --database postgres
 
 With this, we will have an initial structure on our application, but I felt more comfortable adding some other folders and files that I will cover now, but before it you will need those dependencies
 
-```
+```ts
 npm i winston
 npm i dotenv
 ```
@@ -182,6 +182,7 @@ On this application we will use the Book as an entity to do operations
 Create an entities folder and put the book.ts inside of it:
 
 ```ts
+// src/entities/Book.ts
 import {
   Column,
   CreateDateColumn,
@@ -218,6 +219,7 @@ If you want to get know more about it, check their [documentation](https://typeo
 For configuring our TypeORM, we are gonna move the config of the data-source.ts file into database folder and keep it like that:
 
 ```ts
+// src/database/data-source.ts
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { DATABASE } from "../config/config";
@@ -249,6 +251,7 @@ Putting in simple words, a repository is a way to handle operations with the res
 And the structure of the repository should look like this:
 
 ```ts
+// src/repositories/BookRepository.ts
 import { Repository } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { Book } from "../entities/Book";
@@ -307,7 +310,7 @@ We use the DTO (Data transfer object) to transfer data between layers of our app
 CHECK IF NECESSARY TO USE CLASS-TRANSFORMER
 
 ```ts
-src / dtos / book / insert - book - dto.ts;
+// src/dtos/book/insert-book-dto.ts;
 import { Expose } from "class-transformer";
 export class BookDTO {
   @Expose()
@@ -321,7 +324,7 @@ export class BookDTO {
 About the custom exception, I believe it's easier to debug and can improve the error handling in our application. But just to know, we will talk specifically about errorHandlers and how we can implement them.
 
 ```ts
-src / exceptions / NotFoundException.ts;
+// src/exceptions/NotFoundException.ts;
 export class NotFoundException extends Error {
   constructor(message: string) {
     super(message);
@@ -339,6 +342,7 @@ If you are don't know what controllers are, they are the entry points for extern
 Before showing the implementation of our controller, we have the use of schemas, that are basically a model that defines the structure and validation rules for data, in this case our request body:
 
 ```ts
+// src/schemas/index.ts
 import Joi from "joi";
 
 export const bookSchema = {
@@ -361,6 +365,7 @@ export const bookSchema = {
 Now we can run into our controller:
 
 ```ts
+// src/controllers/bookController.ts
 import { Router, Request, Response, NextFunction } from "express";
 import { bookSchema } from "../schemas";
 import BookRepository from "../repositories/BookRepository";
@@ -492,6 +497,7 @@ In our application we have 4 middlewares:
 - corsHandler : Handles Cross-Origin Resource Sharing (CORS) by setting appropriate headers to allow cross-origin requests
 
 ```ts
+// src/middleware/corsHandler.ts
 import { Request, Response, NextFunction } from "express";
 
 export function corsHandler(req: Request, res: Response, next: NextFunction) {
@@ -515,6 +521,8 @@ export function corsHandler(req: Request, res: Response, next: NextFunction) {
 - ErrorHandler: Processes errors, logs them, and sends error responses to clients
 
 ```ts
+// src/middleware/errorHandler.ts
+
 import { Request, Response, NextFunction } from "express";
 import { HttpException } from "../exceptions/HttpException";
 import logger from "../config/logger";
@@ -539,6 +547,7 @@ export const errorHandler = (
 - LoggingHandler: Logs information about incoming requests and their results
 
 ```ts
+// src/middleware/loggingHandler.ts
 import { Request, Response, NextFunction } from "express";
 import logger from "../config/logger";
 
@@ -564,6 +573,7 @@ export function loggingHandler(
 - RouteNotFound: Handles cases when a requested route doesn't exist (404 errors)
 
 ```ts
+// src/middleware/routeNotFound.ts
 import { Request, Response, NextFunction } from "express";
 import logger from "../config/logger";
 
@@ -587,6 +597,7 @@ We use those middlewares to help in "repetitive" tasks/problems that may happen 
 For implementing all the configurations we prepared, here we have our server.ts file, the one which will start our server:
 
 ```ts
+// src/server.ts
 import http from "http";
 import express from "express";
 import logger from "./config/logger";

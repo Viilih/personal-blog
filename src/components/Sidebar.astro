@@ -1,25 +1,27 @@
 <ul class="sidebar">
-    <li><a href="/">Writing</a></li>
-</ul>  
+  <li><a href="/">Writing</a></li>
+</ul>
 <style>
   .sidebar {
     list-style: none;
     padding: 0;
     margin: 0;
-    font-family: sans-serif;
+    position: sticky;
+    top: 1.5rem; /* This matches your layout__sidebar top value */
+    max-height: calc(100vh - 3rem); /* Viewport height minus top padding */
+    overflow-y: auto; /* In case the sidebar content is taller than viewport */
   }
-  
+
   .sidebar li {
     margin-bottom: 1rem;
   }
-  
+
   .sidebar a {
     text-decoration: none;
     color: #333;
   }
-  
+
   .sidebar a:hover {
     color: #0077cc;
   }
 </style>
-  
