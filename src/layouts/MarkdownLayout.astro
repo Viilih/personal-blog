@@ -3,6 +3,12 @@ import GoBackButton from "../components/GoBackButton.astro";
 import BaseLayout from "./BaseLayout.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 
+interface Heading {
+  depth: number;
+  text: string;
+  slug: string;
+  subheadings: Heading[];
+}
 const { frontmatter, headings } = Astro.props;
 const { minutesRead } = Astro.props.frontmatter;
 const formatDate = (date: Date) => {
@@ -16,10 +22,10 @@ const formatDate = (date: Date) => {
 const publishDate = new Date(frontmatter.pubDate);
 const formattedDate = formatDate(publishDate);
 
-function buildToc(headings) {
-  const toc = [];
+function buildToc(headings: Heading[]) {
+  const toc: Heading[] = [];
   const parentHeadings = new Map();
-  headings.forEach((h) => {
+  headings.forEach((h: any) => {
     const heading = { ...h, subheadings: [] };
     parentHeadings.set(heading.depth, heading);
     if (heading.depth === 2) {
@@ -80,6 +86,18 @@ const toc = buildToc(headings);
     overflow: scroll;
   }
 
+  .post__title {
+    color: #333;
+    line-height: 1;
+    font-size: 3rem;
+  }
+  .post__date {
+    line-height: 1rem;
+    color: rgb(85, 95, 108);
+  }
+  .post__author {
+  }
+
   .toc-sidebar {
     position: relative;
     width: 280px;
@@ -100,8 +118,6 @@ const toc = buildToc(headings);
     background-color: rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
   }
-
-  /* Rest of your existing post styles... */
 
   @media (max-width: 1024px) {
     .layout {

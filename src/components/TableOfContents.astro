@@ -1,22 +1,27 @@
 ---
+import { Icon } from "astro-icon/components";
+
+interface Heading {
+  depth: number;
+  text: string;
+  slug: string;
+  subheadings: Heading[];
+}
+
 interface Props {
-  toc: {
-    depth: number;
-    text: string;
-    slug: string;
-    subheadings: any[];
-  }[];
+  toc: Heading[];
 }
 
 const { toc } = Astro.props;
 ---
 
-<nav class="toc">
-  <div class="toc-header">
+<nav class="toc" aria-label="Table of contents">
+  <button class="toc-header" id="toc-toggle" aria-expanded="false">
     <span class="toc-title">CONTENTS</span>
     <span class="toc-count">({toc.length})</span>
-  </div>
-  <ul class="toc-list">
+    <Icon name="down-arrow" class="toc-icon" />
+  </button>
+  <ul class="toc-list" id="toc-content">
     {
       toc.map((heading) => (
         <li>
@@ -41,84 +46,119 @@ const { toc } = Astro.props;
 </nav>
 
 <style>
+  :root {
+    --toc-bg: rgb(247, 247, 247);
+    --text-primary: #333;
+    --text-secondary: #666;
+    --transition-speed: 0.2s;
+  }
+
   .toc {
     position: sticky;
     top: 2rem;
-    background-color: rgb(247, 247, 247);
+    background: var(--toc-bg);
     border-radius: 4px;
     padding: 1rem;
-    width: 200px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-      "Liberation Mono", "Courier New", monospace;
+    width: min(200px, 100%);
   }
 
   .toc-header {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.875rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
   }
 
   .toc-title {
     font-weight: 500;
-    color: #333;
+    color: var(--text-primary);
+  }
+  .toc-count {
+    color: var(--text-secondary);
   }
 
-  .toc-count {
-    color: #666;
+  .toc-icon {
+    transition: transform var(--transition-speed) ease;
+    margin-left: auto;
+  }
+  .toc-icon.rotated {
+    transform: rotate(180deg);
   }
 
   .toc-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
     gap: 1rem;
+    max-height: 0;
+    overflow: hidden;
+    transition:
+      max-height var(--transition-speed) ease,
+      opacity var(--transition-speed) ease;
+    opacity: 0;
+  }
+  .toc-list.show {
+    max-height: 100vh;
+    opacity: 1;
+    display: grid !important;
   }
 
-  .toc-link {
+  .toc-link,
+  .toc-sublink {
     display: block;
-    color: #333;
     text-decoration: none;
     font-size: 0.875rem;
     line-height: 1.4;
-    transition: color 0.2s;
+    transition: color var(--transition-speed);
   }
-
-  .toc-link:hover {
-    color: #000;
+  .toc-link {
+    padding-top: 0.5rem;
+    color: var(--text-primary);
+  }
+  .toc-sublink {
+    color: var(--text-secondary);
+  }
+  .toc-link:hover,
+  .toc-sublink:hover {
+    color: var(--text-primary);
   }
 
   .toc-sublist {
     list-style: none;
     padding-left: 1rem;
     margin-top: 0.5rem;
-    display: flex;
-    flex-direction: column;
     gap: 0.5rem;
-  }
-
-  .toc-sublink {
-    display: block;
-    color: #666;
-    text-decoration: none;
-    font-size: 0.875rem;
-    line-height: 1.4;
-    transition: color 0.2s;
-  }
-
-  .toc-sublink:hover {
-    color: #333;
+    display: grid;
   }
 
   @media (max-width: 768px) {
     .toc {
       position: relative;
       top: 0;
-      width: 100%;
       margin-top: 2rem;
     }
   }
 </style>
+
+<script is:inline>
+  (function initTOC() {
+    const tocToggle = document.getElementById("toc-toggle");
+    const tocContent = document.getElementById("toc-content");
+    const tocIcon = document.querySelector(".toc-icon");
+
+    if (!tocToggle || !tocContent || !tocIcon) return;
+
+    const toggle = () => {
+      const isExpanded = tocToggle.getAttribute("aria-expanded") === "true";
+      tocContent.classList.toggle("show", !isExpanded);
+      tocIcon.classList.toggle("rotated", !isExpanded);
+      tocToggle.setAttribute("aria-expanded", String(!isExpanded));
+    };
+
+    tocToggle.addEventListener("click", toggle);
+  })();
+</script>

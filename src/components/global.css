@@ -15,8 +15,39 @@ a:hover {
 pre {
   overflow-x: auto;
   padding: 1rem 0;
+  border-radius: 8px;
 }
 
-pre [data-line] {
-  padding: 0 0.6rem;
+code {
+  counter-reset: line;
+  display: grid;
+}
+
+code > [data-line] {
+  padding-right: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid transparent;
+}
+
+code > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1.5rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: #888;
+}
+
+code[data-line-numbers-max-digits="2"] > [data-line]::before {
+  width: 2rem;
+}
+
+code[data-line-numbers-max-digits="3"] > [data-line]::before {
+  width: 3rem;
+}
+
+code > [data-line][data-highlighted] {
+  background-color: rgba(200, 200, 255, 0.1);
+  border-left: 3px solid #60a5fa;
 }
