@@ -126,6 +126,8 @@ export const DATABASE = {
 };
 ```
 
+----------
+
 ```ts
 //src/config/logger.ts
 import winston from "winston";

@@ -133,5 +133,23 @@ const toc = buildToc(headings);
     .toc-sidebar {
       width: 100%;
     }
+
+    .post {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .post {
+      max-width: 100%;
+    }
+    .toc-sidebar {
+      display: none;
+    }
+    .post__title {
+      font-size: 2rem;
+      line-height: 1.2;
+      text-align: justify;
+    }
   }
 </style>

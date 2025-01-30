@@ -12,9 +12,14 @@ a:hover {
   text-decoration: underline;
 }
 
+figure:has(> pre) {
+  margin: 0;
+}
+
 pre {
   overflow-x: auto;
   padding: 1rem 0;
+  margin: 0;
   border-radius: 8px;
 }
 
@@ -33,7 +38,7 @@ code > [data-line]::before {
   counter-increment: line;
   content: counter(line);
   display: inline-block;
-  width: 1.5rem;
+  width: 0.5rem;
   margin-right: 1rem;
   text-align: right;
   color: #888;
