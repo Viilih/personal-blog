@@ -126,7 +126,7 @@ export const DATABASE = {
 };
 ```
 
-----------
+---
 
 ```ts
 //src/config/logger.ts
@@ -612,9 +612,9 @@ import routers from "./routes/bookRoutes";
 import { errorHandler } from "./middleware/errorHandler";
 
 export const application = express();
-export let httpServer: ReturnType<typeof http.createServer>;
+export let httpServer: http.Server;
 
-export const Main = () => {
+export const Main = async () => {
   logger.info("-----------------------");
   logger.info("Initializing API");
   logger.info("-----------------------");
@@ -625,6 +625,7 @@ export const Main = () => {
   logger.info("-----------------------");
   logger.info("Logging and configuration");
   logger.info("-----------------------");
+
   application.use(loggingHandler);
   application.use(corsHandler);
 
@@ -632,32 +633,114 @@ export const Main = () => {
   logger.info("Controller routing");
   logger.info("-----------------------");
 
+  application.get("/main/healthcheck", (req, res) => {
+    res.status(200).json({ hello: "world!" });
+  });
+
   application.use(routers);
   application.use(routeNotFound);
   application.use(errorHandler);
 
-  httpServer = http.createServer();
-  application.listen(SERVER.PORT, SERVER.HOSTNAME, () => {
+  httpServer = http.createServer(application);
+
+  httpServer.listen(SERVER.PORT, SERVER.HOSTNAME, () => {
     logger.info(`Server running at http://${SERVER.HOSTNAME}:${SERVER.PORT}`);
   });
-  AppDataSource.initialize()
-    .then(async () => {
-      logger.info("database connected!");
-    })
-    .catch((error) => logger.error("Database connection failed!", error));
+
+  await AppDataSource.initialize();
+  logger.info("Database connected!");
 };
 
-export const Shutdown = () =>
-  httpServer &&
-  httpServer.close(() => {
-    AppDataSource.destroy();
-  });
+export const Shutdown = async () => {
+  if (httpServer) {
+    return new Promise<void>((resolve) => {
+      httpServer.close(async () => {
+        if (AppDataSource.isInitialized) {
+          await AppDataSource.destroy();
+        }
+        resolve();
+      });
+    });
+  }
+};
 
 if (require.main === module) {
-  Main();
+  Main().catch((error) => {
+    logger.error("Failed to start server:", error);
+  });
 }
 ```
 
 ## Testing
 
-## Containerize our application
+Why testing a simple application, you may ask? Well, I believe start writing tests can help you to prevent bugs in your application, reduce manual tasks/testing endpoints and also improve your code in order to become more easy to test it
+
+For this application, we are gonna write integration tests, that basically tests a functionality that communicates between different parts of our application, in our case, our layers (repositories, database, controllers). If you want to know more about testing you can check this [article](https://kentcdodds.com/blog/write-tests)
+
+In our case you will need to install some dependencies:
+
+```ts
+npm install --save-dev @types/jest @types/supertest jest supertest ts-jest
+```
+
+You will also add the "test" command on package.json:
+
+```ts
+"scripts": {
+	"start": "ts-node src/server.ts",
+	"typeorm": "typeorm-ts-node-commonjs",
+	"test": "jest --config jest.config.ts --coverage",
+	"build": "rm -rf build/ && tsc"
+},
+```
+
+After that, configure your jest.config.ts file like this:
+
+```ts
+import type { Config } from "jest";
+
+const config: Config = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/test"],
+  maxWorkers: 1,
+  detectOpenHandles: true,
+};
+
+export default config;
+```
+
+After all that setup, we can create our test folder and start writing tests:
+
+```ts
+// test/integration/server.test.ts
+import request from "supertest";
+import { application, Main, Shutdown } from "../../src/server";
+
+describe("Application", () => {
+  beforeAll(async () => {
+    await Main();
+  });
+
+  afterAll(async () => {
+    await Shutdown();
+  });
+
+  it("Starts and has the proper test environment", async () => {
+    expect(process.env.NODE_ENV).toBe("test");
+    expect(application).toBeDefined();
+  });
+
+  it("Check our healthcheck route", async () => {
+    const response = await request(application).get("/main/healthcheck");
+    expect(response.status).toBe(200);
+  });
+
+  it("Returns 404 when the route requested is not found.", async () => {
+    const response = await request(application).get(
+      "/a/cute/route/that/does/not/exist/",
+    );
+    expect(response.status).toBe(404);
+  });
+});
+```
