@@ -62,38 +62,48 @@ A RESTful API is an API that follows the [REST](https://restfulapi.net/) princip
 
 An ORM, or Object Relational Mapper, is a database tool to help identify and translate the database models used on relational databases to OO models used on client applications, and typeOrm is just one of these tools.
 
-## Core concepts
+## Project setup
 
 ### Initial setup
 
 To start our project:
 
 ```ts
-npm init -y
-```
-
-And then install some dependencies for this initial setup:
-
-```ts
-npm install typeorm --save
-npm install reflect-metadata --save
-npm install @types/node --save-dev
-npm install pg --save
-```
-
-Or
-
-```ts
-
 npx typeorm init --name MyProject --database postgres
 
+cd MyProject
+
+npm i express  @types/express --save
 ```
+
+I like to delete the src/index.ts file and create a server.ts file, but the choice is yours
 
 With this, we will have an initial structure on our application, but I felt more comfortable adding some other folders and files that I will cover now, but before it you will need those dependencies
 
 ```ts
 npm i winston
 npm i dotenv
+```
+
+Before setup, our config files, make your tsconfig.json like this one, in order to prevent some import problems with some libs,prepare the build of our application and will help us dealing with testing:
+
+```json
+{
+  "compilerOptions": {
+    "lib": ["es5", "es6"],
+    "target": "ES2016",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./build",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "types": ["jest", "reflect-metadata"]
+  },
+  "exclude": ["node_modules/"],
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}
 ```
 
 Here we have some configuration files where I put some configuration and logging file:
@@ -125,8 +135,6 @@ export const DATABASE = {
   NAME: process.env.DB_DATABASE || "localdb",
 };
 ```
-
----
 
 ```ts
 //src/config/logger.ts
@@ -184,7 +192,7 @@ On this application we will use the Book as an entity to do operations
 Create an entities folder and put the book.ts inside of it:
 
 ```ts
-// src/entities/Book.ts
+// src/entities/book.ts
 import {
   Column,
   CreateDateColumn,
@@ -214,7 +222,17 @@ Above is a simple implementation of some model that became an entity for our dat
 
 If you want to get know more about it, check their [documentation](https://typeorm.io/)
 
-> CHECK THE INTERFACE STEP AND THE OTHER DOCUMENTATION
+Not mandatory, but I believe it will be helpful create an interface for this entitie, in order dealing with the repositories when settings some types:
+
+```ts
+// src/interfaces/IBook.ts
+export interface IBook {
+  id: number;
+  author: string;
+  title: string;
+  publishedAt: Date;
+}
+```
 
 ### TypeORM setup
 
@@ -225,7 +243,7 @@ For configuring our TypeORM, we are gonna move the config of the data-source.ts 
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { DATABASE } from "../config/config";
-import { Book } from "../entities/Book";
+import { Book } from "../entities/book";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -242,10 +260,6 @@ export const AppDataSource = new DataSource({
 });
 ```
 
-### Migrations
-
-Need to check the video to discover which command for setup the migrations of the database
-
 ### Repository and DTOs
 
 Putting in simple words, a repository is a way to handle operations with the respective entities that you have, in our case, the Book entity
@@ -253,10 +267,10 @@ Putting in simple words, a repository is a way to handle operations with the res
 And the structure of the repository should look like this:
 
 ```ts
-// src/repositories/BookRepository.ts
+// src/repositories/bookRepository.ts
 import { Repository } from "typeorm";
 import { AppDataSource } from "../database/data-source";
-import { Book } from "../entities/Book";
+import { Book } from "../entities/book";
 import { IBook } from "../interfaces/IBook";
 import { BookDTO } from "../dtos/book/insert-book-dto";
 import { NotFoundException } from "../exceptions/NotFoundException";
@@ -302,6 +316,8 @@ class BookRepository {
 export default new BookRepository();
 ```
 
+You may seem some errors, but that's because we didn't create the DTO's and the exception, we will cover them now
+
 Beyond it implementation i would like highlight some points:
 
 - The use of a DTO
@@ -309,28 +325,41 @@ Beyond it implementation i would like highlight some points:
 
 We use the DTO (Data transfer object) to transfer data between layers of our application, in this case we will use the bookDto to receive the information of the book we want to do some operation from the controllers, that we will cover lately.
 
-CHECK IF NECESSARY TO USE CLASS-TRANSFORMER
-
 ```ts
-// src/dtos/book/insert-book-dto.ts;
+//src/dtos/book/insert-book-dto.ts
 import { Expose } from "class-transformer";
 export class BookDTO {
-  @Expose()
   title: string;
 
-  @Expose()
   author: string;
 }
 ```
 
 About the custom exception, I believe it's easier to debug and can improve the error handling in our application. But just to know, we will talk specifically about errorHandlers and how we can implement them.
 
+On our application we are gonna use two custom exceptions: One for  
+an element that was not found and one for HttpExceptions:
+
 ```ts
-// src/exceptions/NotFoundException.ts;
+//src/exceptions/NotFoundException.ts
 export class NotFoundException extends Error {
   constructor(message: string) {
     super(message);
     this.name = "NotFoundException";
+  }
+}
+```
+
+```ts
+// src/exceptions/HttpException.ts
+export class HttpException extends Error {
+  status: number;
+  message: string;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+    this.message = message;
   }
 }
 ```
@@ -341,7 +370,15 @@ export class NotFoundException extends Error {
 
 If you are don't know what controllers are, they are the entry points for external applications to communicate with ours, its through them and their URI that we will know what action or resource is being requested.
 
-Before showing the implementation of our controller, we have the use of schemas, that are basically a model that defines the structure and validation rules for data, in this case our request body:
+Before showing the implementation of our controller, we have the use of schemas, that are basically a model that defines the structure and validation rules for data:
+
+We are using [joi](https://joi.dev/) to handle those schemas and validations:
+
+```node
+npm i joi
+```
+
+In this case, we create a schema to handle some operations we are going to do:
 
 ```ts
 // src/schemas/index.ts
@@ -491,6 +528,22 @@ Some notes about it:
 - We use the `next` on the catch error instead of throwing a new Error in order to use a middleware that we are gonna create to handle errors in our application
 - We use our repository to interact with the database
 
+### Defining our router
+
+After creating our controller, we need to define our router file, a file that will centralize the routers of our controllers:
+
+```ts
+// src/routes/bookRoutes.ts
+import { Router } from "express";
+import { bookRouter } from "../controllers/bookController";
+
+const routers = Router();
+
+routers.use(bookRouter);
+
+export default routers;
+```
+
 ### The use of middlewares
 
 Middlewares are functions that runs between receiving a request and sending a response in web application.
@@ -524,7 +577,6 @@ export function corsHandler(req: Request, res: Response, next: NextFunction) {
 
 ```ts
 // src/middleware/errorHandler.ts
-
 import { Request, Response, NextFunction } from "express";
 import { HttpException } from "../exceptions/HttpException";
 import logger from "../config/logger";
@@ -612,7 +664,7 @@ import routers from "./routes/bookRoutes";
 import { errorHandler } from "./middleware/errorHandler";
 
 export const application = express();
-export let httpServer: http.Server;
+export let httpServer: ReturnType<typeof http.createServer>;
 
 export const Main = async () => {
   logger.info("-----------------------");
@@ -671,7 +723,119 @@ if (require.main === module) {
 }
 ```
 
+After settinng the server.ts file up, you need to change initialization file on the package.json from src/index.ts to src/server.ts , on the scripts section.
+
+It should look like this:
+
+```json
+"scripts": {
+	"start": "ts-node src/server.ts",
+	"typeorm": "typeorm-ts-node-commonjs"
+}
+```
+
+When you finish all this configuration, you are ready to start your application and test your endpoints!
+
+For start your application just type:
+
+```ts
+npm start
+```
+
 ## Testing
+
+Why testing a simple application, you may ask? Well, I believe start writing tests can help you to prevent bugs in your application, reduce manual tasks/testing endpoints and also improve your code in order to become more easy to test it
+
+For this application, we are gonna write integration tests, that basically tests a functionality that communicates between different parts of our application, in our case, our layers (repositories, database, controllers). If you want to know more about testing you can check this [article](https://kentcdodds.com/blog/write-tests)
+
+In our case you will need to install some dependencies:
+
+```ts
+npm install --save-dev @types/jest @types/supertest jest supertest ts-jest
+```
+
+You will also add the "test" command on package.json:
+
+```json
+"scripts": {
+	"start": "ts-node src/server.ts",
+	"typeorm": "typeorm-ts-node-commonjs",
+	"test": "jest --config jest.config.ts --coverage",
+	"build": "rm -rf build/ && tsc"
+},
+```
+
+And add the jest type on your tsconfig.json:
+
+```json
+{
+  "compilerOptions": {
+    "lib": ["es5", "es6"],
+    "target": "ES2016",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./build",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "types": ["jest", "reflect-metadata"]
+  },
+  "exclude": ["node_modules/"],
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}
+```
+
+After that, you need to create a jest.config.ts on the source of your project file like this:
+
+```ts
+import type { Config } from "jest";
+
+const config: Config = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/test"],
+  maxWorkers: 1,
+  detectOpenHandles: true,
+};
+
+export default config;
+```
+
+After all that setup, we can create our test folder and start writing tests:
+
+```ts
+// test/integration/server.test.ts
+import request from "supertest";
+import { application, Main, Shutdown } from "../../src/server";
+
+describe("Application", () => {
+  beforeAll(async () => {
+    await Main();
+  });
+
+  afterAll(async () => {
+    await Shutdown();
+  });
+
+  it("Starts and has the proper test environment", async () => {
+    expect(process.env.NODE_ENV).toBe("test");
+    expect(application).toBeDefined();
+  });
+
+  it("Check our healthcheck route", async () => {
+    const response = await request(application).get("/main/healthcheck");
+    expect(response.status).toBe(200);
+  });
+
+  it("Returns 404 when the route requested is not found.", async () => {
+    const response = await request(application).get(
+      "/a/cute/route/that/does/not/exist/",
+    );
+    expect(response.status).toBe(404);
+  });
+});
+```
 
 Why testing a simple application, you may ask? Well, I believe start writing tests can help you to prevent bugs in your application, reduce manual tasks/testing endpoints and also improve your code in order to become more easy to test it
 
@@ -744,3 +908,19 @@ describe("Application", () => {
   });
 });
 ```
+
+## Conclusion
+
+### What did you learn?
+
+We covered fundamental concepts of developing a RESTful API with Node.js using TypeScript.
+
+You learned about ORMs, their usability, and how they can be applied to your development workflow.
+
+We also discussed the importance of testing in an application and how to write it with jest.
+
+### What are the next steps?
+
+A great next step would be to develop your own API to solve a real-world problem or explore a different business context. For example, you could build a product management system for a local store, a task manager for personal productivity, or an inventory tracking system for a small business.
+
+The key is to choose a project that challenges you to apply what you've learned while aligning with your interests!
