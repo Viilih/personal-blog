@@ -28,6 +28,16 @@ code {
   display: grid;
 }
 
+code:not(pre code) {
+  display: inline;
+  background-color: #f0f0f0;
+  border: 2px solid black;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
 code > [data-line] {
   padding-right: 1rem;
   padding-left: 1rem;

@@ -2,9 +2,17 @@
 import PostList from "../components/PostList.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const posts = await Astro.glob("./posts/*.md");
+const allPosts = await Astro.glob("./posts/*.md");
+
+const sortedPosts = allPosts.sort((a, b) => {
+  const dateA = new Date(a.frontmatter.pubDate).getTime();
+  const dateB = new Date(b.frontmatter.pubDate).getTime();
+  return dateB - dateA;
+});
+
+console.log(sortedPosts.map((post) => post.frontmatter.pubDate));
 ---
 
 <BaseLayout>
-  <PostList posts={posts} />
+  <PostList posts={sortedPosts} />
 </BaseLayout>
