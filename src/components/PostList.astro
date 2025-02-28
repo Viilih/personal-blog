@@ -6,6 +6,7 @@ interface Props {
   posts: MarkdownInstance<Record<string, any>>[];
 }
 const { posts } = Astro.props;
+console.log(posts);
 ---
 
 <ul>
@@ -27,6 +28,7 @@ const { posts } = Astro.props;
     gap: 16px;
     flex-direction: column;
     padding-left: 0;
+    margin-top: 0;
   }
 
   @media (max-width: 768px) {

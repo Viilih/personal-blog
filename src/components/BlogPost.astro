@@ -4,17 +4,28 @@ interface Props {
   url: string | undefined;
   pubDate: string;
 }
+
 const { postTitle, url, pubDate } = Astro.props;
-const formatDate = (date: Date) => {
+
+// Get the current locale from Astro
+const currentLocale = Astro.currentLocale || "en";
+
+const formatDate = (date: Date, locale: string) => {
   const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
   const month = String(utcDate.getMonth() + 1).padStart(2, "0");
   const day = String(utcDate.getDate()).padStart(2, "0");
   const year = utcDate.getFullYear();
-  return `${month}-${day}-${year}`;
+
+  // Use DD/MM/YYYY for pt-br, MM-DD-YYYY for others
+  if (locale === "pt-br") {
+    return `${day}/${month}/${year}`;
+  } else {
+    return `${month}-${day}-${year}`;
+  }
 };
 
 const publishDate = new Date(pubDate);
-const formattedDate = formatDate(publishDate);
+const formattedDate = formatDate(publishDate, currentLocale);
 ---
 
 <li>
@@ -32,9 +43,11 @@ const formattedDate = formatDate(publishDate);
     justify-content: space-between;
     align-items: center;
   }
+
   li > h3 {
     margin: 0;
   }
+
   a {
     text-decoration: none;
     color: #333;
