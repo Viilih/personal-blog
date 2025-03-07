@@ -1,10 +1,8 @@
 ---
-layout: "../../layouts/MarkdownLayout.astro"
+layout: "../../../layouts/MarkdownLayout.astro"
 title: Intro to my vault
-author: Guilherme Nascimento
-description: "After learning some Astro, I couldn't stop!"
 pubDate: 2024-12-22
-tags: ["astro", "blogging", "learning in public", "successes"]
+slug: en/intro-to-my-vault
 ---
 
 ## What is this blog?

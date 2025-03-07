@@ -1,23 +1,23 @@
 ---
-import type { MarkdownInstance } from "astro";
 import BlogPost from "./BlogPost.astro";
 
-interface Props {
-  posts: MarkdownInstance<Record<string, any>>[];
-}
 const { posts } = Astro.props;
-console.log(posts);
 ---
 
 <ul>
   {
-    posts.map((post) => (
-      <BlogPost
-        postTitle={post.frontmatter.title}
-        url={post.url}
-        pubDate={post.frontmatter.pubDate}
-      />
-    ))
+    posts.map((post) => {
+      const lang = post.slug.split("/")[0];
+      const blogPage = post.slug.split("/")[1];
+
+      return (
+        <BlogPost
+          postTitle={post.data.title}
+          url={`/${lang}/blog/${blogPage}`}
+          pubDate={post.data.pubDate}
+        />
+      );
+    })
   }
 </ul>
 

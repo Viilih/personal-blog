@@ -1,10 +1,13 @@
 ---
 import Link from "./Link.astro";
 
+const currentLocale = Astro.currentLocale || "en";
+
+const backText = currentLocale === "pt-br" ? "Voltar" : "Go back";
+
+const baseUrlBasedOnLocale = currentLocale === "pt-br" ? "/pt-br" : "/en";
 ---
 
-<Link href="/">
-  <p>
-    Go back
-  </p>
+<Link href={baseUrlBasedOnLocale}>
+  <p>{backText}</p>
 </Link>

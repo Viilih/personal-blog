@@ -1,10 +1,8 @@
 ---
-layout: "../../layouts/MarkdownLayout.astro"
+layout: "../../../layouts/MarkdownLayout.astro"
 title: What is Sliding Window?
-author: Guilherme Nascimento
-description: "After learning some Astro, I couldn't stop!"
 pubDate: 2025-02-23
-tags: ["astro", "blogging", "learning in public", "successes"]
+slug: en/sliding-window-en
 ---
 
 ## Sliding Window
@@ -73,4 +71,4 @@ bool ContainsNearbyDuplicate(int[] nums, int k) {
 The idea is the same for both codes above.
 
 Here is a simple sketch describing the logic I used for solving this problem (with go, but the idea is the same with C#)
-![](../../images/excalidraw/sliding-window/sliding-window-sketch.png)
+![](../../../images/excalidraw/sliding-window/sliding-window-sketch.png)

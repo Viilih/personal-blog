@@ -6,8 +6,6 @@ interface Props {
 }
 
 const { postTitle, url, pubDate } = Astro.props;
-
-// Get the current locale from Astro
 const currentLocale = Astro.currentLocale || "en";
 
 const formatDate = (date: Date, locale: string) => {

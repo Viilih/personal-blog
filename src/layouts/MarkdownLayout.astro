@@ -2,6 +2,7 @@
 import GoBackButton from "../components/GoBackButton.astro";
 import BaseLayout from "./BaseLayout.astro";
 import TableOfContents from "../components/TableOfContents.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
 
 interface Heading {
   depth: number;
@@ -9,10 +10,19 @@ interface Heading {
   slug: string;
   subheadings: Heading[];
 }
-const { frontmatter, headings } = Astro.props;
-const { minutesRead } = Astro.props.frontmatter;
+const { frontmatter, headings = [] } = Astro.props;
+const { minutesRead } = Astro.props.frontmatter || {};
+
+// Get the current language from URL
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Use the current language for date formatting
 const formatDate = (date: Date) => {
-  return date.toLocaleDateString("en-us", {
+  // Use the appropriate locale based on the language
+  const locale = lang === "pt-br" ? "pt-BR" : "en-US";
+
+  return date.toLocaleDateString(locale, {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -23,17 +33,31 @@ const publishDate = new Date(frontmatter.pubDate);
 const formattedDate = formatDate(publishDate);
 
 function buildToc(headings: Heading[]) {
+  if (!headings || !Array.isArray(headings)) {
+    return [];
+  }
+
   const toc: Heading[] = [];
   const parentHeadings = new Map();
+
   headings.forEach((h: any) => {
     const heading = { ...h, subheadings: [] };
     parentHeadings.set(heading.depth, heading);
+
     if (heading.depth === 2) {
       toc.push(heading);
     } else {
-      parentHeadings.get(heading.depth - 1).subheadings.push(heading);
+      // Check if parent heading exists before adding
+      const parentHeading = parentHeadings.get(heading.depth - 1);
+      if (parentHeading) {
+        parentHeading.subheadings.push(heading);
+      } else {
+        // Add to top level if no parent exists
+        toc.push(heading);
+      }
     }
   });
+
   return toc;
 }
 
@@ -50,10 +74,7 @@ const toc = buildToc(headings);
           <span class="post__date">
             {formattedDate}
           </span>
-          <p>{minutesRead}</p>
-          <span class="post__author">
-            By {frontmatter.author}
-          </span>
+          {minutesRead && <p>{minutesRead}</p>}
         </div>
       </header>
       <div class="post__content-wrapper">

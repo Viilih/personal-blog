@@ -1,62 +1,18 @@
 ---
-import { getRelativeLocaleUrl } from "astro:i18n";
+import LanguagePicker from "../components/LanguagePicker.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
 
-// Get the current locale from Astro
-const currentLocale = Astro.currentLocale || "en";
-
-// Strip the locale prefix from the current path to get the base path
-const currentPathWithoutLocale = Astro.url.pathname
-  .replace(/^\/pt-br\//, "") // Remove pt-br prefix if it exists
-  .replace(/^\//, ""); // Remove leading slash
-
-// Generate URLs for each language while preserving the current path
-const enUrl = currentPathWithoutLocale ? `/${currentPathWithoutLocale}` : "/";
-const ptBrUrl = `/${currentLocale === "pt-br" && !currentPathWithoutLocale ? "" : "pt-br/"}${currentPathWithoutLocale}`;
-
-// Create locale-specific navigation URLs
-const homeURL =
-  currentLocale === "en" ? "/" : getRelativeLocaleUrl(currentLocale, "");
-const aboutURL = getRelativeLocaleUrl(currentLocale, "about");
-const postsURL = getRelativeLocaleUrl(currentLocale, "posts");
-
-// Translate sidebar items based on locale
-const translations = {
-  en: {
-    writing: "Writing",
-    about: "About",
-    posts: "Posts",
-  },
-  "pt-br": {
-    writing: "Artigos",
-    about: "Sobre",
-    posts: "Postagens",
-  },
-};
-
-// Get the appropriate translations
-const t =
-  translations[currentLocale as keyof typeof translations] || translations.en;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
 <div class="sidebar-container">
   <div class="language-switcher">
-    <a
-      href={enUrl}
-      class={`language-link ${currentLocale === "en" ? "active" : ""}`}
-    >
-      EN
-    </a>
-    <span class="language-divider">|</span>
-    <a
-      href={ptBrUrl}
-      class={`language-link ${currentLocale === "pt-br" ? "active" : ""}`}
-    >
-      PT-BR
-    </a>
+    <LanguagePicker />
   </div>
 
   <ul class="sidebar">
-    <li><a href={homeURL}>{t.writing}</a></li>
+    <li><a href={`/${lang}/`}>{t("sidebar.articles")}</a></li>
   </ul>
 </div>
 

@@ -1,15 +1,10 @@
 ---
-layout: "../../layouts/MarkdownLayout.astro"
+layout:  "../../../layouts/MarkdownLayout.astro"
+slug: "en/backend-node-typescript-en"
 title: How to implement a simple backend application with NodeJS and Typescript?
-author: Guilherme Nascimento
-description: "After learning some Astro, I couldn't stop!"
 pubDate: 2025-01-27
-tags: ["astro", "blogging", "learning in public", "successes"]
 ---
-
-## Introduction
-
-### What can you expect on this blog post?
+February 22, 2025og post?
 
 After reading this blog post, you will be able to develop restful API's using typescript and express that will be connected to database and using typeORM as an ORM tool.
 Beyond that you will have the knowledge to help you organize your projects and handle errors, implementing logs, set up your config files,environment variables and use docker to containerize your application.

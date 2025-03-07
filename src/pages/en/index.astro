@@ -5,7 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const posts = await getCollection("blog", (data) => {
   const lang = data.slug.split("/");
-  return lang.includes("pt-br");
+  return lang.includes("en");
 });
 
 const sortedPosts = posts.sort((a, b) => {

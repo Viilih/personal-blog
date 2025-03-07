@@ -1,10 +1,8 @@
 ---
 layout: "../../../layouts/MarkdownLayout.astro"
 title: Introdução ao meu repositório
-author: Guilherme Nascimento
-description: "Depois de aprender um pouco de Astro, eu simplesmente não consegui parar!"
 pubDate: 2024-12-22
-tags: ["astro", "blog", "aprendizado em público", "sucessos"]
+slug: pt-br/introducao-ao-meu-site
 ---
 
 ## O que é este blog?
