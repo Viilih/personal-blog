@@ -7,6 +7,9 @@ import icon from "astro-icon";
 
 export default defineConfig({
   integrations: [icon()],
+  redirects: {
+    "/": "/en",
+  },
   output: "static",
   markdown: {
     syntaxHighlight: false,
