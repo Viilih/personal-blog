@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import BlogCard from "@/components/BlogCard.astro";
+
+const posts = await getCollection("blog", (data: { slug: string }) => {
+  const lang = data.slug.split("/");
+  return lang.includes("en");
+});
+
+const sortedPosts = posts.sort((a, b) => {
+  const dateA = new Date(a.data.pubDate).getTime();
+  const dateB = new Date(b.data.pubDate).getTime();
+  return dateB - dateA;
+});
+---
+
+<BaseLayout>
+  <section class="flex flex-col gap-y-4">
+    <h2 class="text-2xl font-bold">Posts</h2>
+    <div class="not-prose flex flex-col gap-4">
+      {sortedPosts.map((post) => <BlogCard entry={post} />)}
+    </div>
+  </section>
+</BaseLayout>

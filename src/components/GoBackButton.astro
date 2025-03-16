@@ -1,5 +1,5 @@
 ---
-import Link from "./Link.astro";
+import Link2 from "./Link2.astro";
 
 const currentLocale = Astro.currentLocale || "en";
 
@@ -8,6 +8,6 @@ const backText = currentLocale === "pt-br" ? "Voltar" : "Go back";
 const baseUrlBasedOnLocale = currentLocale === "pt-br" ? "/pt-br" : "/en";
 ---
 
-<Link href={baseUrlBasedOnLocale}>
-  <p>{backText}</p>
-</Link>
+<Link2 href={baseUrlBasedOnLocale}>
+  <p class="hover:text-blue-500">{backText}</p>
+</Link2>

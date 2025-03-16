@@ -1,0 +1,56 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Link2 from "./Link2.astro";
+
+const currentLocale = Astro.currentLocale || "en";
+
+const formatDate = (date: Date, locale: string) => {
+  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  const month = String(utcDate.getMonth() + 1).padStart(2, "0");
+  const day = String(utcDate.getDate()).padStart(2, "0");
+  const year = utcDate.getFullYear();
+
+  // Use DD/MM/YYYY for pt-br, MM-DD-YYYY for others
+  if (locale === "pt-br") {
+    return `${day}/${month}/${year}`;
+  } else {
+    return `${month}-${day}-${year}`;
+  }
+};
+
+type Props = {
+  entry: CollectionEntry<"blog">;
+  class?: string;
+};
+const { entry, class: className = "" } = Astro.props as Props;
+
+const lang = entry.slug.split("/")[0];
+const blogPage = entry.slug.split("/")[1];
+const publishDate = new Date(entry.data.pubDate);
+const formattedDate = formatDate(publishDate, currentLocale);
+---
+
+<div
+  class={`not-prose rounded-xl border p-4 transition-colors duration-300 ease-in-out hover:bg-secondary/50 h-full ${className}`}
+>
+  <Link2
+    href={`/${lang}/blog/${blogPage}`}
+    class="flex flex-col h-full"
+    underline={false}
+  >
+    <div class="flex flex-col h-full">
+      <div class="flex justify-between items-start mb-2">
+        <h3 class="text-2xl font-semibold line-clamp-2">
+          {entry.data.title}
+        </h3>
+        <span class="text-xl text-muted-foreground whitespace-nowrap ml-4">
+          {formattedDate}
+        </span>
+      </div>
+      <p class="text-lg text-muted-foreground line-clamp-3 flex-grow">
+        some random description that i am writing for this blog some random
+        description that i am writing for this blog
+      </p>
+    </div>
+  </Link2>
+</div>

@@ -1,12 +1,15 @@
 import { defineConfig } from "astro/config";
 import { remarkReadingTime } from "./plugins/remark-reading-time.mjs";
+import tailwindcss from "@tailwindcss/vite";
 import rehypeKatex from "rehype-katex";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeExternalLinks from "rehype-external-links";
 import icon from "astro-icon";
 
+import react from "@astrojs/react";
+
 export default defineConfig({
-  integrations: [icon()],
+  integrations: [icon(), react()],
   redirects: {
     "/": "/en",
   },
@@ -38,5 +41,8 @@ export default defineConfig({
     routing: {
       prefixDefaultLocale: false,
     },
+  },
+  vite: {
+    plugins: [tailwindcss()],
   },
 });

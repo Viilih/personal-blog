@@ -1,56 +1,15 @@
 ---
 import { languages } from "../i18n/ui";
+import LanguageSelector from "./LanguageSelector";
+
+// Define the type for the languages object
+type LanguageKey = keyof typeof languages;
 
 const currentPath = Astro.url.pathname;
-const currentLang =
-  Object.keys(languages).find(
+const currentLang: LanguageKey =
+  (Object.keys(languages) as LanguageKey[]).find(
     (lang) => currentPath.startsWith(`/${lang}/`) || currentPath === `/${lang}`,
   ) || "en";
 ---
 
-<div class="language-picker">
-  {
-    Object.entries(languages).map(([lang, label], index) => (
-      <>
-        {index > 0 && <div class="language-separator" />}
-        <a
-          href={`/${lang}/`}
-          class={`language-link ${currentLang === lang ? "active" : ""}`}
-        >
-          {label}
-        </a>
-      </>
-    ))
-  }
-</div>
-
-<style>
-  .language-picker {
-    display: flex;
-    align-items: center;
-  }
-
-  .language-link {
-    font-size: 14px;
-    font-weight: 500;
-    color: #6b7280;
-    text-decoration: none;
-    padding: 4px 8px;
-    transition: color 0.2s ease;
-  }
-
-  .language-link:hover {
-    color: #111827;
-  }
-
-  .language-link.active {
-    color: #000000;
-  }
-
-  .language-separator {
-    height: 16px;
-    width: 1px;
-    background-color: #d1d5db;
-    margin: 0 4px;
-  }
-</style>
+<LanguageSelector client:load languages={languages} currentLang={currentLang} />

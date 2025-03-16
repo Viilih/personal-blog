@@ -1,20 +1,96 @@
 ---
-import { getCollection } from "astro:content";
-import PostList from "../../components/PostList.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+import { ArrowRight } from "lucide-react";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import BlogCard from "@/components/BlogCard.astro";
+import Link2 from "@/components/Link2.astro";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
-const posts = await getCollection("blog", (data) => {
+const posts = await getCollection("blog", (data: { slug: string }) => {
   const lang = data.slug.split("/");
-  return lang.includes("pt-br");
+  return lang.includes("pt-br"); // Filter posts with "en" in the slug
 });
 
-const sortedPosts = posts.sort((a, b) => {
-  const dateA = new Date(a.data.pubDate).getTime();
-  const dateB = new Date(b.data.pubDate).getTime();
-  return dateB - dateA;
-});
+const sortedPosts = posts
+  .sort(
+    (
+      a: { data: { pubDate: string | number | Date } },
+      b: { data: { pubDate: string | number | Date } },
+    ) => {
+      const dateA = new Date(a.data.pubDate).getTime();
+      const dateB = new Date(b.data.pubDate).getTime();
+      return dateB - dateA; // Sort by date in descending order (newest first)
+    },
+  )
+  .slice(0, 2);
 ---
 
 <BaseLayout>
-  <PostList posts={sortedPosts} />
+  <main class="flex flex-col gap-4">
+    <section>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">Guilherme Nascimento</CardTitle>
+          <CardDescription className="text-xl"
+            >Desenvolvedor Fullstack</CardDescription
+          >
+        </CardHeader>
+        <CardContent>
+          <div class="flex gap-2 flex-col">
+            <p class="text-foreground">
+              Sou um engenheiro de software brasileiro atualmente trabalhando
+              com .NET, Azure, React e Typescript. Meu foco principal nos
+              estudos normalmente envolve testes unitários e de integração
+              (frontend e backend), Typescript, plataforma .NET, arquitetura de
+              código e devops (Eu sei que são muitas coisas, mas você pode
+              conferir o que estou fazendo atualmente na minha página /now)
+            </p>
+            <Separator />
+            <p class="text-foreground">
+              Além de código/estudos, eu realmente gosto de Magic (quem não
+              gosta, né?), astronomia e de ouvir boa música e ler bons livros.
+            </p>
+            <Separator />
+            <p>
+              Você pode conferir meu <Link2
+                href="https://github.com/Viilih"
+                class="text-blue-500 underline">perfil no Github</Link2
+              > onde coloco o código de todos os artigos escritos aqui e como disse
+              antes você pode ir para <Link2
+                href="https://github.com/Viilih"
+                class="text-blue-500 underline">\now</Link2
+              > para ver o que estou estudando e trabalhando atualmente.
+            </p>
+            <span
+              >AVISO: Não sei quando, mas em algum momento vou disponibilizar o
+              link para o repositório deste blog caso alguém queira fazer algo
+              semelhante, mas ainda tenho algumas coisas para fazer/ajustar
+              então por favor aguarde :)</span
+            >
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+    <section class="flex flex-col gap-y-4">
+      <div class="flex justify-between">
+        <h2 class="text-2xl font-bold">Últimas postagens</h2>
+        <Link2
+          href="/pt-br/blog"
+          class="flex underline items-center gap-0.5 font-semibold"
+          >Ver todos os posts
+          <ArrowRight />
+        </Link2>
+      </div>
+      <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {sortedPosts.map((post: unknown) => <BlogCard entry={post} />)}
+      </div>
+    </section>
+  </main>
 </BaseLayout>

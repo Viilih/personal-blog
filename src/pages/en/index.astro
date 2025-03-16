@@ -1,20 +1,98 @@
 ---
-import { getCollection } from "astro:content";
-import PostList from "../../components/PostList.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { ArrowRight } from "lucide-react";
 
-const posts = await getCollection("blog", (data) => {
+import Link2 from "../../components/Link2.astro";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import BlogCard from "@/components/BlogCard.astro";
+
+const posts = await getCollection("blog", (data: { slug: string }) => {
   const lang = data.slug.split("/");
   return lang.includes("en");
 });
 
-const sortedPosts = posts.sort((a, b) => {
-  const dateA = new Date(a.data.pubDate).getTime();
-  const dateB = new Date(b.data.pubDate).getTime();
-  return dateB - dateA;
-});
+const sortedPosts = posts
+  .sort(
+    (
+      a: { data: { pubDate: string | number | Date } },
+      b: { data: { pubDate: string | number | Date } },
+    ) => {
+      const dateA = new Date(a.data.pubDate).getTime();
+      const dateB = new Date(b.data.pubDate).getTime();
+      return dateB - dateA;
+    },
+  )
+  .slice(0, 2);
 ---
 
 <BaseLayout>
-  <PostList posts={sortedPosts} />
+  <main class="flex flex-col gap-4">
+    <section>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">Guilherme Nascimento</CardTitle>
+          <CardDescription className="text-xl"
+            >Fullstack developer</CardDescription
+          >
+        </CardHeader>
+        <CardContent>
+          <div class="flex gap-2 flex-col">
+            <p class="text-foreground">
+              I'm a brazilian software engineer currently working with .NET,
+              Azure, React and Typescript. My main focus on studies normally
+              evolves unit and integration testing (frontend and backend),
+              Typescript, .NET platform, Code architecture and devops (I know
+              it's a lot of things, but you can check what I am currently doing
+              on my /now page)
+            </p>
+            <Separator />
+            <p class="text-foreground">
+              Beyond code/studies, I really enjoy some Magic (who doesn't
+              right?), astronomy and to listen a good music and read good books.
+            </p>
+            <Separator />
+            <p>
+              You can check my <Link2
+                href="https://github.com/Viilih"
+                class="text-blue-500 underline">Github profile</Link2
+              > where I put the code of every article wrote here and as I said before
+              you can go to <Link2
+                href="https://github.com/Viilih"
+                class="text-blue-500 underline">\now</Link2
+              > to see what I'm currently studying and working on.
+            </p>
+            <span
+              >DISCLAIMER: I don't know when but at some time I will provide the
+              link for this blog repository if someone want to do something
+              similiar, but I still have a few things to do/adjust so please
+              wait :)</span
+            >
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+    <section class="flex flex-col gap-y-4">
+      <div class="flex justify-between">
+        <h2 class="text-2xl font-bold">Últimas postagens</h2>
+        <Link2
+          href="/pt-br/blog"
+          class="flex underline items-center gap-0.5 font-semibold"
+          >See all posts
+          <ArrowRight />
+        </Link2>
+      </div>
+      <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {sortedPosts.map((post: unknown) => <BlogCard entry={post} />)}
+      </div>
+    </section>
+  </main>
 </BaseLayout>
