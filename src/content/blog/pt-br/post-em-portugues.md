@@ -1,8 +1,6 @@
 ---
-layout: "../../../layouts/MarkdownLayout.astro"
 title: Introdução ao meu repositório
 pubDate: 2024-12-22
-slug: pt-br/introducao-ao-meu-site
 ---
 
 ## O que é este blog?

@@ -2,9 +2,10 @@
 import { getCollection } from "astro:content";
 import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Link from "components/Link.astro";
 
 const posts = await getCollection("blog", (data) => {
-  const lang = data.slug.split("/");
+  const lang = data.id.split("/");
   return lang.includes("pt-br");
 });
 
@@ -16,5 +17,31 @@ const sortedPosts = posts.sort((a, b) => {
 ---
 
 <BaseLayout>
-  <PostList posts={sortedPosts} />
+  <main class="blog-container">
+    <section class="intro">
+      <h1>Guilherme Nascimento</h1>
+      <p class="subtitle">Desenvolvedor fullstack</p>
+      <p>
+        Sou um engenheiro de software brasileiro atualmente trabalhando com
+        .NET, Azure, React e Typescript.Atualmente focado em se desenvolver em
+        testes unitários e de integração (frontend e backend), Typescript, .NET
+        e DevOps
+      </p>
+      <section class="bio">
+        <p>
+          Gosto de mágica(quem não gosta?),astronomia,ouvir uma boa música e ler
+          alguns livros
+        </p>
+        <p>
+          Você pode conferir meu <Link href="https://github.com/Viilih"
+            >perfil no Github</Link
+          > onde coloco o código de todos os artigos escritos aqui.
+        </p>
+      </section>
+      <section class="posts">
+        <h2>Últimas postagens</h2>
+        <PostList posts={sortedPosts} />
+      </section>
+    </section>
+  </main>
 </BaseLayout>

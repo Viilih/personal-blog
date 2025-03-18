@@ -4,7 +4,7 @@ import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const posts = await getCollection("blog", (data) => {
-  const lang = data.slug.split("/");
+  const lang = data.id.split("/");
   return lang.includes("en");
 });
 
@@ -16,5 +16,31 @@ const sortedPosts = posts.sort((a, b) => {
 ---
 
 <BaseLayout>
-  <PostList posts={sortedPosts} />
+  <main class="blog-container">
+    <section class="intro">
+      <h1>Guilherme Nascimento</h1>
+      <p class="subtitle">Fullstack Developer</p>
+      <p>
+        I'm a Brazilian software engineer working with .NET, Azure, React, and
+        TypeScript. Currently focusing on unit/integration testing, TypeScript, .NET and DevOps.
+      </p>
+    </section>
+    <section class="bio">
+      <p>I enjoy Magic, astronomy, music, and reading.</p>
+      <p>
+        Visit my <a href="https://github.com/Viilih">GitHub</a> for my projects.
+        A blog repository will be available soon!
+      </p>
+    </section>
+    <section class="posts">
+      <h2>Posts</h2>
+      <PostList posts={sortedPosts} />
+    </section>
+  </main>
 </BaseLayout>
+
+<style>
+  .blog-container > p{{
+    margin-bottom: 0;
+  }}
+</style>

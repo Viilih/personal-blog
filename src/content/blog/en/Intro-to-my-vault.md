@@ -1,8 +1,6 @@
 ---
-layout: "../../../layouts/MarkdownLayout.astro"
 title: Intro to my vault
 pubDate: 2024-12-22
-slug: en/intro-to-my-vault
 ---
 
 ## What is this blog?

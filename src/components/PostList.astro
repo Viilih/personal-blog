@@ -7,18 +7,17 @@ interface Props {
 }
 
 const { posts } = Astro.props;
+posts.forEach((post) => console.log(post.data));
 ---
 
 <ul>
   {
     posts.map((post) => {
-      const lang = post.slug.split("/")[0];
-      const blogPage = post.slug.split("/")[1];
-
+      const lang = post.id.split("/")[0];
       return (
         <BlogPost
           postTitle={post.data.title}
-          url={`/${lang}/blog/${blogPage}`}
+          url={`/${lang}/blog/${post.id}`}
           pubDate={post.data.pubDate}
         />
       );

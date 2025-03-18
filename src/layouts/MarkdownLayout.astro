@@ -10,8 +10,7 @@ interface Heading {
   slug: string;
   subheadings: Heading[];
 }
-const { frontmatter, headings = [] } = Astro.props;
-const { minutesRead } = Astro.props.frontmatter || {};
+const { frontmatter, headings = [], minutesRead } = Astro.props;
 
 // Get the current language from URL
 const lang = getLangFromUrl(Astro.url);

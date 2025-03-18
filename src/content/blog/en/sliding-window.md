@@ -1,8 +1,6 @@
 ---
-layout: "../../../layouts/MarkdownLayout.astro"
 title: What is Sliding Window?
 pubDate: 2025-02-23
-slug: en/sliding-window-en
 ---
 
 ## Sliding Window

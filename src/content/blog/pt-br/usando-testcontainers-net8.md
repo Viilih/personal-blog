@@ -1,8 +1,6 @@
 ---
-layout: "../../../layouts/MarkdownLayout.astro"
 title: Usando TestContainers na sua Aplicação .NET 8
 pubDate: 2025-03-14
-slug: pt-br/testcontainers-net-8-pt-br
 ---
 
 ## Introdução

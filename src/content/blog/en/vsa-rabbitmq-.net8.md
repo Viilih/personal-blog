@@ -1,8 +1,6 @@
 ---
-layout:  "../../../layouts/MarkdownLayout.astro"
 title: Implementing a voting system using .NET8, RabbitMQ, Vertical Slice Architecture and Docker
 pubDate: 2025-02-23
-slug: en/vsa-rabbitmq-net8-en
 ---
 
 ## Introduction

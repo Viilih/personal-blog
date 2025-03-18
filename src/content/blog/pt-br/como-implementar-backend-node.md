@@ -1,11 +1,7 @@
 ---
-layout:  "../../../layouts/MarkdownLayout.astro"
-slug: "pt-br/como-implementar-backend-node-typescript"
 title: Como implementar um backend com Node?
 pubDate: 2025-01-27
-translations:
-  en: "how-to-implement-backend-with-node"
-  pt-br: "como-implementar-backend-node"
+
 ---
 
 ## Introdução
