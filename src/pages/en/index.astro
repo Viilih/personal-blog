@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { ClientRouter } from "astro:transitions";
 
 const posts = await getCollection("blog", (data) => {
   const lang = data.id.split("/");
@@ -22,20 +23,21 @@ const sortedPosts = posts.sort((a, b) => {
       <p class="subtitle">Fullstack Developer</p>
       <p>
         I'm a Brazilian software engineer working with .NET, Azure, React, and
-        TypeScript. Currently focusing on unit/integration testing, TypeScript, .NET and DevOps.
+        TypeScript. Currently studying DevOps, .NET,Typescript,Node and other cool (or random) stuff. If you become interested to know what I'm doing right now
+         you  can check the <a href="en/now">/now page</a> 
       </p>
     </section>
     <section class="bio">
       <p>I enjoy Magic, astronomy, music, and reading.</p>
       <p>
-        Visit my <a href="https://github.com/Viilih">GitHub</a> for my projects.
-        A blog repository will be available soon!
+        Visit my <a href="https://github.com/Viilih">GitHub</a> for my projects and the code for each article written.
       </p>
     </section>
     <section class="posts">
       <h2>Posts</h2>
       <PostList posts={sortedPosts} />
     </section>
+    <ClientRouter />
   </main>
 </BaseLayout>
 

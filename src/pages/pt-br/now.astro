@@ -1,0 +1,60 @@
+---
+import GoBackButton from "components/GoBackButton.astro";
+import Link from "components/Link.astro";
+import BaseLayout from "layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+  <GoBackButton />
+  <div>
+    <h1>O que estou fazendo agora?</h1>
+    <span>Última atualização: 21 de Março de 2025 - 01:04</span>
+  </div>
+  <div>
+    <h3>Trabalho</h3>
+    <p>
+      Atualmente, trabalho como desenvolvedor fullstack na
+      <Link href="#">DBC Company</Link>. Normalmente, trabalho com as seguintes
+      tecnologias:
+      <ul>
+        <li>.NET</li>
+        <li>C#</li>
+        <li>React</li>
+        <li>Typescript</li>
+        <li>Azure DevOps (também Docker e Kubernetes)</li>
+      </ul>
+    </p>
+  </div>
+  <div>
+    <h3>Estudos</h3>
+    <p>
+      No momento em que você está lendo isto, estou estudando um desses tópicos:
+      <ul>
+        <li>DevOps (Kubernetes e Docker)</li>
+        <li>
+          Fundamentos/Princípios do Javascript (closures, async javascript e
+          funções) mais a fundo
+        </li>
+        <li>Typescript</li>
+        <li>Node</li>
+        <li>Ecossistema .NET</li>
+        <li>Frameworks de frontend para web</li>
+      </ul>
+    </p>
+  </div>
+  <div>
+    <h3>O que estou construindo?</h3>
+    <p>Este blog e um site explicando os princípios do JavaScript</p>
+  </div>
+  <div>
+    <h3>Hobbies</h3>
+    <p>Tocar guitarra e violão</p>
+    <p>Pratico Jiu Jitsu (BJJ)</p>
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-bottom: 0;
+  }
+</style>

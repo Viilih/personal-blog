@@ -1,0 +1,62 @@
+---
+import { ClientRouter } from "astro:transitions";
+import GoBackButton from "components/GoBackButton.astro";
+import Link from "components/Link.astro";
+import BaseLayout from "layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+  <GoBackButton />
+  <div>
+    <h1>What am I doing right now?</h1>
+    <span>Last update: March 21, 2025 - 1:04 AM</span>
+  </div>
+  <div>
+    <h3>Work</h3>
+    <p>
+      Currently I am working as a fullstack developer at <Link href="#"
+        >DBC Company</Link
+      >
+      I usually work with this tecnologies:
+      <ul>
+        <li>.NET</li>
+        <li>C#</li>
+        <li>React</li>
+        <li>Typescript</li>
+        <li>Azure DevOps (Docker and kubernetes also)</li>
+      </ul>
+    </p>
+  </div>
+  <div>
+    <h3>Studies</h3>
+    <p>
+      By the time you are reading this, I'm studing one of those topics:
+      <ul>
+        <li>DevOps (Kubernetes and Docker)</li>
+        <li>
+          Javascript fundalmentals/ Principles (closures, async javascript and
+          functions) more under the hood
+        </li>
+        <li>Typescript</li>
+        <li>NodeJS</li>
+        <li>.NET Ecosystem</li>
+        <li>Web frontend frameworks</li>
+      </ul>
+    </p>
+  </div>
+  <div>
+    <h3>What am I Building?</h3>
+    <p>This blog and a website explaining the fundamentals of javascript</p>
+  </div>
+  <div>
+    <h3>Hobbies</h3>
+    <p>Playing guitar (electric and acoustic one)</p>
+    <p>Brazilian Jiu Jitsu (BJJ)</p>
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-bottom: 0;
+  }
+</style>
