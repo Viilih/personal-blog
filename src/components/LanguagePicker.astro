@@ -1,11 +1,15 @@
 ---
 import { languages } from "../i18n/ui";
+import { getRelativeLocaleUrl } from "astro:i18n";
 
 const currentPath = Astro.url.pathname;
-const currentLang =
-  Object.keys(languages).find(
-    (lang) => currentPath.startsWith(`/${lang}/`) || currentPath === `/${lang}`,
-  ) || "en";
+const currentLang = Astro.currentLocale ?? "en";
+
+// Determine the new language to switch to
+const newLang = currentLang === "en" ? "pt-br" : "en";
+
+// Remove any locale prefix from the current path
+const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
 ---
 
 <div class="language-picker">
@@ -14,7 +18,7 @@ const currentLang =
       <>
         {index > 0 && <div class="language-separator" />}
         <a
-          href={`/${lang}/`}
+          href={getRelativeLocaleUrl(newLang, cleanPath)}
           class={`language-link ${currentLang === lang ? "active" : ""}`}
         >
           {label}

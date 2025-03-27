@@ -3,20 +3,21 @@ import type { CollectionEntry } from "astro:content";
 import BlogPost from "./BlogPost.astro";
 
 interface Props {
-  posts: CollectionEntry<"blog">[];
+  posts: CollectionEntry<"en">[];
 }
 
+const currentLang = Astro.currentLocale;
+console.log(currentLang);
 const { posts } = Astro.props;
 ---
 
 <ul>
   {
     posts.map((post) => {
-      const lang = post.id.split("/")[0];
       return (
         <BlogPost
           postTitle={post.data.title}
-          url={`/${lang}/blog/${post.id}`}
+          url={`/${currentLang}/blog/${post.id}`}
           pubDate={post.data.pubDate}
         />
       );

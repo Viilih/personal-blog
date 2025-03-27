@@ -168,14 +168,13 @@ const { toc } = Astro.props;
 </style>
 
 <script is:inline>
-  (function initTOC() {
+  function initializeTOC() {
     const tocToggle = document.getElementById("toc-toggle");
     const tocContent = document.getElementById("toc-content");
     const tocIcon = document.querySelector(".toc-icon");
 
     if (!tocToggle || !tocContent || !tocIcon) return;
 
-    // Open TOC by default if it fits on the screen
     const initialOpen = window.innerHeight > 900;
     if (initialOpen) {
       tocContent.classList.add("show");
@@ -191,5 +190,22 @@ const { toc } = Astro.props;
     };
 
     tocToggle.addEventListener("click", toggle);
-  })();
+
+    document.querySelectorAll(".toc-link, .toc-sublink").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        const targetId = link.getAttribute("href").substring(1);
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+    });
+  }
+
+  initializeTOC();
+
+  document.addEventListener("astro:after-swap", () => {
+    initializeTOC();
+  });
 </script>

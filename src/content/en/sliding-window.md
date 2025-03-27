@@ -69,4 +69,4 @@ bool ContainsNearbyDuplicate(int[] nums, int k) {
 The idea is the same for both codes above.
 
 Here is a simple sketch describing the logic I used for solving this problem (with go, but the idea is the same with C#)
-![](../../../images/excalidraw/sliding-window/sliding-window-sketch.png)
+![](../../images/excalidraw/sliding-window/sliding-window-sketch.png)

@@ -4,10 +4,7 @@ import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { ClientRouter } from "astro:transitions";
 
-const posts = await getCollection("blog", (data) => {
-  const lang = data.id.split("/");
-  return lang.includes("en");
-});
+const posts = await getCollection("en");
 
 const sortedPosts = posts.sort((a, b) => {
   const dateA = new Date(a.data.pubDate).getTime();

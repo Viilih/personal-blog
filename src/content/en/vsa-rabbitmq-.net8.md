@@ -1,116 +1,116 @@
 ---
-title: Implementando um sistema de votação usando .NET8, RabbitMQ, Arquitetura Vertical Slice e Docker
+title: Implementing a voting system using .NET8, RabbitMQ, Vertical Slice Architecture and Docker
 pubDate: 2025-02-23
 ---
 
-## Introdução
+## Introduction
 
-### O que você pode esperar deste blog
+### What can you expect from this blog
 
-O leitor aprenderá como e por que implementar serviços de fila em uma aplicação .NET, além de aprender o conceito de VSA (Arquitetura Vertical Slice) e como configurar um docker compose para esta aplicação.
+The reader will learn how and why implement queue services on a .net application, beyond learning the concept of the VSA and how to setup a docker compose for this application
 
-### Pré-requisitos
+### Prerequisites
 
-Familiaridade com .NET, Docker, conceitos de API e princípios RESTful, um pouco sobre DDD e conhecimento na linguagem C#.
+Familiarity with .NET, Docker, concepts of API and RESTful principles, a little about DDD and knowledge on the c# language.
 
-### Construindo um Sistema de Votação?
+### Building a Voting System?
 
-Não me lembro exatamente quando, mas me deparei com este [desafio](https://dev.to/zanfranceschi/desafio-sistema-de-votacao-bbb-50e3) através de um tweet.
+I don't exactly remember when, but I came across this [challenge](https://dev.to/zanfranceschi/desafio-sistema-de-votacao-bbb-50e3)through a tweet.
 
-Ele fala sobre uma discussão sobre como nós brasileiros estávamos pensando em como um site de um reality show poderia suportar milhares de requisições por segundo e ainda ter um tempo de resposta rápido.
+It talks about a discussion about how we Brazilians were thinking about how a website from a reality show could support thousands of requests per second and still have a fast response time.
 
-Neste artigo, o autor introduz o conceito de serviços de fila e como eles podem ajudar a suportar essas milhares de requisições. Basicamente consiste em duas etapas:
+In this article, the author introduces the concept of queue services and how they can help to support these thousands of requests. It basically consists of two steps:
 
-1. A API recebe uma requisição para votar em um candidato, então publica este voto em uma fila, e o mais rápido possível, a API retorna algum tipo de Voto aceito (202)
-2. Em seguida, o próximo passo é realmente salvar esse voto em um banco de dados. Criamos um consumidor que será executado de forma assíncrona para consumir a fila e salvar o voto no banco de dados
+1. The API receives a request to vote for a candidate, then publishes this vote on a queue, and as soon as possible, the API returns some kind of Vote accepted (202)
+2. Then the next step is to actually save this vote into a database. We create a consumer that will run asynchronously to consume the queue and save the vote into the database
 
-O desafio sugere o uso do RabbitMQ para resolvê-lo, e este é o que vamos usar. Quanto à linguagem de programação, sinta-se à vontade para escolher qualquer uma de sua preferência, mas fique atento a alguns conceitos que vamos trabalhar durante este post:
+The challenge suggests the use of RabbitMQ for solving it, and this is the one we will use. As for the programming language, feel free to choose any of your preference, but keep an eye on some concepts we will work on during this post:
 
-- Workers em Segundo Plano
-- Serviços de Fila
-- Integração com o banco de dados
-- Arquitetura Vertical Slice
+- Background Workers
+- Queue Services
+- Integration with the database
+- Vertical Slice Architecture
 
-Se você só quer verificar a implementação da solução, pode ir para este [repositório](https://github.com/Viilih/VSA-voting-system) e ler o arquivo README.md com as instruções.
+If you just want to check the implementation of the solution, you can go to this [repository](https://github.com/Viilih/VSA-voting-system) and read the README.md file with the instructions.
 
-## Entendendo a Arquitetura Vertical Slice
+## Understanding Vertical Slice Architecture
 
-### O que é Arquitetura Vertical Slice? (VSA)
+### What is Vertical Slice Architecture? (VSA)
 
-É uma arquitetura centrada em recursos, onde você divide sua aplicação por funcionalidades e não por outras camadas, como Apresentação, Aplicação, Domínio que está presente na Arquitetura Limpa. Aqui está um esboço simples sobre como a VSA funciona:
-![Exemplo de Vertical Slice.](../../../images/excalidraw/vsa-.net-rabbit-post/VSA-example.png)
-O foco da VSA é isolar cada funcionalidade, criando uma aplicação menos acoplada entre as funcionalidades, onde cada funcionalidade tem seus próprios arquivos, serviços e lógica de negócios.
+It's an architecture feature centered, where you divide your application by features and not other layers, such as Presentation, Application, Domain that is present on Clean Architecture. Here is a simple sketch about how VSA works:
+![Vertical Slice example.](../../images/excalidraw/vsa-.net-rabbit-post/VSA-example.png)
+The focus of the VSA is isolating each feature, creating a less coupled application between features, where each feature has its own files, services, and business logic.
 
-### Vantagens e desvantagens
+### Advantages and disadvantages
 
-Na aplicação que vamos construir, usaremos os princípios e conceitos da Arquitetura Vertical Slice. Como qualquer outra arquitetura, ela tem suas próprias vantagens e desvantagens:
+In the application we are going to build, we will use the principles and concepts of the Vertical Slice Architecture.As with any other architecture, it has its own advantages and disadvantages:
 
-Vantagens:
+Advantages:
 
-- Cada funcionalidade é independente
-- As equipes podem trabalhar sem interferir no trabalho umas das outras
-- Menos acoplamento
-- Fácil de entender o que sua aplicação faz
+- Each feature stands on its own
+- Teams can work without stepping on each other's toes
+- Less coupling
+- Easy to understand what your application does
 
-Desvantagens:
+Disadvantages:
 
-- Você pode escrever código similar ou idêntico mais de uma vez
-- Funcionalidades compartilhadas precisam de planejamento cuidadoso
-- Você pode ter muitos arquivos em sua aplicação devido à separação de funcionalidades
+- You might write similar or identical code more than once
+- Shared features need careful planning
+- You might have a lot of files in your application due to feature separation
 
-### Quando usar VSA?
+### When to use VSA?
 
-Bem, a resposta para a segunda pergunta é: **Depende**
-Como disse antes, cada Arquitetura tem seus próprios compromissos e você precisa analisá-los para escolher o melhor para sua necessidade.
+Well the answer of the second question is: **It Depends**
+As I said before each Architecture has their own Trade offs and you need to analyze it to choose the best one to ind the best one for your need.
 
-Nesta aplicação, escolhi a VSA devido ao tamanho da nossa aplicação e a facilidade de implementar a VSA.
+In this application, I choose the VSA because the size of our application and the facility to implement the VSA.
 
-### Recursos para aprender mais
+### Resources for learning more
 
-Se você quiser se aprofundar neste conceito, aqui estão alguns bons recursos:
+If you want to dive deep into this concept, here are some good resources for it:
 
-- [Maneiras de implementar a Arquitetura Vertical Slice](https://antondevtips.com/blog/vertical-slice-architecture-the-best-ways-to-structure-your-project)
-- [Introdução à Arquitetura Vertical Slice](https://www.milanjovanovic.tech/blog/vertical-slice-architecture)
-- [Arquitetura Vertical Slice](https://www.jimmybogard.com/vertical-slice-architecture/)
-- [Implementação de Vertical Slice](https://www.youtube.com/watch?v=T-EwN9UqRwE&t=1471s)
+- [Ways to implement Vertical Slice Architecture](https://antondevtips.com/blog/vertical-slice-architecture-the-best-ways-to-structure-your-project)
+- [Intro to Vertical Slice Architecture](https://www.milanjovanovic.tech/blog/vertical-slice-architecture)
+- [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/)
+- [Vertical Slice implementation](https://www.youtube.com/watch?v=T-EwN9UqRwE&t=1471s)
 
-NOTA: O foco deste post é resolver o desafio que vou abordar nos próximos parágrafos, mas acredito que é importante contextualizar você, meu leitor, sobre a forma como vamos implementar a solução.
+NOTE: The focus of this post is to solve the challenge that I will go through in the next paragraphs, but I believe it's important to contextualize you, my reader, about the way we are going to implement the solution.
 
-## Configuração e Implementação do Projeto
+## Project Setup and Implementation
 
-### Configuração inicial do projeto
+### Initial project setup
 
-Para configurar a estrutura que vamos usar, você pode simplesmente copiar isso no seu terminal, basicamente ele cria uma solução e adiciona uma API à pasta src:
+To set up the structure we are gonna use you can just copy this into your terminal, basically it creates a solution and add an api to the src folder:
 
 ```cs
-# Criar uma nova solução
+# Create a new solution
 dotnet new sln -n voting-system
 
-# Criar pastas do projeto
+# Create project folders
 mkdir src mkdir "Solution Items"
 
-# Navegar até a pasta src e criar um projeto de API web
+# Navigate to src folder and create a web API project
 cd src
 dotnet new webapi -n votingSystem.Api --no-minimal
 
-# Criar diretório de teste dentro de src
+# Create test directory inside src
 mkdir test
 
-# Adicionar o projeto de API à solução cd ..
+# Add the API project to the solution cd ..
 dotnet sln add src/votingSystem.Api/votingSystem.Api.csproj
 
 dotnet add package FluentResults --version 3.16.0
 ```
 
-Depois disso, estamos prontos para começar nosso projeto
+After that, we are ready to to start our project
 
-### Entidades de domínio (Candidato e Voto)
+### Domain entities (Candidate and Vote)
 
-Bem, o desafio envolve basicamente duas entidades:
+Well the challenge involves basically two entities:
 
-- Candidato - Representa um candidato que pode receber votos.
-- Voto - Representa um voto individual dado a um candidato.
-  Como um candidato pode receber múltiplos votos à medida que o período de votação continua, vamos definir essas entidades na pasta **Domain**:
+- Candidate - Represents a candidate who can receive votes.
+- Vote - Represents an individual vote cast for a candidate.
+  Since a candidate can receive multiple votes as the voting period continues, let’s define these entities in the **Domain** folder:
 
 ```cs
 // votingSystem.Api/Domain/Candidate.cs
@@ -178,15 +178,15 @@ public class Vote {
 }
 ```
 
-Você pode estar pensando, por que estamos usando esse padrão de construtor privado e usando essa biblioteca usando **Result.Ok** ou **Result.Fail**?
+You might be thinking, why are we using this pattern of private constructor and use this lib using **Result.Ok** or **Result.Fail** ?
 
-Basicamente porque isso pode ajudar você a escalar seu projeto e ajudar a definir suas regras de negócio para suas entidades.
+Basically because It can help you to scale your project and help you to define your business rules for your entities.
 
-Ao usar um **método de fábrica** (Create), garantimos que a entidade esteja sempre em um estado válido antes de ser criada. Esse padrão também ajuda a prevenir inconsistências na instanciação de objetos e mantém a lógica de validação dentro do domínio, tornando a base de código mais limpa e mais fácil de manter a longo prazo.
+By using a **factory method** (Create), we ensure that the entity is always in a valid state before being created. This pattern also helps prevent inconsistencies in object instantiation and keeps validation logic within the domain, making the codebase cleaner and easier to maintain in the long run.
 
-### Configuração do banco de dados
+### Database configuration
 
-Vamos usar o SQL Server, para utilizá-lo precisamos fazer algumas configurações e instalar alguns pacotes, são eles:
+We are going to use SQL Server, in order to use it we need to do some configurations and install some packages, they are:
 
 ```bash
 dotnet add package Microsoft.EntityFrameworkCore --version 8.0.11
@@ -195,13 +195,13 @@ dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.11
 dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design --version 8.0.7
 ```
 
-### AVISO
+### DISCLAIMER
 
-Se preferir, você pode instalá-los através do seu Nuget Manager Packet.
+If you prefer you can install them through your Nuget Manager Packet,
 
-### Configurando o DbContext
+### Setting up the DbContext
 
-Para configurar nosso contexto de banco de dados, vamos usar a pasta `Infrastructure` para manter tanto a configuração do banco de dados quanto o serviço de fila dentro dela:
+To configure our database context, we are going to use the `Infrastructure` folder to keep both the database configuration and the queue service inside it:
 
 ```cs
 // Infrastructure/DbContext/VoteSystemDbContext.cs
@@ -239,18 +239,18 @@ public class VoteSystemDbContext: Microsoft.EntityFrameworkCore.DbContext {
 }
 ```
 
-Também definimos o relacionamento entre nossas entidades:
+We also define the relationship between our entities:
 
-- Um candidato pode ter muitos votos
+- One candidate can have many votes
 
-No seu `Program.cs`, você precisa adicionar este `DbContext` para inicializá-lo dentro da aplicação. Para fazer isso, basta adicionar o seguinte código no seu `Program.cs`:
+In your `Program.cs`, you need to add this `DbContext` to initialize it within the application. To do this, simply add the following code in your `Program.cs`:
 
 ```cs
 builder.Services.AddDbContext <VoteSystemDbContext> (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
   b => b.MigrationsAssembly("votingSystem.Api")));
 ```
 
-Apenas um lembrete rápido—se você não está muito familiarizado com o .NET, você precisa configurar uma **ConnectionString** no seu `appsettings.json`. Aqui está um exemplo:
+Just a quick reminder—if you are not very familiar with .NET, you need to set up a **ConnectionString** in your `appsettings.json`. Here’s an example:
 
 ```json
 "ConnectionStrings": {
@@ -258,7 +258,7 @@ Apenas um lembrete rápido—se você não está muito familiarizado com o .NET,
 }
 ```
 
-Após esta configuração, estamos prontos para iniciar nosso banco de dados. No meu caso, como uso Linux, me senti mais confortável apenas executando um contêiner usando o comando:
+After this configuration, we are ready to start our database. In my case, as I use Linux, I felt more comfortable on just running a container using the command:
 
 ```bash
  docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=@RandomPassword12345!" \
@@ -268,11 +268,11 @@ Após esta configuração, estamos prontos para iniciar nosso banco de dados. No
 
 ```
 
-No entanto, se você já tem o SQL Server rodando localmente em sua máquina, sinta-se à vontade para ignorar o comando acima.
+However, if you already have SQL Server running locally on your machine, feel free to ignore the command above.
 
-### Criando migrações
+### Creating migrations
 
-Agora, precisamos criar e aplicar migrações para gerar nosso banco de dados com as tabelas e relacionamentos necessários. O **EF Core** fornece comandos para ajudar com isso:
+Now, we need to create and apply migrations to generate our database with the necessary tables and relationships. **EF Core** provides commands to help with this:
 
 ```bash
 dotnet ef migrations add InitialMigration
@@ -284,19 +284,19 @@ dotnet ef migrations add InitialMigration
 dotnet ef database update
 ```
 
-E é isso—temos nosso banco de dados configurado!
+And that’s it—we have our database set up!
 
-### Implementação do repositório
+### Repository implementation
 
-Para lidar com operações de banco de dados, vamos usar repositórios. Eles serão bastante simples, mas à medida que os configuramos, precisamos começar a pensar nas funcionalidades que vamos fornecer.
+To handle database operations, we are going to use repositories. They will be quite simple, but as we set them up, we need to start thinking about the features we will provide.
 
-Ao considerar a entidade **Candidate**, não podemos permitir votar em um candidato que não existe, então precisamos garantir que podemos criar um candidato primeiro.
+When considering the **Candidate** entity, we cannot allow voting for a candidate that does not exist, so we need to ensure we can create a candidate first.
 
-Crie uma pasta **Features**, e dentro dela, organize cada contexto em pastas separadas, assim:
+Create a **Features** folder, and inside it, organize each context into separate folders, like this:
 
-![Exemplo de Vertical Slice.](../../../images/excalidraw/vsa-.net-rabbit-post/folder-structure.png)
+![Vertical Slice example.](../../images/excalidraw/vsa-.net-rabbit-post/folder-structure.png)
 
-Na pasta Candidates:
+On the Candidates folder:
 
 ```cs
 // Features/Candidates/ICandidateRepository.cs
@@ -329,7 +329,7 @@ public class CandidateRepository: ICandidateRepository {
 }
 ```
 
-A mesma lógica se aplica à entidade Vote, mas neste caso só precisamos inserir o voto no banco de dados:
+The same logic goes for the Vote entity, but on this case we just need to insert the vote on the database:
 
 ```cs
 // Features/Votes/IVoteRepository.cs
@@ -357,9 +357,9 @@ public class VoteRepository: IVoteRepository {
 }
 ```
 
-Depois de criar todos esses arquivos, precisamos lidar com a **injeção de dependência** para os repositórios em `Program.cs`.
+After creating all these files, we need to handle **dependency injection** for the repositories in `Program.cs`.
 
-Para fazer isso, adicione as seguintes linhas a `Program.cs`:
+To do this, add the following lines to `Program.cs`:
 
 ```cs
 // Program.cs
@@ -367,7 +367,7 @@ builder.Services.AddScoped <IVoteRepository, VoteRepository> ();
 builder.Services.AddScoped <ICandidateRepository, CandidateRepository> ();
 ```
 
-Com nosso repositório de candidatos pronto, podemos criar o handler e o endpoint para criar os Candidatos:
+With our candidate repository ready we can create the handler and the endpoint to create the Candidates:
 
 ```cs
 // Features/Candidates/CreateCandidate/CreateCandidateHandler
@@ -436,51 +436,51 @@ namespace votingSystem.Api.Features.Candidates.CreateCandidate {
 
 ```
 
-## Entendendo Message Brokers
+## Understanding Message Brokers
 
-### O que é um message broker?
+### What is a message broker?
 
-É um software que permite que aplicações se comuniquem entre si e troquem informações, podemos pensar nele como uma espécie de caixa de correio.
+It's a software that enables applications communicate with each other and exchange information, we can think of it as a kind of a mailbox
 
-### Produtores e Consumidores
+### Producers and Consumers
 
-Quando se fala em Message Brokers, é importante pensar em alguns pontos:
+When talking about messages Brokers it's important to think about some points:
 
-- O Serviço que está enviando uma mensagem para o message broker é chamado de Produtor
-- O Serviço recebendo a mensagem é chamado de consumidor
+- The Service that is sending a message to the message broker it's called Producer
+- The Service receiving the message is called consumer
 
-Aqui está um esboço simples sobre como um message broker funciona:
+Here is a simple sketch about how a message broker works:
 
-![Exemplo de Vertical Slice.](../../../images/excalidraw/vsa-.net-rabbit-post/message-broker-example.png)
+![Vertical Slice example.](../../images/excalidraw/vsa-.net-rabbit-post/message-broker-example.png)
 
-Vamos usar o message broker RabbitMq, e a comunicação do Produtor e Consumidor com o RabbitMq ocorre através do [Protocolo AMQP](https://www.rabbitmq.com/tutorials/amqp-concepts)
+We are going to use the RabbitMq message broker, and the communication of the Producer and Consumer with RabbitMq occurs via the [AMQP Protocol](https://www.rabbitmq.com/tutorials/amqp-concepts)
 
-### Por que estamos usando RabbitMq?
+### Why are we using RabbitMq ?
 
-Você pode estar pensando, Por que estamos usando RabbitMQ?
+You might be thinking, Why are we using RabbitMQ?
 
-Principalmente por dois motivos:
+Mainly for two reasons:
 
-- Para estudar e entender como os message brokers funcionam
-- Para dar uma resposta rápida ao usuário ao tentar interagir com a API através da UI
+- To study and understand of how message brokers works
+- To give a fast response to the user when trying to interact with the api through the UI
 
-Para melhorar a experiência do usuário ao votar em alguém em um reality show, PRECISAMOS mostrar ao usuário que seu voto foi aceito o mais rápido possível, e com isso tornaremos o público mais engajado com o reality show.
+In order to improve the user experience of voting for someone on a reality show, we NEED show to the user that their vote was accepted as fast as possible, and by that we will make the public more engaged with the reality show.
 
-Mas como podemos fazer isso?
+But how can we do that?
 
-Em um cenário com milhares de requisições, publicar mensagens em um sistema de filas para processamento assíncrono é geralmente mais rápido e eficiente do que lidar com um grande número de interações diretas com o banco de dados. As filas ajudam a distribuir a carga de trabalho, evitam sobrecarga do banco de dados e melhoram a escalabilidade do sistema, permitindo que as mensagens sejam processadas de forma independente e em um ritmo controlado.
+In a scenario with thousands of requests, publishing messages to a queue system for asynchronous processing is generally faster and more efficient than handling a large number of direct interactions with the database. Queues help distribute the workload, prevent database overload, and improve system scalability by allowing messages to be processed independently and at a controlled pace
 
-## Implementando o Sistema de Filas
+## Implementing the Queue System
 
-### Configuração do RabbitMq
+### RabbitMq Configuration
 
-Agora que sabemos o que é um Message Broker, vamos escolher um dentre muitos deles: RabbitMq
+Now that we know what a Message Broker is, we are going to choose one of many of them: RabbitMq
 
-O RabbitMq armazena suas mensagens em um formato de fila (FIFO) com os produtores publicando as mensagens na fila e os consumidores consumindo e removendo-as da fila.
+RabbitMq store it messages into a queue (FIFO) format with the producers publishing the messages on the queue and the consumers consuming and removing them from the queue.
 
-#### Implementando o Produtor
+#### Implementing the Producer
 
-Dentro da pasta `Infrastructure`, crie uma subpasta chamada `Messaging`, e dentro dela, outra subpasta chamada `RabbitMq`. Em seguida, crie a classe `RabbitMqProducer` e a interface `IRabbitMqProducer`.
+Inside the `Infrastructure` folder, create a subfolder named `Messaging`, and within it, another subfolder called `RabbitMq`. Then, create the `RabbitMqProducer` class and the `IRabbitMqProducer` interface.
 
 ```cs
 // Infrastructure/Messaging/RabbitMq/IRabbitMqProducer.cs
@@ -510,13 +510,13 @@ public class RabbitMqProducer: IRabbitMqProducer {
 }
 ```
 
-PARA RESUMIR O PROCESSO:
+TO SUMMARIZE THE PROCESS:
 
-1. Criar uma conexão com o contêiner RabbitMQ em execução
-2. Declarar a fila que você vai usar e suas configurações
-3. Codificar a mensagem para publicar na fila que você declarou
+1. Create a connection with the RabbitMQ container running
+2. Declare the queue you are going to use and its configurations
+3. Encode the message to publish to the queue you declared
 
-Agora que temos nosso Produtor, podemos implementar um endpoint e um handler para receber uma solicitação para enviar um voto:
+Now that we have our Producer, we can implement an endpoint and a handler to receive a request for submitting a vote:
 
 ```cs
 // Features/Votes/SubmitVote/SubmitVoteHandler.cs
@@ -557,7 +557,7 @@ public record SubmitVoteRequest(int CandidateId);
 public record SubmitVoteResponse(int CandidateId);
 ```
 
-E o endpoint se parece com isso:
+And the endpoint looks like this:
 
 ```cs
 // Features/Votes/SubmitVote/SubmitVoteController.cs
@@ -587,9 +587,9 @@ public class SubmitVoteController: ControllerBase {
 }
 ```
 
-#### Implementando o Consumidor:
+#### Implementing the Consumer:
 
-Assim como fizemos para enviar o voto para a fila, para processar o voto, lidar com eles e interagir com o banco de dados, precisamos criar um handler:
+As we did to submit the vote to the queue, to process the vote and handle them and interact with the database, we need to create a handler:
 
 ```cs
 using FluentResults;
@@ -626,7 +626,7 @@ public class ProcessVoteHandler {
 
 ```
 
-Na pasta `RabbitMq`, crie outro arquivo chamado RabbitMqConsumer.cs:
+In the `RabbitMq` folder, create another file called RabbitMqConsumer.cs:
 
 ```cs
 public class RabbitMqConsumer: BackgroundService {
@@ -708,24 +708,24 @@ public class RabbitMqConsumer: BackgroundService {
 }
 ```
 
-Resumindo o processo:
+Summarizing the process:
 
-1. **Estabelecer uma conexão com o RabbitMQ**: Configurar e criar uma conexão com o broker RabbitMQ.
-2. **Declarar uma fila**: Garantir que a fila `vote` exista com as configurações adequadas.
-3. **Consumir mensagens**: Escutar mensagens recebidas, processá-las e confirmar o recebimento.
-4. **Processar votos**: Extrair o conteúdo da mensagem e passá-lo para o `ProcessVoteHandler` para processamento.
+1. **Establish a connection with RabbitMQ**: Configure and create a connection to the RabbitMQ broker.
+2. **Declare a queue**: Ensure the `vote` queue exists with the proper settings.
+3. **Consume messages**: Listen for incoming messages, process them, and acknowledge receipt.
+4. **Process votes**: Extract the message content and pass it to the `ProcessVoteHandler` for processing.
 
-### Entendendo Serviços em Segundo Plano?
+### Understanding Background Services?
 
-Um `BackgroundService` no .NET é um tipo especial de serviço que roda em segundo plano enquanto sua aplicação está em execução. Pense nele como um **trabalhador** que continuamente realiza uma tarefa sem bloquear a aplicação principal.
+A `BackgroundService` in .NET is a special type of service that runs in the background while your application is running. Think of it like a **worker** that continuously performs a task without blocking the main application.
 
-No nosso exemplo, o serviço em segundo plano é responsável por ouvir e consumir a fila e lidar com as operações com o banco de dados.
+On our example, the background service is responsible for listening and consuming the queue and handle the operations with the database.
 
-Você pode verificar informações mais detalhadas de como os Serviços em Segundo Plano funcionam na [documentação oficial](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-9.0&tabs=visual-studio)
+You can check more detailed information of how Background Services works on the [official documentation](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-9.0&tabs=visual-studio)
 
-## Atualizando o Program.cs
+### Update the Program.cs
 
-Após todas essas configurações, você pode atualizar seu arquivo Program.cs, ele deve ficar assim:
+After all of those configurations you can update your Program.cs file, it should be like this:
 
 ```cs
 using Microsoft.EntityFrameworkCore;
@@ -739,32 +739,32 @@ using votingSystem.Api.Infrastructure.Messaging.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona serviços ao container.
+// Add services to the container.
 
-builder.Services.AddDbContext<VoteSystemDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+builder.Services.AddDbContext < VoteSystemDbContext > (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
   b => b.MigrationsAssembly("votingSystem.Api")));
 
 builder.Services.AddControllers();
-// Saiba mais sobre configurações de Swagger/OpenAPI em https://aka.ms/aspnetcore/swashbuckle
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IVoteRepository, VoteRepository>();
-builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
-builder.Services.AddScoped<CreateCanidadateHandler>();
-builder.Services.AddScoped<SubmitVoteHandler>();
-builder.Services.AddScoped<ProcessVoteHandler>();
-builder.Services.AddHostedService<RabbitMqConsumer>();
-builder.Services.AddScoped<IRabbitMqProducer, RabbitMqProducer>();
+builder.Services.AddScoped < IVoteRepository, VoteRepository > ();
+builder.Services.AddScoped < ICandidateRepository, CandidateRepository > ();
+builder.Services.AddScoped < CreateCanidadateHandler > ();
+builder.Services.AddScoped < SubmitVoteHandler > ();
+builder.Services.AddScoped < ProcessVoteHandler > ();
+builder.Services.AddHostedService < RabbitMqConsumer > ();
+builder.Services.AddScoped < IRabbitMqProducer, RabbitMqProducer > ();
 
 var app = builder.Build();
 
-// Temos isso para aplicar automaticamente as migrações ao banco de dados
+// We have this to automatically apply the migrations to the database
 using(var scope = app.Services.CreateScope()) {
-  var context = scope.ServiceProvider.GetRequiredService<VoteSystemDbContext>();
+  var context = scope.ServiceProvider.GetRequiredService < VoteSystemDbContext > ();
   context.Database.Migrate();
 }
 
-// Configurar o pipeline de requisições HTTP.
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
   app.UseSwagger();
   app.UseSwaggerUI();
@@ -779,11 +779,11 @@ app.MapControllers();
 app.Run();
 ```
 
-## Executando a aplicação
+## Running the application
 
-### Opções de configuração de contêiner
+### Container setup options
 
-Você pode executar cada contêiner do SQL Server e do RabbitMQ com estes comandos:
+You can either run each container of the sql server and the rabbitmq with these commands:
 
 SQL SERVER:
 
@@ -801,11 +801,11 @@ RabbitMQ:
 docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-management
 ```
 
-### Usando docker compose
+### Using docker compose
 
-Você também pode configurar um arquivo docker compose para executar todos esses serviços para você e apenas executar sua API localmente.
+You can also setup a docker compose file to run all theses services for you and just run your api locally.
 
-Se quiser fazer isso, crie um arquivo compose.yaml como este:
+If you want to do so, create a compose.yaml file like this one:
 
 ```yaml
 services:
@@ -840,30 +840,30 @@ volumes:
   sql-volume:
 ```
 
-e então basta executar o comando:
+and then just run the command:
 
 ```bash
 docker compose up
 ```
 
-E seja feliz :)
+And be happy :)
 
-## Conclusão
+## Conclusion
 
-### O que você aprendeu?
+### What did you learn?
 
-Apresentamos alguns conceitos sobre message brokers e como eles podem ser aplicados em uma aplicação e um exemplo de seus casos de uso
+We introduced some conecpts about message brokers and how those can be applied on an applicattion and an example of it use cases
 
-Aprendemos sobre Arquitetura de Vertical Slice
+Learned about Vertical Slice Architecture
 
-Como aplicar o docker para executar alguns serviços para ajudar durante o desenvolvimento
+How to apply docker for running some services to help during your development
 
-#### Quais são os próximos passos?
+#### What are the next steps?
 
-Acredito que seria uma boa ideia tentar criar algum projeto que VOCÊ pensou e tentar implementar um serviço de fila e aplicar o docker durante o seu desenvolvimento
+I believe it would be a good idea to try and create some project that YOU thought of and try to implement a queue service and apply docker during your development
 
-Tente aplicar VSA e veja se funciona para seus desafios/projetos
+Try to apply VSA an if it works for your challenges/projects
 
-Sua imaginação é o limite do que você vai fazer com as ferramentas que abordamos hoje
+Your imagination it's your limit of what are you going to do with the tools we covered today
 
-Espero que tenha gostado da leitura e lembre-se: É importante comer frutas e beber água
+Hope you enjoyed the reading and remember: It's important to eat fruits and drink water
