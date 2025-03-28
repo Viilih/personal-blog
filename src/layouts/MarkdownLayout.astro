@@ -14,7 +14,6 @@ const { frontmatter, headings = [], minutesRead } = Astro.props;
 
 // Get the current language from URL
 const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 // Use the current language for date formatting
 const formatDate = (date: Date) => {

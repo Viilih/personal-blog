@@ -3,7 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import BlogPost from "./BlogPost.astro";
 
 interface Props {
-  posts: CollectionEntry<"en">[];
+  posts: CollectionEntry<"en" | "pt-br">[];
 }
 
 const currentLang = Astro.currentLocale;
