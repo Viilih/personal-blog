@@ -1,0 +1,190 @@
+---
+title: How can you use HOFs to improve your DX with Javascript?
+pubDate: 2025-04-07
+---
+
+import { Image } from "astro:assets";
+import func1 from "../../images/excalidraw/hofs/hof1.png";
+import func2 from "../../images/excalidraw/hofs/hof2.png";
+
+Have you ever thought about how can you use the principle of HOFs (High Order Functions) to help and improve your DX(Developer experience)? We are going to dig into that.
+
+### I know that you already know what HOFs are...
+
+But I think it's never enough to explain how functions work and what makes it a <u>High Order Function</u>
+
+Let's take a look into this piece of code:
+
+```js
+function greeting(name) {
+  const greetingName = `Hello ${name}`;
+  return greetingName;
+}
+const firstName = "John Doe";
+const greetingResult = greeting(firstName);
+console.log(greetingResult);
+```
+
+> DISCLAIMER: I know that you know what are functions, but I believe that, as a developer, you should be able to explain technically how they work, not only functions but other fundamental concepts.
+
+Since javascript is a language where it works with a single thread, the
+code is executed _line by line_, so we first declare the function but we don't start running it, declare our firstName variable and allocate them in the local Memory
+
+<Image
+  class="rounded-diagram"
+  quality={80}
+  src={func1}
+  alt="Diagram showing variable declaration and memory allocation before function execution."
+  width={870}
+  height={400}
+/>
+
+Now we declare our greetingResult and at the moment we goes inside of our unction we create a new _Execution context_ where:
+
+- Our greeting function enter our call stack
+- We declare our argument "name", with the value "John Doe"
+- We return the new string and assign the return value to the greetingResult variable
+
+<Image
+  class="rounded-diagram"
+  src={func2}
+  alt="Diagram showing the call stack and execution context during function execution."
+  width={870}
+  height={450}
+/>
+
+And that's it, this is how functions works!
+
+Now that we know how functions work under the hood, we can define what makes a function a High Order Function:
+
+- The function receive another function/callback or return another function.
+
+Simple as that!
+
+### But how can I apply this?
+
+You might be wondering, why do I need to understand this if I already know how to use `.map()` , `.filter()`, `.reduce()` and `find()` ? (For those who are not fafmiliar, these are some HOF from javascript )
+
+You can use it to optimize repetitive tasks! You sometimes need to console.log() to debug something right? Or even with authorization or even for creating factory functions!
+
+> Remember this is an alternative for doing those activities, you are not "wrong" or missing something if you are not doing that.
+
+#### Logging
+
+```js
+function createLogger(level) {
+  const prefix = `[${level.toUpperCase()}]`;
+  return function (message) {
+    console.log(`${prefix} ${new Date().toISOString()}: ${message}`);
+  };
+}
+
+const logInfo = createLogger("info");
+const logWarn = createLogger("warning");
+const logError = createLogger("error");
+
+logInfo("User logged in successfully.");
+logWarn("API response took longer than expected.");
+logError("Failed to connect to the database.");
+```
+
+### Factory a Fetcher for a base URL
+
+```js
+function createApiFetcher(baseUrl, defaultOptions = {}) {
+  return async function (endpoint, options = {}) {
+    const url = `${baseUrl}${endpoint}`;
+    const fetchOptions = {
+      ...defaultOptions,
+      ...options,
+    };
+    console.log(`Fetching: ${url} with options:`, fetchOptions);
+    try {
+      const response = await fetch(url, fetchOptions);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      logError(`API Fetch failed for ${url}: ${error.message}`);
+      throw error;
+    }
+  };
+}
+
+const internalApi = createApiFetcher(
+  "https://some-random-very-cool-api.com/v1",
+  {
+    headers: {
+      "X-API-Key": "SECRET_KEY",
+    },
+  },
+);
+
+async function fetchUserData() {
+  try {
+    const internalData = await internalApi("/profile/me");
+    logInfo(`Fetched internal profile: ${JSON.stringify(internalData)}`);
+    // Now you *could* process internalData further if needed
+  } catch (e) {
+    // Log the error from the fetcher OR a general error
+    logError(`Failed to fetch or process user data: ${e.message}`);
+  }
+}
+
+fetchUserData();
+```
+
+#### Authorization
+
+Here is an example using `Express.js`
+
+```js
+const authorize = (requiredRoles) => {
+  return (req, res, next) => {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({
+        error: "Authentication required",
+      });
+    }
+
+    const hasPermission = requiredRoles.some((role) =>
+      user.roles.includes(role),
+    );
+
+    if (!hasPermission) {
+      return res.status(403).json({
+        error: "Insufficient permissions",
+      });
+    }
+
+    next();
+  };
+};
+
+app.get("/users", authorize([ROLES.ADMIN]), getAllUsers);
+```
+
+### Why would I use this?
+
+Why go beyond just using built-in HOFs like .map() and .filter() and start creating your own HOFs?
+
+Here are some points that you might think about using it:
+
+- **Reducing Repetitive Code (DRY):** Write common logic (like adding a log prefix or checking roles) once inside the HOF, not everywhere you need it.
+- **Making Code Clearer:**: Your main code focuses on what it does (e.g., authorize(['admin'])), hiding the how (the complex checks) inside the HOF. This makes it easier to read and understand.
+- **Simplifying Maintenance:**: Need to change how logging or authorization works? Update the HOF in one place, not scattered across your project.
+- **Creating Reusable Tools:** You can Build flexible HOFs (like createApiFetcher) that you can configure and reuse for different situations and repetitive tasks.
+
+Beyond these examples, think about creating reusable HOFs for any repetitive task, like complex array manipulations tailored to your specific data needs!
+
+And remember, there won't be one exact way to do something in programming and you are not "wrong" on following something different!
+
+Obviously, you need to keep in mind the trade-offs of your decision.
+
+And this is how we can use a principle (High Order Functions) to create and improve our Developer experience and the developer workflow
+
+Hope you learned something useful in this article and remember:
+
+Drink water, eat fruits and be kind!

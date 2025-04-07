@@ -98,7 +98,7 @@ const toc = buildToc(headings);
 
   .post {
     width: 100%;
-    max-width: 40vw;
+    max-width: 65vw;
     position: relative;
     text-align: justify;
     height: 100%;
@@ -137,7 +137,10 @@ const toc = buildToc(headings);
     background-color: rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
   }
-
+  .rounded-diagram img {
+    border-radius: 8px; /* Or use rem, em, % */
+    display: block; /* Ensures proper block layout if needed */
+  }
   @media (max-width: 1024px) {
     .layout {
       max-width: 90%;
@@ -168,7 +171,7 @@ const toc = buildToc(headings);
     .post__title {
       font-size: 2rem;
       line-height: 1.2;
-      text-align: justify;
+      text-align: start;
     }
   }
 </style>

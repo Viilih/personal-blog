@@ -6,8 +6,10 @@ import rehypePrettyCode from "rehype-pretty-code";
 import rehypeExternalLinks from "rehype-external-links";
 import icon from "astro-icon";
 
+import mdx from "@astrojs/mdx";
+
 export default defineConfig({
-  integrations: [icon()],
+  integrations: [icon(), mdx()],
   redirects: {
     "/": "/en",
   },

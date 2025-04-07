@@ -1,0 +1,189 @@
+---
+title: Como você pode usar HOFs para melhorar sua DX com Javascript?
+pubDate: 2025-04-07
+---
+
+import { Image } from "astro:assets";
+import func1 from "../../images/excalidraw/hofs/hof1.png";
+import func2 from "../../images/excalidraw/hofs/hof2.png";
+
+Você já pensou sobre como pode usar o princípio das HOFs (High Order Functions) para ajudar e melhorar sua DX (Developer Experience)? Vamos nos aprofundar nisso.
+
+### Eu sei que você já sabe o que são HOFs...
+
+Mas acho que nunca é demais explicar como as funções funcionam e o que faz delas uma <u>High Order Function</u>
+
+Vamos dar uma olhada neste trecho de código:
+
+```js
+function greeting(name) {
+  const greetingName = `Hello ${name}`;
+  return greetingName;
+}
+const firstName = "John Doe";
+const greetingResult = greeting(firstName);
+console.log(greetingResult);
+```
+
+> AVISO: Eu sei que você sabe o que são funções, mas acredito que, como desenvolvedor, você deve ser capaz de explicar tecnicamente como elas funcionam, não apenas funções, mas outros conceitos fundamentais.
+
+Como o javascript é uma linguagem que funciona com uma única thread, o código é executado _linha por linha_, então primeiro declaramos a função, mas não começamos a executá-la, declaramos nossa variável firstName e a alocamos na memória local
+
+<Image
+  class="rounded-diagram"
+  quality={80}
+  src={func1}
+  alt="Diagrama mostrando a declaração de variáveis e alocação de memória antes da execução da função."
+  width={870}
+  height={400}
+/>
+
+Agora declaramos nosso greetingResult e no momento em que entramos dentro da nossa função, criamos um novo _Contexto de Execução_ onde:
+
+- Nossa função greeting entra em nossa pilha de chamadas
+- Declaramos nosso argumento "name", com o valor "John Doe"
+- Retornamos a nova string e atribuímos o valor de retorno à variável greetingResult
+
+<Image
+  class="rounded-diagram"
+  src={func2}
+  alt="Diagrama mostrando a pilha de chamadas e o contexto de execução durante a execução da função."
+  width={870}
+  height={450}
+/>
+
+E é isso, é assim que as funções funcionam!
+
+Agora que sabemos como as funções funcionam por baixo dos panos, podemos definir o que faz uma função ser uma High Order Function:
+
+- A função receber outra função/callback ou retornar uma outra função.
+
+Simples assim!
+
+### Mas como posso aplicar isso?
+
+Você deve estar se perguntando, por que preciso entender isso se já sei como usar `.map()`, `.filter()`, `.reduce()` e `find()`? (Para aqueles que não estão familiarizados, estas são algumas HOFs do javascript)
+
+Você pode usá-las para otimizar tarefas repetitivas! Às vezes você precisa usar console.log() para depurar algo, certo? Ou mesmo com autorização ou até para criar funções factory!
+
+> Lembre-se que esta é uma alternativa para realizar essas atividades, você não está "errado" ou perdendo algo se não estiver fazendo isso.
+
+#### Logging
+
+```js
+function createLogger(level) {
+  const prefix = `[${level.toUpperCase()}]`;
+  return function (message) {
+    console.log(`${prefix} ${new Date().toISOString()}: ${message}`);
+  };
+}
+
+const logInfo = createLogger("info");
+const logWarn = createLogger("warning");
+const logError = createLogger("error");
+
+logInfo("Usuário logado com sucesso.");
+logWarn("A resposta da API demorou mais do que o esperado.");
+logError("Falha ao conectar ao banco de dados.");
+```
+
+### Factory para um Fetcher com URL base
+
+```js
+function createApiFetcher(baseUrl, defaultOptions = {}) {
+  return async function (endpoint, options = {}) {
+    const url = `${baseUrl}${endpoint}`;
+    const fetchOptions = {
+      ...defaultOptions,
+      ...options,
+    };
+    console.log(`Buscando: ${url} com opções:`, fetchOptions);
+    try {
+      const response = await fetch(url, fetchOptions);
+      if (!response.ok)
+        throw new Error(`Erro HTTP! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      logError(`Falha na busca da API para ${url}: ${error.message}`);
+      throw error;
+    }
+  };
+}
+
+const internalApi = createApiFetcher(
+  "https://some-random-very-cool-api.com/v1",
+  {
+    headers: {
+      "X-API-Key": "SECRET_KEY",
+    },
+  },
+);
+
+async function fetchUserData() {
+  try {
+    const internalData = await internalApi("/profile/me");
+    logInfo(`Dados obtidos: ${JSON.stringify(internalData)}`);
+    // Agora você *poderia* processar o internalData mais adiante se necessário
+  } catch (e) {
+    // Registre o erro do fetcher OU um erro geral
+    logError(`Falha ao buscar ou processar dados do usuário: ${e.message}`);
+  }
+}
+
+fetchUserData();
+```
+
+#### Autorização
+
+Aqui está um exemplo usando `Express.js`
+
+```js
+const authorize = (requiredRoles) => {
+  return (req, res, next) => {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({
+        error: "Autenticação necessária",
+      });
+    }
+
+    const hasPermission = requiredRoles.some((role) =>
+      user.roles.includes(role),
+    );
+
+    if (!hasPermission) {
+      return res.status(403).json({
+        error: "Permissões insuficientes",
+      });
+    }
+
+    next();
+  };
+};
+
+app.get("/users", authorize([ROLES.ADMIN]), getAllUsers);
+```
+
+### Por que eu usaria isso?
+
+Por que ir além de apenas usar HOFs integradas como .map() e .filter() e começar a criar suas próprias HOFs?
+
+Aqui estão alguns pontos que você pode considerar ao usá-las:
+
+- **Reduz Código Repetitivo (DRY):** Escreva lógica comum (como adicionar um prefixo de log ou verificar funções) uma vez dentro da HOF, não em todo lugar que você precisa.
+- **Torna o Código Mais Claro:** Seu código principal se concentra no que faz (por exemplo, authorize(['admin'])), ocultando o como (as verificações complexas) dentro da HOF. Isso torna mais fácil de ler e entender.
+- **Simplifica a Manutenção:** Precisa mudar como o registro ou a autorização funciona? Atualize a HOF em um só lugar, não espalhada por todo o seu projeto.
+- **Criando Ferramentas Reutilizáveis:** Você pode construir HOFs flexíveis (como createApiFetcher) que pode configurar e reutilizar para diferentes situações e tarefas repetitivas.
+
+Além desses exemplos, pense em criar HOFs reutilizáveis para qualquer tarefa repetitiva, como manipulações complexas de arrays adaptadas às suas necessidades específicas de dados!
+
+E lembre-se, não haverá uma maneira exata de fazer algo na programação e você não está "errado" em seguir algo diferente!
+
+Obviamente, você precisa ter em mente as vantagens e desvantagens da sua decisão.
+
+E é assim que podemos usar um conceito (High Order Function) para criar e melhorar nossa Experiência de Desenvolvedor e o fluxo de trabalho do desenvolvedor.
+
+Espero que você tenha aprendido algo útil neste artigo e lembre-se:
+
+Beba água, coma frutas e seja gentil!
