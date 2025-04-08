@@ -6,12 +6,7 @@ const { id } = Astro.props;
   <span class="light"> light </span>
   <div>
     <label class="switch" aria-label="Switch theme">
-      <input
-        id={id}
-        class="theme-toggle"
-        type="checkbox"
-        onclick="togglePreference()"
-      />
+      <input id={id} class="theme-toggle" type="checkbox" />
       <span class="slider round"></span>
     </label>
   </div>
