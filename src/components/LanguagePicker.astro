@@ -5,10 +5,8 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 const currentPath = Astro.url.pathname;
 const currentLang = Astro.currentLocale ?? "en";
 
-// Determine the new language to switch to
 const newLang = currentLang === "en" ? "pt-br" : "en";
 
-// Remove any locale prefix from the current path
 const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
 ---
 
@@ -37,7 +35,37 @@ const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
   .language-link {
     font-size: 14px;
     font-weight: 500;
-    color: #6b7280;
+    text-decoration: none;
+    padding: 4px 8px;
+    transition: color 0.2s ease;
+    color: var(--language-inactive); /* Use the inactive color by default */
+  }
+
+  .language-link:hover {
+    color: var(--language-hover);
+  }
+
+  .language-link.active {
+    color: var(--language-active);
+    font-weight: 600; /* Make active language slightly bolder */
+  }
+
+  .language-separator {
+    height: 16px;
+    width: 1px;
+    background-color: var(--language-separator);
+    margin: 0 4px;
+  }
+</style>
+<!-- <style>
+  .language-picker {
+    display: flex;
+    align-items: center;
+  }
+
+  .language-link {
+    font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
     padding: 4px 8px;
     transition: color 0.2s ease;
@@ -48,7 +76,7 @@ const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
   }
 
   .language-link.active {
-    color: #000000;
+    color: var(--language-active);
   }
 
   .language-separator {
@@ -57,4 +85,4 @@ const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
     background-color: #d1d5db;
     margin: 0 4px;
   }
-</style>
+</style> -->

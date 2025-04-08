@@ -1,7 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import Sidebar from "../components/Sidebar.astro";
-import "../components/global.css";
+import "../styles/global.css";
 import { getLangFromUrl } from "../i18n/utils";
 
 const lang = getLangFromUrl(Astro.url);
@@ -13,8 +13,7 @@ const lang = getLangFromUrl(Astro.url);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{Astro.props.title || "Vili's vault"}</title>
-    <link rel="icon" type="image/x-icon" href="/public/favicon.png" />
-    <link rel="stylesheet" href="/components/global.css" />
+    <link rel="icon" type="image/x-icon" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -48,6 +47,7 @@ const lang = getLangFromUrl(Astro.url);
     </div>
   </body>
 </html>
+<script src="/public/theme-util.js" type="text/javascript" is:inline></script>
 
 <style is:global>
   .layout {
@@ -85,26 +85,6 @@ const lang = getLangFromUrl(Astro.url);
   .content-wrapper {
     max-width: 85vw;
     line-height: 1.6;
-  }
-
-  h1,
-  h2,
-  h3 {
-    margin: 1rem 0 1rem;
-    color: #1a1a1a;
-  }
-
-  p {
-    margin-bottom: 1.5rem;
-  }
-
-  a {
-    color: #0066cc;
-    text-decoration: none;
-  }
-
-  a:hover {
-    text-decoration: underline;
   }
 
   .meta-info {
