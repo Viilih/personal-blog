@@ -2,6 +2,7 @@
 title: Using TestContainers on your .NET 8 Application
 description: Understando what Test containersare, it benefits and how to use it on your application
 pubDate: 2025-03-14
+draft: false
 ---
 
 ## Introduction

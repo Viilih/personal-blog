@@ -1,6 +1,7 @@
 ---
 title: Usando TestContainers na sua Aplicação .NET 8
 pubDate: 2025-03-14
+draft: false
 ---
 
 ## Introdução

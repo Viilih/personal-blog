@@ -1,0 +1,159 @@
+---
+title: Introdução à performance do React - Parte I
+pubDate: 2025-04-28
+draft: true
+---
+
+import NotionImage from "../../components/ImageNotio.astro";
+import func1 from "../../images/excalidraw/react-performance/isolate-prop.png";
+
+Quando ouvimos sobre problemas de performance no React, geralmente pensamos, em primeiro lugar, em começar a usar técnicas como memoização ou começar a usar useCallbacks em todos os lugares para resolver nosso problema, mas aqui está uma coisa:
+
+Você NÃO precisa de memoização e useCallbacks para resolver problemas de performance em uma aplicação React!
+
+Obviamente haverá momentos em que você vai precisar disso, mas precisamos entender quando lidar com performance em geral.
+
+A chave é entender POR QUE sua aplicação está lenta. Há muitos re-renders? Importações não otimizadas ao carregar páginas?
+
+Para obter um melhor entendimento da performance do React, vamos mergulhar em como podemos abordar e resolver problemas de performance no React!
+
+## Re-renders
+
+Quando se trata de React, uma das principais "características" é entender re-renders, o que são, como e por que acontecem. Em geral, se você conseguir identificar as condições de renderização do seu componente/aplicação, você pode identificar e normalmente propor uma solução para o problema de performance que você está enfrentando.
+
+Se você, como eu uma vez, se perguntou como o React identifica e re-renderiza e atualiza o DOM virtual, é através de um processo chamado reconciliação. Pretendo escrever mais sobre isso no futuro, mas vamos focar primeiro nos re-renders e no ciclo de vida do componente para entendê-lo.
+
+### O ciclo de vida do componente
+
+Podemos dividir o ciclo de vida em três etapas:
+
+- Montagem: React cria a instância do componente pela primeira vez, renderizando todos os estados, hooks e elementos filhos pela primeira vez no DOM
+- Desmontagem: React "remove" o componente do DOM
+- Re-renderização: Quando o React atualiza um componente já existente com novas informações/dados → ele apenas atualiza o que mudou! O React reutiliza tudo o mais que não mudou
+
+O conceito-chave para entender bem a re-renderização é entender os estados na sua aplicação. Sempre que um ESTADO muda, o componente que contém esse estado e todos os seus componentes filhos são re-renderizados.
+
+Apenas um aviso:
+
+> Componentes não re-renderizam quando suas props mudam, a menos que o componente esteja envolvido em um componente de alta ordem React.memo
+
+> Para um componente filho re-renderizar devido a mudanças nas props, o componente pai DEVE re-renderizar e passar as props atualizadas
+
+### Mas como podemos resolver isso?
+
+Uma das técnicas mais simples é Mover o Estado para Baixo, com isso, quero dizer isolar o estado em um componente mais abaixo na árvore de renderização, simples assim!
+
+Imagine que você tem este App com um alternador de tema:
+
+```jsx
+import { useEffect, useState } from "react";
+import "./App.css";
+import {
+  FirstSlowComponent,
+  SecondSlowComponent,
+} from "./components/slowComponents";
+import ThemeOption from "./components/themeToggle";
+import { RandomContent } from "./components/randomContent";
+
+function App() {
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  return (
+    <>
+      <div>Olá Mundo!</div>
+      <div className="theme-options">
+        <ThemeOption theme="light" setTheme={setTheme} />
+        <ThemeOption theme="dark" setTheme={setTheme} />
+      </div>
+      <FirstSlowComponent />
+      <RandomContent />
+      <SecondSlowComponent />
+    </>
+  );
+}
+
+export default App;
+```
+
+Se você ver, até mesmo alternar um tema pode ser lento, mas vamos entender por quê:
+
+Sempre que mudamos um estado dentro do componente App, todo o componente será re-renderizado, até mesmo os componentes lentos que temos. Como podemos resolver esse problema de performance? Isolando o estado mais abaixo na árvore de renderização. Em vez de colocar a lógica explicitamente no componente App, vamos criar um componente ThemeSwitcher e isolar o estado de alternância de tema dentro dele.
+
+```jsx
+// ThemeSwitcher.tsx
+
+import { useEffect, useState } from "react";
+import ThemeOption from "./themeToggle";
+
+function ThemeSwitcher() {
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  return (
+    <div className="theme-options">
+      <ThemeOption theme="light" setTheme={setTheme} />
+      <ThemeOption theme="dark" setTheme={setTheme} />
+    </div>
+  );
+}
+
+export default ThemeSwitcher;
+```
+
+---
+
+```tsx
+// App.tsx
+import "./App.css";
+import {
+  FirstSlowComponent,
+  SecondSlowComponent,
+} from "./components/slowComponents";
+import { RandomContent } from "./components/randomContent";
+import ThemeSwitcher from "./components/ThemeSwitcher";
+
+function App() {
+  // const [theme, setTheme] = useState("light");
+
+  // useEffect(() => {
+  //   document.body.setAttribute("data-theme", theme);
+  // }, [theme]);
+
+  return (
+    <>
+      <div>Olá Mundo!</div>
+      {/* <div className="theme-options">
+        <ThemeOption theme="light" setTheme={setTheme} />
+        <ThemeOption theme="dark" setTheme={setTheme} />
+      </div> */}
+      <ThemeSwitcher />
+      <FirstSlowComponent />
+      <RandomContent />
+      <SecondSlowComponent />
+    </>
+  );
+}
+
+export default App;
+```
+
+Simplesmente isolando o estado em um componente, já podemos ver como alternar tema é rápido! Acabamos de evitar que toda a árvore de renderização seja re-renderizada.
+
+<NotionImage
+  src={func1}
+  alt="Exemplo"
+  caption="Esta é uma legenda, assim como no Notion."
+/>
+
+Esta é uma técnica simples onde você pode começar a resolver problemas de performance em vez de usar memoização e usar useCallbacks em todos os lugares (Isso tende a piorar sua performance).
+
+Esta é apenas uma introdução à otimização de performance do React. Conforme você se aprofunda neste tópico, você descobrirá e aprenderá técnicas mais avançadas para melhorar a velocidade da sua aplicação. No entanto, é importante entender que você deve sempre começar identificando a causa raiz dos problemas de performance antes de aplicar soluções.
+
+Lembre-se de que otimização prematura pode levar a complexidade desnecessária e potencialmente pior performance. Deixe as necessidades específicas da sua aplicação guiarem sua estratégia de otimização, e sempre meça o impacto das suas mudanças para garantir que elas estejam entregando benefícios reais.

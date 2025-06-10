@@ -58,39 +58,29 @@ const togglePreference = () => {
   setPreference(newTheme);
 };
 
-// --- Initialization and Event Listeners ---
 const handleToggleClick = () => {
   const newTheme = getColorPreference() === "dark" ? "light" : "dark";
-  setPreference(newTheme); // setPreference still calls syncThemeAndToggles
+  setPreference(newTheme);
 };
 
-// Function to find toggles and attach listeners
 const setupToggleListeners = () => {
   const themeToggles = document.querySelectorAll(
     'input.theme-toggle[type="checkbox"]',
   );
   themeToggles.forEach((toggle) => {
-    // Remove listener first to prevent duplicates if this runs multiple times
     toggle.removeEventListener("click", handleToggleClick);
-    // Add the actual listener
     toggle.addEventListener("click", handleToggleClick);
   });
-  // console.log(`Attached listeners to ${themeToggles.length} toggles.`); // For debugging
 };
 
-// --- Initialization and Event Listeners ---
-
-// 1. Initial sync and listener setup on page load
 syncThemeAndToggles();
 setupToggleListeners();
 
-// 2. Sync and re-attach listeners after Astro swaps page content
 document.addEventListener("astro:after-swap", () => {
   syncThemeAndToggles(); // Ensure theme attribute and toggle state are correct
   setupToggleListeners(); // Re-attach listeners to potentially new toggle elements
 });
 
-// 3. Optional: System theme changes listener (no change needed here)
 window
   .matchMedia("(prefers-color-scheme: dark)")
   .addEventListener("change", () => {
@@ -98,20 +88,3 @@ window
       syncThemeAndToggles();
     }
   });
-// 1. Initial sync when the script loads
-// // This runs on the very first page load.
-// syncThemeAndToggles();
-
-// // 2. Sync *after* Astro swaps page content during client-side navigation
-// // This is the key fix for View Transitions!
-// document.addEventListener("astro:after-swap", syncThemeAndToggles);
-
-// // Optional: Listen for system theme changes (if user hasn't set a preference)
-// window
-//   .matchMedia("(prefers-color-scheme: dark)")
-//   .addEventListener("change", () => {
-//     // Only sync if the user hasn't explicitly chosen a theme via the toggle
-//     if (!localStorage.getItem(storageKey)) {
-//       syncThemeAndToggles();
-//     }
-//   });

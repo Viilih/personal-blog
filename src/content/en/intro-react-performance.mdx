@@ -1,0 +1,159 @@
+---
+title: Introduction to react performance - Part I
+pubDate: 2025-04-28
+draft: true
+---
+
+import NotionImage from "../../components/ImageNotio.astro";
+import func1 from "../../images/excalidraw/react-performance/isolate-prop.png";
+
+When we hear about performance issues in react, we usually think, at first, to start using techniques such as memoization or start using useCallbacks everywhere to solve our problem, but here is one thing:
+
+You DON´T need memoization and useCallbacks to solve performance problems in a react application!
+
+Obviously there will times you are gonna need it, but we need to take when dealing with performance in general.
+
+The key is to understand WHY your application is slow. Is there a lot of re-renders? Unoptimized imports when loading pages?
+
+In order to get a better understanding of React performance, we are going to dig into how we can approach and solve performance issues in React!
+
+## Re-renders
+
+When it comes to react, one of the main “characteristics” is to understand re-renders, what they are, how and why they happen. In general if you can identify the conditions of rendering your component/application, you can identify and normally propose a solution for the performance issue you are dealing with.
+
+If you, like myself once, wondered how React identifies and re-renders and updates the virtual DOM, it's through a process called reconciliation. I intend to write more about it in the future, but let's focus on re-renders first and the lifecycle of the component to understand it.
+
+### The lifecycle of the component
+
+We can divide the life cycle into three steps:
+
+- Mouting: React creates the instance of the component for the first time, rendering all of states,hooks and child elements for the first time in the DOM ()
+- Unmounting: React “remove” the component from the DOM
+- Re-rendering: When React updates an already existing component with new information/data → it just updates what has changed! React re-uses everything else that hasn't changed
+
+The key concept to understand re-rendering well is to understand the states in your application. Whenever a STATE changes, the component containing that state and all its child components are re-rendered.
+
+Just a disclaimer:
+
+> Component’s don’t re-renders when it’s props change, unless the component is wrapper in a React.memo high-order component
+
+> For a child component to re-render due to prop changes, the parent component MUST re-render and pass the updated props
+
+### But how we can solve it?
+
+One of the simplest techniques is Moving the State Down, by that, I mean to isolate the state into a component down on the render tree, simple as that!
+
+Imagine that you have this App with a theme switcher:
+
+```jsx
+import { useEffect, useState } from "react";
+import "./App.css";
+import {
+  FirstSlowComponent,
+  SecondSlowComponent,
+} from "./components/slowComponents";
+import ThemeOption from "./components/themeToggle";
+import { RandomContent } from "./components/randomContent";
+
+function App() {
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  return (
+    <>
+      <div>Hello World!</div>
+      <div className="theme-options">
+        <ThemeOption theme="light" setTheme={setTheme} />
+        <ThemeOption theme="dark" setTheme={setTheme} />
+      </div>
+      <FirstSlowComponent />
+      <RandomContent />
+      <SecondSlowComponent />
+    </>
+  );
+}
+
+export default App;
+```
+
+If you see, even switching a theme can be slow, but let’s understand why:
+
+Whenever we change a state inside the component App, the whole component will be re-rendered, even the slow components we have. How can we solve this performance issue? By isolating the state down the render tree. Instead of putting the logic explicitly on the App component, let's create a ThemeSwitcher component and isolate the state of switching theme inside of it.
+
+```jsx
+// ThemeSwitcher.tsx
+
+import { useEffect, useState } from "react";
+import ThemeOption from "./themeToggle";
+
+function ThemeSwitcher() {
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  return (
+    <div className="theme-options">
+      <ThemeOption theme="light" setTheme={setTheme} />
+      <ThemeOption theme="dark" setTheme={setTheme} />
+    </div>
+  );
+}
+
+export default ThemeSwitcher;
+```
+
+---
+
+```tsx
+// App.tsx
+import "./App.css";
+import {
+  FirstSlowComponent,
+  SecondSlowComponent,
+} from "./components/slowComponents";
+import { RandomContent } from "./components/randomContent";
+import ThemeSwitcher from "./components/ThemeSwitcher";
+
+function App() {
+  // const [theme, setTheme] = useState("light");
+
+  // useEffect(() => {
+  //   document.body.setAttribute("data-theme", theme);
+  // }, [theme]);
+
+  return (
+    <>
+      <div>Hello World!</div>
+      {/* <div className="theme-options">
+        <ThemeOption theme="light" setTheme={setTheme} />
+        <ThemeOption theme="dark" setTheme={setTheme} />
+      </div> */}
+      <ThemeSwitcher />
+      <FirstSlowComponent />
+      <RandomContent />
+      <SecondSlowComponent />
+    </>
+  );
+}
+
+export default App;
+```
+
+Simply by isolating the state into a component, we can already see how fast switching theme is! We just avoided having the whole render tree re-rendered.
+
+<NotionImage
+  src={func1}
+  alt="Example"
+  caption="This is a caption, just like in Notion."
+/>
+
+This is a simple technique where you can begin to solve performance issues instead of using memoization and using useCallbacks everywhere (This tends to worsen your performance).
+
+This is just an introduction to React performance optimization. As you dive deeper into this topic, you'll discover and learn more advanced techniques to improve your application's speed. However, it's important to understand that you should always start by identifying the root cause of performance issues before applying solutions.
+
+Remember that premature optimization can lead to unnecessary complexity and potentially worse performance. Let your application's specific needs guide your optimization strategy, and always measure the impact of your changes to ensure they're delivering real benefits.

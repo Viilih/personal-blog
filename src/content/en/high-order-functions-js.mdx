@@ -1,9 +1,11 @@
 ---
 title: How can you use HOFs to improve your DX with Javascript?
 pubDate: 2025-04-07
+draft: false
 ---
 
 import { Image } from "astro:assets";
+import NotionImage from "../../components/ImageNotio.astro";
 import func1 from "../../images/excalidraw/hofs/hof1.png";
 import func2 from "../../images/excalidraw/hofs/hof2.png";
 
@@ -30,14 +32,7 @@ console.log(greetingResult);
 Since javascript is a language where it works with a single thread, the
 code is executed _line by line_, so we first declare the function but we don't start running it, declare our firstName variable and allocate them in the local Memory
 
-<Image
-  class="rounded-diagram"
-  quality={80}
-  src={func1}
-  alt="Diagram showing variable declaration and memory allocation before function execution."
-  width={870}
-  height={400}
-/>
+<NotionImage src={func1} alt="Example" />
 
 Now we declare our greetingResult and at the moment we goes inside of our unction we create a new _Execution context_ where:
 
@@ -45,12 +40,9 @@ Now we declare our greetingResult and at the moment we goes inside of our unctio
 - We declare our argument "name", with the value "John Doe"
 - We return the new string and assign the return value to the greetingResult variable
 
-<Image
-  class="rounded-diagram"
+<NotionImage
   src={func2}
   alt="Diagram showing the call stack and execution context during function execution."
-  width={870}
-  height={450}
 />
 
 And that's it, this is how functions works!

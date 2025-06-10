@@ -1,6 +1,7 @@
 ---
 title: Implementing a voting system using .NET8, RabbitMQ, Vertical Slice Architecture and Docker
 pubDate: 2025-02-23
+draft: false
 ---
 
 ## Introduction

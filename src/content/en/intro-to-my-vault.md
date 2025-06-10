@@ -1,6 +1,7 @@
 ---
 title: Intro to my vault
 pubDate: 2024-12-22
+draft: false
 ---
 
 ## What is this blog?

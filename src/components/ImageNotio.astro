@@ -1,0 +1,48 @@
+---
+// src/components/NotionImage.astro
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  caption?: string;
+  className?: string;
+  width?: number;
+  height?: number;
+}
+
+const { src, alt, caption, className = "", width, height } = Astro.props;
+
+// For string URLs that aren't ImageMetadata objects
+const isRemoteImage = typeof src === "string";
+---
+
+<figure class={`notion-image ${className}`}>
+  {
+    isRemoteImage ? (
+      <img src={src} alt={alt} width={width} height={height} />
+    ) : (
+      <Image src={src} alt={alt} width={width} height={height} />
+    )
+  }
+  {caption && <figcaption class="notion-caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .notion-image {
+    margin: 2rem 0;
+    text-align: center;
+  }
+  .notion-image img {
+    border-radius: 12px;
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  }
+  .notion-caption {
+    font-size: 0.95em;
+    color: var(--text-muted, #888);
+    margin-top: 0.5em;
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 title: Introdução ao meu repositório
 pubDate: 2024-12-22
+draft: false
 ---
 
 ## O que é este blog?

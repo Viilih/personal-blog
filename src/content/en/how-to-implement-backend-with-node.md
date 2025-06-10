@@ -1,6 +1,7 @@
 ---
 title: How to implement a simple backend application with NodeJS and Typescript?
 pubDate: 2025-01-27
+draft: false
 ---
 
 ## Introduction
