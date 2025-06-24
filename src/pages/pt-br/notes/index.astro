@@ -1,0 +1,158 @@
+---
+import { getCollection } from "astro:content";
+import GoBackButton from "components/GoBackButton.astro";
+import BaseLayout from "layouts/BaseLayout.astro";
+
+const posts = await getCollection("pt-br-notes", (post) => !post.data.draft);
+
+const sortedPosts = posts.sort(
+  (a, b) =>
+    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
+);
+---
+
+<BaseLayout>
+  <div class="notes-container">
+    <GoBackButton />
+    <h1 class="page-title">Notes</h1>
+
+    {
+      sortedPosts.length === 0 ? (
+        <p class="no-notes">No notes available yet.</p>
+      ) : (
+        <div class="notes-list">
+          {sortedPosts.map((post) => (
+            <article class="note-item">
+              <a href={`/pt-br/notes/${post.id}`} class="note-link">
+                <div class="note-content">
+                  <h2 class="note-title">{post.data.title}</h2>
+                  <time
+                    class="note-date"
+                    datetime={post.data.pubDate.toISOString()}
+                  >
+                    {post.data.pubDate.toLocaleDateString("pt-br", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </time>
+                </div>
+                <div class="note-arrow">→</div>
+              </a>
+            </article>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .notes-container {
+    /* max-width: 700px; */
+    /* margin: 0 auto; */
+    /* padding: 2rem 1rem; */
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--heading-color);
+  }
+
+  .no-notes {
+    color: var(--language-inactive);
+    font-size: 1rem;
+    margin-top: 2rem;
+  }
+
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .note-item {
+    border-bottom: 1px solid var(--language-separator);
+  }
+
+  .note-item:last-child {
+    border-bottom: none;
+  }
+
+  .note-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-speed) ease;
+  }
+
+  .note-link:hover {
+    color: var(--link-color);
+    text-decoration: none;
+  }
+
+  .note-content {
+    flex: 1;
+  }
+
+  .note-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--heading-color);
+    margin: 0 0 0.25rem 0;
+    line-height: 1.4;
+    transition: color var(--transition-speed) ease;
+  }
+
+  .note-link:hover .note-title {
+    color: var(--link-color);
+  }
+
+  .note-date {
+    font-size: 0.85rem;
+    color: var(--language-inactive);
+    font-family: inherit;
+  }
+
+  .note-arrow {
+    color: var(--language-inactive);
+    font-size: 1.2rem;
+    transition: all var(--transition-speed) ease;
+    margin-left: 1rem;
+    opacity: 0;
+  }
+
+  .note-link:hover .note-arrow {
+    color: var(--link-color);
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .notes-container {
+      padding: 1rem;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .note-link {
+      padding: 1.25rem 0;
+    }
+
+    .note-title {
+      font-size: 1rem;
+    }
+
+    .note-date {
+      font-size: 0.8rem;
+    }
+  }
+</style>

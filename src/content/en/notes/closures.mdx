@@ -1,0 +1,149 @@
+---
+title: Closures
+
+pubDate: 2025-06-23
+
+draft: false
+---
+
+# Understanding JavaScript Closures: Let's Get This Code!
+
+Let's take a look at this piece of code and really dig into how JavaScript handles it, especially the super cool concepts of scope and closures.
+
+## The Core Example
+
+```javascript
+function outer() {
+  let counter = 0;
+  function incrementCounter() {
+    counter++;
+  }
+  return incrementCounter;
+}
+
+const anotherFunction = outer();
+anotherFunction();
+anotherFunction();
+```
+
+## Diving into JavaScript's Brain
+
+Going through our code and understanding, at some level, how JavaScript handles this, we can go through each line and debug what it's doing.
+
+We first **DECLARE** a function called `outer` in our global memory (or, more precisely, in the global execution context's variable environment).
+
+Then, we create a variable `anotherFunction` that receives the invocation of `outer`. When we call `outer()`, we create a new execution context and put `outer` on the call stack.
+
+## Inside the outer Function's World
+
+Now we're inside the execution context of the `outer` function! This is where the magic starts:
+
+1. We create a variable `counter` with an initial value of 0. This `counter` lives in `outer`'s own local memory (which we call its variable environment or lexical environment).
+
+2. We **DECLARE** the `incrementCounter` function. Here's a crucial detail: when `incrementCounter` is declared, it "remembers" its surrounding environment – the one where `counter` lives! This "memory" is the very beginning of a closure.
+
+3. We return this `incrementCounter` function. When we do this, it's not just sending back the code; it's also taking a "backpack" – the lexical environment of the `outer()` function (where our `counter` variable is!) – and attaching it to `incrementCounter`. So, `anotherFunction` now holds the `incrementCounter` code plus that special backpack.
+
+After the return, `outer`'s execution context is deleted, and the `outer()` function is popped off the call stack. But here's the kicker: because `anotherFunction` is still holding onto that "backpack" (the closure), the `counter` variable doesn't disappear! It sticks around, privately linked to `anotherFunction`.
+
+## The Cool Part: Closures in Action!
+
+Now it's the really cool part, so we're going to go very slow here!
+
+The next line of code calls `anotherFunction()`. This creates a new execution context with its own local memory (or variable environment) and pushes this new function onto the call stack.
+
+Inside this new execution context, we execute `counter++`. But wait, the `incrementCounter` function doesn't have a `counter` variable directly inside its own local scope!
+
+Let's search for it, right? We start by looking in the local memory of the `incrementCounter` function's execution context. Do we find `counter` there? **No!**
+
+Well, if we don't find it here, where's the next place we're going to search? The global memory, right? But hold on, we don't find it on the global scope either! Where the heck is the `counter` variable stored?!
+
+This is exactly why that "backpack" is so vital! When we returned the `incrementCounter` function, it didn't just save its code; it also grabbed the lexical environment of the `outer()` function (where `counter` lives) and put it on its "back," working like that backpack we talked about.
+
+So, whenever we call `anotherFunction()`, and `incrementCounter` doesn't find `counter` in its immediate local memory, it doesn't go directly to the **GLOBAL** memory. Instead, it looks in that "backpack" – its closure – to find `counter` from its outer scope.
+
+Whenever we keep calling `anotherFunction()`, we have a permanent, "private" counter data. Each execution increments that specific counter, thanks to the closure!
+
+## Practical Example: Add by X
+
+```javascript
+function addByX(x) {
+  function addNumberByX(number) {
+    return number + x;
+  }
+
+  return addNumberByX;
+}
+
+// /*** Uncomment these to check your work! ***/
+const addByTwo = addByX(2);
+//console.log(addByTwo(1)) // => should return 3
+//console.log(addByTwo(2)); // => should return 4
+//console.log(addByTwo(3)) // => should return 5
+
+const addByThree = addByX(3);
+//console.log(addByThree(1)) // => should return 4
+//console.log(addByThree(2))  // => should return 5
+
+const addByFour = addByX(4);
+//console.log(addByFour(4)) // => should return 8
+//console.log(addByFour(5)) // => should return 9
+```
+
+## Advanced Applications
+
+### Memoization
+
+```javascript
+function saveOutput(func, magicWord) {
+  let resultObjects = {};
+  return function output(argumentNumOrString) {
+    if (Number.parseInt(argumentNumOrString)) {
+      const resultFromArgumentFunction = func(argumentNumOrString);
+      resultObjects[argumentNumOrString] = resultFromArgumentFunction;
+      return resultFromArgumentFunction;
+    } else if (argumentNumOrString === magicWord) {
+      return resultObjects;
+    }
+  };
+}
+```
+
+### Debouncing and Throttling
+
+```javascript
+function debounce(callback, interval) {
+  let counter = 0;
+  let hasRan = false;
+  function closureFn() {
+    let id = undefined;
+    if (!hasRan) {
+      id = setInterval(() => counter++, 1);
+      hasRan = true;
+      return callback();
+    } else {
+      if (counter < interval) {
+        counter = 0;
+        clearInterval(id);
+        id = setInterval(() => counter++, 1);
+        return undefined;
+      } else {
+        counter = 0;
+        clearInterval(id);
+        id = setInterval(() => counter++, 1);
+        return callback();
+      }
+    }
+  }
+  return closureFn;
+}
+
+// Function that allows the invocation of the callback
+// after interval milliseconds have passed since the
+// last time the returned function ran
+```
+
+## Key Takeaways
+
+- **Closures** allow inner functions to access variables from their outer scope even after the outer function has finished executing
+- The "backpack" metaphor helps visualize how closures preserve the lexical environment

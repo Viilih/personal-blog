@@ -3,7 +3,7 @@ import { glob } from "astro/loaders";
 
 const enBlogCollection = defineCollection({
   loader: glob({
-    pattern: ["**/*.{md,mdx}", "!weekly/**"],
+    pattern: ["**/*.{md,mdx}", "!weekly/**", "!notes/**"],
     base: "./src/content/en",
   }),
   schema: z.object({
@@ -15,7 +15,7 @@ const enBlogCollection = defineCollection({
 
 const ptBrBlogCollection = defineCollection({
   loader: glob({
-    pattern: "**/[^_]*.{md,mdx}",
+    pattern: ["**/*.{md,mdx}", "!weekly/**", "!notes/**"],
     base: "./src/content/pt-br",
   }),
   schema: z.object({
@@ -25,7 +25,33 @@ const ptBrBlogCollection = defineCollection({
   }),
 });
 
+const enNotesCollection = defineCollection({
+  loader: glob({
+    pattern: ["**/*.{md,mdx}"],
+    base: "./src/content/en/notes",
+  }),
+  schema: z.object({
+    title: z.string(),
+    pubDate: z.date(),
+    draft: z.boolean(),
+  }),
+});
+
+const ptBrNotesCollection = defineCollection({
+  loader: glob({
+    pattern: ["**/*.{md,mdx}"],
+    base: "./src/content/pt-br/notes",
+  }),
+  schema: z.object({
+    title: z.string(),
+    pubDate: z.date(),
+    draft: z.boolean(),
+  }),
+});
+
 export const collections = {
+  "en-notes": enNotesCollection,
   en: enBlogCollection,
   "pt-br": ptBrBlogCollection,
+  "pt-br-notes": ptBrNotesCollection,
 };

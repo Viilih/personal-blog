@@ -11,10 +11,12 @@ export const ui = {
     "sidebar.articles": "Articles",
     "sidebar.now": "Now",
     "sidebar.learning": "Learning",
+    "sidebar.notes": "Notes",
   },
   "pt-br": {
     "sidebar.articles": "Artigos",
     "sidebar.now": "Now",
     "sidebar.learning": "Aprendizado",
+    "sidebar.notes": "Anotações",
   },
 } as const;

@@ -1,0 +1,149 @@
+---
+title: Closures
+
+pubDate: 2025-06-23
+
+draft: false
+---
+
+# Entendendo Closures: a mochila das funções
+
+Vamos dar uma olhada nesse trecho de código e mergulhar de verdade em como o JavaScript lida com isso, especialmente os conceitos super maneiros de escopo e closures.
+
+## O Exemplo Principal
+
+```javascript
+function outer() {
+  let counter = 0;
+  function incrementCounter() {
+    counter++;
+  }
+  return incrementCounter;
+}
+
+const anotherFunction = outer();
+anotherFunction();
+anotherFunction();
+```
+
+## Mergulhando na Mente do JavaScript
+
+Passando pelo nosso código e entendendo, a fundo, como o JavaScript lida com isso, podemos ir linha por linha e debugar o que está rolando.
+
+Primeiro, **DECLARAMOS** uma função chamada `outer` na nossa memória global (ou, mais precisamente, no ambiente de variáveis do contexto de execução global).
+
+Depois, criamos uma variável `anotherFunction` que recebe a invocação de `outer`. Quando chamamos `outer()`, criamos um novo contexto de execução e colocamos `outer` na call stack.
+
+## Dentro do Mundo da Função outer
+
+Agora estamos dentro do contexto de execução da função `outer`! É aqui que a mágica começa:
+
+1. Criamos uma variável `counter` com valor inicial 0. Esse `counter` vive na memória local da `outer` (que chamamos de variable environment ou lexical enviroment).
+
+2. **DECLARAMOS** a função `incrementCounter`. Aqui está um detalhe crucial: quando `incrementCounter` é declarada, ela "lembra" do ambiente que a cerca – aquele onde `counter` vive! Essa "memória" é o começo de um closure.
+
+3. Retornamos essa função `incrementCounter`. Quando fazemos isso, não estamos só mandando o código de volta; ela também está levando uma "mochila" – o lexical environment da função `outer()` (onde nossa variável `counter` está!) – e anexando à `incrementCounter`. Então, `anotherFunction` agora tem o código da `incrementCounter` mais essa mochila especial.
+
+Depois do return, o contexto de execução da `outer` é deletado, e a função `outer()` sai da call stack. Mas aqui está o pulo do gato: como `anotherFunction` ainda está segurando essa "mochila" (o closure), a variável `counter` não desaparece! Ela fica por aí, privadamente ligada à `anotherFunction`.
+
+## A Parte Maneira: Closures !
+
+Agora vem a parte realmente divertida, então vamos bem devagar aqui!
+
+A próxima linha de código chama `anotherFunction()`. Isso cria um novo contexto de execução com sua própria memória local (ou variable environment) e empurra essa nova função pra call stack.
+
+Dentro desse novo contexto de execução, executamos `counter++`. Mas peraí, a função `incrementCounter` não tem uma variável `counter` diretamente no seu próprio escopo local!
+
+Vamos procurar por ela, né? Começamos procurando na memória local do contexto de execução da função `incrementCounter`. Encontramos `counter` lá? **Não!**
+
+Bom, se não encontramos aqui, qual é o próximo lugar que vamos procurar? A memória global, certo? Mas opa, também não encontramos no escopo global! Onde que a variável `counter` está armazenada?!
+
+É exatamente por isso que essa "mochila" é tão vital! Quando retornamos a função `incrementCounter`, ela não só salvou seu código; ela também pegou o lexical environment da função `outer()` (onde `counter` vive) e colocou nas suas "costas", funcionando como aquela mochila que falamos.
+
+Então, sempre que chamamos `anotherFunction()`, e `incrementCounter` não encontra `counter` na sua memória local imediata, ela não vai direto pra memória **GLOBAL**. Em vez disso, ela olha naquela "mochila" – seu closure – pra encontrar `counter` do seu escopo externo.
+
+Sempre que continuamos chamando `anotherFunction()`, temos dados de contador permanentes e "privados". Cada execução incrementa aquele contador específico, graças ao closure!
+
+## Exemplo Prático: Adicionar por X
+
+```javascript
+function addByX(x) {
+  function addNumberByX(number) {
+    return number + x;
+  }
+
+  return addNumberByX;
+}
+
+// /*** Descomente essas linhas pra testar! ***/
+const addByTwo = addByX(2);
+//console.log(addByTwo(1)) // => deve retornar 3
+//console.log(addByTwo(2)); // => deve retornar 4
+//console.log(addByTwo(3)) // => deve retornar 5
+
+const addByThree = addByX(3);
+//console.log(addByThree(1)) // => deve retornar 4
+//console.log(addByThree(2))  // => deve retornar 5
+
+const addByFour = addByX(4);
+//console.log(addByFour(4)) // => deve retornar 8
+//console.log(addByFour(5)) // => deve retornar 9
+```
+
+## Aplicações Avançadas
+
+### Memoização
+
+```javascript
+function saveOutput(func, magicWord) {
+  let resultObjects = {};
+  return function output(argumentNumOrString) {
+    if (Number.parseInt(argumentNumOrString)) {
+      const resultFromArgumentFunction = func(argumentNumOrString);
+      resultObjects[argumentNumOrString] = resultFromArgumentFunction;
+      return resultFromArgumentFunction;
+    } else if (argumentNumOrString === magicWord) {
+      return resultObjects;
+    }
+  };
+}
+```
+
+### Debouncing e Throttling
+
+```javascript
+function debounce(callback, interval) {
+  let counter = 0;
+  let hasRan = false;
+  function closureFn() {
+    let id = undefined;
+    if (!hasRan) {
+      id = setInterval(() => counter++, 1);
+      hasRan = true;
+      return callback();
+    } else {
+      if (counter < interval) {
+        counter = 0;
+        clearInterval(id);
+        id = setInterval(() => counter++, 1);
+        return undefined;
+      } else {
+        counter = 0;
+        clearInterval(id);
+        id = setInterval(() => counter++, 1);
+        return callback();
+      }
+    }
+  }
+  return closureFn;
+}
+
+// Função que permite a invocação do callback
+// depois que interval milissegundos passaram desde a
+// última vez que a função retornada rodou
+```
+
+## Pontos-Chave
+
+- **Closures** permitem que funções internas acessem variáveis do seu escopo externo mesmo depois que a função externa terminou de executar
+- A metáfora da "mochila" ajuda a visualizar como closures preservam o lexical environment

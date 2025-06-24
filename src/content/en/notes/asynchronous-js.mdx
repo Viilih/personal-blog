@@ -1,0 +1,151 @@
+---
+title: Javascript asynchronicity and event loop
+
+pubDate: 2025-06-24
+
+draft: false
+---
+
+# How Asynchronicity Works in JavaScript
+
+JavaScript is a synchronous language with a single thread working → This means that JavaScript does one line of code at a time, and when it's finished, we move to the next line of code and keep going like this.
+
+So imagine this piece of code:
+
+```jsx
+const num = 3;
+function multiplyBy2(inputNumber) {
+  const result = inputNumber * 2;
+  return result;
+}
+
+const output = multiplyBy2(num);
+const anotherOutput = multiplyBy2(10);
+```
+
+For example, when we define the variable `output`, our thread of execution will only run the code of the execution context created by calling the function `multiplyBy2`. Only after finishing this execution, we move to the next line.
+
+**JavaScript is single-threaded === one command runs at a time**
+
+But what happens if we have a slow line of code? What if I want to grab some information about a lot of GitHub repositories and this task takes some time? Will our app be waiting for it to be completed to run the next line of code? It could be, but this will make our application slow!
+
+So far, with the current model of thinking we have:
+
+- Thread of Execution
+- Memory environment
+- Call stack
+
+But this is not enough for dealing with these new situations.
+
+## Beyond JavaScript: The Browser Features
+
+To handle those situations, we need more than JavaScript - we need more features beyond the language itself! That's when we get these new components:
+
+- **Web Browser APIs**
+- **Promises**
+- **Event loop, Callback queue and micro task queue**
+
+JavaScript mainly runs in the browser! We can access those features through some functions.
+
+**Web browser features:**
+
+- Network requests - (`fetch`/`xhr`)
+- Rendering HTML DOM - (`document`)
+- Timer - (`setTimeout`)
+
+## Tricky Questions
+
+Which console will display first?
+
+```jsx
+function printHello() {
+  console.log("hi from the function");
+}
+setTimeout(printHello, 1000);
+console.log("Hello from the global");
+
+// Answer: Hello from the global
+```
+
+Which console will display first?
+
+```jsx
+function printHello() {
+  console.log("hi from the function");
+}
+setTimeout(printHello, 0);
+console.log("Hello from the global");
+
+// Answer: Hello from the global
+```
+
+## Event Loop Deep Dive
+
+Let's dive into this piece of code and understand how JavaScript interacts with browser features and how the event loop works :)
+
+As mentioned before, JavaScript is a single-threaded language, so we execute each line at a time. We'll go through each line because I believe it's the best way to understand what's actually happening!
+
+```jsx
+function printHello() {
+  console.log("Hello");
+}
+
+function blockFor1Sec() {
+  //Imagine a giant loop here
+}
+
+setTimeout(printHello, 0);
+
+blockFor1Sec();
+
+console.log("Hi outside the function");
+```
+
+### Step-by-Step Breakdown
+
+**First**, we declare a function `printHello` - pretty straightforward!
+
+**Then** we declare another function `blockFor1Sec` that blocks the thread for one second.
+
+**Next**, we call a web browser feature from inside our JavaScript code through the `setTimeout` function. This tells the browser that after 0 milliseconds, it should execute the `printHello` function.
+
+**Here's the key:** `setTimeout` is NOT a JavaScript function - it's a **Web API** provided by the browser! When JavaScript encounters `setTimeout`, it hands off this task to the browser and continues executing the next line immediately.
+
+But... is `printHello` going to display "Hello" right away? **NO!** We'll show you why later, but keep this in your heart 💝
+
+**After** the `setTimeout`, we call the `blockFor1Sec` function, creating a new execution context and putting it onto the call stack.
+
+When `blockFor1Sec` finishes, it gets popped off the call stack, and then we finally execute the `printHello` function, right? **NO!** Weird, right? Like, it was supposed to... but again, keep it in your heart 💝
+
+**Then** we have `console.log("Hi outside the function")` and **FINALLY** we display "Hello" from the `printHello` function.
+
+### The Big Questions
+
+You might be thinking:
+
+- **Why didn't `printHello` go directly to the call stack after the `setTimeout` completed?** Because `setTimeout` is a **Web API**, not pure JavaScript! When we use Web APIs (like `setTimeout`, `fetch`, DOM events, etc.), the browser handles them separately from our JavaScript execution thread. Once the Web API completes its task, it places the callback function (`printHello`) into the **callback queue** - NOT directly onto the call stack.
+- **So when can we dequeue `printHello` from the callback queue and put it onto the call stack?** Only when the call stack is completely empty! The system keeps checking like this:
+  _Is there any function on the call stack?_
+  - **Yes**: I'll keep waiting until the call stack is empty
+  - **No**: I'll go to the callback queue, dequeue the callback, and put it onto the call stack
+
+And this constant checking? That's basically the work of the **event loop**!
+
+## So What IS the Event Loop?
+
+The **Event Loop** is JavaScript's traffic controller that manages the coordination between:
+
+- **JavaScript's single-threaded execution** (the call stack)
+- **Browser Web APIs** (setTimeout, fetch, DOM events, etc.)
+- **The callback queue** (where completed Web API tasks wait)
+
+**Here's what it does:**
+
+1. **Monitors** the call stack constantly
+2. **Checks** if the call stack is empty
+3. **Moves** the first callback from the callback queue to the call stack (only when stack is empty)
+4. **Repeats** this process infinitely
+
+**Why do we need it?** Because JavaScript is single-threaded, but the browser isn't! The browser can handle multiple Web API tasks simultaneously (timers, network requests, etc.) while JavaScript continues executing. The event loop ensures that when these browser tasks complete, their callbacks get executed in JavaScript at the right time - when the main thread is free.
+
+**In simple terms:** The event loop is what allows JavaScript to be non-blocking despite being single-threaded. It's the bridge between JavaScript's synchronous nature and the asynchronous world of Web APIs

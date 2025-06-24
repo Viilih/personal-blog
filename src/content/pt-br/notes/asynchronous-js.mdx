@@ -1,0 +1,152 @@
+---
+title: Assincronicidade em JavaScript e o Event Loop
+pubDate: 2025-06-24
+draft: false
+---
+
+# Como Funciona a Assincronicidade em JavaScript
+
+JavaScript é uma linguagem síncrona e com uma única thread de execução → Isso significa que o JavaScript roda uma linha de código por vez, e só passa para a próxima quando terminar a anterior.
+
+Imagina esse trecho de código:
+
+```javascript
+const num = 3;
+function multiplyBy2(inputNumber) {
+  const result = inputNumber * 2;
+  return result;
+}
+
+const output = multiplyBy2(num);
+const anotherOutput = multiplyBy2(10);
+```
+
+Por exemplo, quando a variável `output` é definida, nossa thread de execução vai rodar apenas o código do contexto gerado pela chamada da função `multiplyBy2`. Só depois que essa execução termina, seguimos para a próxima linha.
+
+**JavaScript é single-threaded === uma instrução por vez**
+
+Mas o que acontece se tivermos uma linha de código lenta? E se eu quiser buscar informações de vários repositórios do GitHub e isso demorar um pouco? Nossa aplicação vai ter que esperar isso terminar pra seguir com o restante? Poderia ser... mas isso deixaria a aplicação lenta!
+
+Até agora, com esse modelo de pensamento, temos:
+
+- Thread de execução
+- Ambiente de memória
+- Call stack
+
+Mas isso ainda não dá conta das novas situações que aparecem por aí.
+
+## Além do JavaScript: As Funcionalidades do Navegador
+
+Pra lidar com essas situações, a gente precisa de mais do que só o JavaScript — precisamos de recursos além da linguagem! É aí que entram esses novos componentes:
+
+- **APIs do Navegador**
+- **Promises**
+- **Event Loop, Callback Queue e Microtask Queue**
+
+JavaScript normalmente roda dentro do navegador! E é por isso que conseguimos acessar essas funcionalidades extras por meio de algumas funções.
+
+**Funcionalidades do navegador:**
+
+- Requisições de rede – (`fetch`/`xhr`)
+- Manipulação do DOM – (`document`)
+- Temporizadores – (`setTimeout`)
+
+## Algumas perguntas "simples"
+
+Qual desses logs aparece primeiro?
+
+```javascript
+function printHello() {
+  console.log("hi from the function");
+}
+setTimeout(printHello, 1000);
+console.log("Hello from the global");
+
+// Resposta: Hello from the global
+```
+
+E esse?
+
+```javascript
+function printHello() {
+  console.log("hi from the function");
+}
+setTimeout(printHello, 0);
+console.log("Hello from the global");
+
+// Resposta: Hello from the global
+```
+
+## Event Loop
+
+Vamos mergulhar nesse trecho de código pra entender como o JavaScript conversa com as funcionalidades do navegador e como o event loop entra em cena :)
+
+Como já comentamos, o JavaScript roda linha por linha. Então vamos analisar passo a passo, porque acredito que é a melhor forma de entender o que está acontecendo de verdade!
+
+```javascript
+function printHello() {
+  console.log("Hello");
+}
+
+function blockFor1Sec() {
+  // Imagina aqui um loop gigante rodando por 1 segundo
+}
+
+setTimeout(printHello, 0);
+
+blockFor1Sec();
+
+console.log("Hi outside the function");
+```
+
+### Passo a passo
+
+**Primeiro**, declaramos a função `printHello` – nada demais.
+
+**Depois**, declaramos `blockFor1Sec`, que vai bloquear a thread por 1 segundo com algum loop gigantesco.
+
+**Em seguida**, chamamos uma funcionalidade do navegador através da função `setTimeout`. Isso diz pro navegador: "depois de 0 milissegundos, execute a função `printHello`".
+
+**Detalhe importante:** `setTimeout` não é uma função do JavaScript – é uma **Web API** fornecida pelo navegador! Quando o JS encontra o `setTimeout`, ele delega essa tarefa pro navegador e já segue pra próxima linha de código.
+
+Mas... a função `printHello` vai rodar logo depois? **NÃO!** A gente vai entender por quê daqui a pouco, mas já guarda essa informação 💝
+
+**Depois disso**, chamamos `blockFor1Sec`, que cria um novo contexto de execução e entra na call stack.
+
+Quando `blockFor1Sec` termina, ela sai da call stack. E agora sim vamos executar `printHello`, né? **NÃO!** Estranho, né? Tipo… era pra acontecer… mas segura esse pensamento 💝
+
+**Aí**, temos o `console.log("Hi outside the function")` e **SÓ DEPOIS** vemos o "Hello" da função `printHello`.
+
+### Alguns questionamentos que você pode ter
+
+Você pode estar pensando:
+
+- **Por que `printHello` não foi direto pra call stack depois do `setTimeout`?** Porque `setTimeout` é uma **Web API**, não faz parte do JavaScript puro! Quando usamos Web APIs (como `setTimeout`, `fetch`, eventos do DOM etc.), o navegador cuida delas separadamente da thread principal do JS. Quando a tarefa termina, o navegador coloca a callback (`printHello`) na **callback queue** – e não direto na call stack.
+
+- **Então quando a gente pode tirar `printHello` da callback queue e jogar na call stack?** Só quando a call stack estiver completamente vazia! O sistema fica o tempo todo perguntando:
+
+  _Tem alguma função na call stack?_
+
+  - **Sim**: Continuo executando as funções dentro da call stack
+  - **Não**: Vai até a callback queue, pega a próxima função e coloca na call stack.
+
+E esse monitoramento constante? É justamente o trabalho do **event loop**!
+
+## Então, O Que É o Event Loop?
+
+O **Event Loop** é o "controlador de tráfego" do JavaScript, coordenando tudo isso:
+
+- **A execução síncrona do JS** (a call stack)
+- **As APIs do navegador** (setTimeout, fetch, eventos do DOM, etc.)
+- **A fila de callbacks** (onde as funções ficam esperando a call stack esvaziar)
+
+**O que ele faz:**
+
+1. **Fica de olho** na call stack o tempo todo
+2. **Checa** se está vazia
+3. **Move** a primeira função da callback queue pra call stack (somente quando estiver vazia)
+4. **Repete** esse processo pra sempre
+
+**Por que isso é importante?** Porque o JavaScript é single-threaded, mas o navegador não é! Ele consegue lidar com várias tarefas ao mesmo tempo (timers, requisições de rede etc.) enquanto o JS vai rodando seu código. O event loop garante que, quando essas tarefas do navegador terminarem, suas callbacks sejam executadas na hora certa – ou seja, quando a thread principal estiver livre.
+
+**Simplificando:** O event loop é o que permite o JavaScript ser não bloqueante mesmo sendo single-threaded. Ele faz a ponte entre o jeito síncrono do JavaScript e o mundo assíncrono das Web APIs.
