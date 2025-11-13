@@ -1,0 +1,190 @@
+---
+title: Não use async e await dentro de forEach
+
+pubDate: 2025-11-12
+
+draft: false
+---
+
+
+# Qual a motivação para não usar async e await em forEach?
+
+Eu estava trabalhando em uma tarefa relacionada a adicionar algum conteúdo a uma variável de índice, e estava iterando
+sobre um array usando `forEach`. Dentro do loop, eu precisava obter algum conteúdo de cada objeto e 
+adicioná-lo a outro array. Estava tendo alguns problemas porque mesmo conseguindo ver o conteúdo
+no meu console, o array final não estava sendo populado como esperado. Era algo similar a isto:
+
+
+```typescript
+
+const finalArray: string[] = []
+
+// ... alguns pushes anteriores de conteúdo de texto neste array
+finalArray.push('título de algum conteúdo')
+
+const items = [
+  { id: 1, content: 'Conteúdo do primeiro item' },
+  { id: 2, content: 'Conteúdo do segundo item' },
+  { id: 3, content: 'Conteúdo do terceiro item' },
+];
+
+items.forEach(async (item) => {
+  const content = await fetchContent(item.id); 
+  finalArray.push(content);
+});
+
+console.log(finalArray);
+```
+
+
+Poderíamos esperar algo assim:
+
+```typescript
+[
+  'título de algum conteúdo',
+  'Conteúdo para o item 1',
+  'Conteúdo para o item 2',
+  'Conteúdo para o item 3'
+]
+
+```
+
+Mas ao invés disso obtemos:
+
+```typescript
+[
+  'título de algum conteúdo'
+]
+```
+
+Você pode estar pensando: "Por que isso está acontecendo? Mesmo se eu consigo ver o conteúdo 
+no console, por que o array final não está sendo populado?"
+
+Era isso que eu estava me perguntando anteriormente e então encontrei a solução
+
+
+# Como podemos corrigir/resolver isso?
+
+Vou me aprofundar um pouco mais nesta questão posteriormente nesta nota, mas por enquanto, você tem duas opções 
+para resolver este problema:
+
+1. Use um loop `for...of` ao invés de `forEach`. Isso permite que você use `await` adequadamente dentro do loop.
+
+```typescript
+const finalArray: string[] = []
+
+// ... alguns pushes anteriores de conteúdo de texto neste array
+finalArray.push('título de algum conteúdo')
+
+const items = [
+  { id: 1, content: 'Conteúdo do primeiro item' },
+  { id: 2, content: 'Conteúdo do segundo item' },
+  { id: 3, content: 'Conteúdo do terceiro item' },
+];
+
+for (const item of items) {
+  const content = await fetchContent(item.id); 
+  finalArray.push(content);
+}
+console.log(finalArray);
+
+const fetchAllContent = async () => {
+  for (const item of items) {
+    const content = await fetchContent(item.id);
+    finalArray.push(content);
+  }
+};
+
+fetchAllContent();
+
+// [
+//   'título de algum conteúdo',
+//   'Conteúdo para o item 1',
+//   'Conteúdo para o item 2',
+//   'Conteúdo para o item 3'
+// ]
+```
+
+2. Use `Promise.all` com `map` para lidar com as operações assíncronas concorrentemente.
+
+```typescript
+
+const fetchContent = async (id: number): Promise<string> => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(`Conteúdo para o item ${id}`), 1000);
+  });
+};
+
+const finalArray: string[] = [];
+
+finalArray.push("título de algum conteúdo");
+
+const items = [
+  { id: 1, content: "Conteúdo do primeiro item" },
+  { id: 2, content: "Conteúdo do segundo item" },
+  { id: 3, content: "Conteúdo do terceiro item" },
+];
+
+Promise.all(
+  items.map(async (item) => {
+    const content = await fetchContent(item.id);
+    finalArray.push(content);
+  })
+).then(() => {
+  console.log(finalArray);
+}).catch((error) => {
+  console.error('Erro ao buscar conteúdo:', error);
+});
+```
+
+
+A diferença chave aqui é que com o loop `for...of`, cada iteração aguarda a anterior completar antes de seguir adiante,
+enquanto a abordagem com `Promise.all` executa todas as operações de busca em paralelo e aguarda todas elas completarem antes de prosseguir. 
+
+
+Existe também uma terceira abordagem para isso, mas não vou cobri-la aqui porque não estou tão familiarizado em usá-la,
+mas apenas para fins de completude, você também pode usar `reduce` para encadear promises sequencialmente.
+
+
+Você pode ler mais sobre esta abordagem [aqui](https://gist.github.com/joeytwiddle/37d2085425c049629b80956d3c618971) 
+
+
+
+# Por que isso acontece?
+
+Se você estava apenas interessado na solução, pode parar de ler aqui, mas agora vamos explorar por que isso acontece
+
+Eu acredito que às vezes é mais importante do que resolver um problema entender por que ele acontece em primeiro lugar.
+
+## O problema principal com forEach e async/await
+
+A razão principal pela qual usar `async` e `await` dentro de um loop `forEach` não funciona como esperado é que `forEach` não lida com operações assíncronas adequadamente. 
+
+Quando você usa `forEach`, ele não aguarda as promises retornadas pela função async serem resolvidas antes de seguir para a próxima iteração. Isso significa que todas as 
+operações assíncronas são iniciadas quase simultaneamente,
+ e o loop completa antes que qualquer uma das promises tenha sido resolvida. 
+ Como resultado, quando você registra o array final, ele contém apenas os valores iniciais,
+  pois as operações assíncronas ainda não foram completadas.
+
+1. O loop `forEach` inicia e cria múltiplas funções async (uma para cada item)
+2. Cada função async retorna uma Promise que é adicionada à fila de microtarefas
+3. O loop `forEach` completa sua iteração síncrona quase instantaneamente
+4. Seu `console.log` executa imediatamente depois
+5. Apenas **então** o event loop processa a fila de microtarefas e resolve as Promises
+6. As operações `finalArray.push()` acontecem, mas tarde demais - você já registrou o array
+
+
+# Conclusão
+Bem, é isso, espero que esta nota tenha sido útil para você.
+
+Aqui estão alguns outros recursos/discussões relacionados a este tópico que você pode achar interessantes:
+
+- [JavaScript: Why doesn't async/await work inside forEach?](https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop) -> Conceitos bem legais aqui
+- [Microtask](https://javascript.info/microtask-queue)
+
+E lembre-se:
+- Beba água
+- Coma frutas
+- Evite deploys às sextas-feiras
+- Não se compare com os outros
+- Descanse e respeite seu tempo e limites :)

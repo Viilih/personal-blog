@@ -1,0 +1,190 @@
+---
+title: Don't use async and await inside forEach
+
+pubDate: 2025-11-12
+
+draft: false
+---
+
+
+# The motivation for not using async and await on forEach?
+
+I was working on a task related to adding some content to an index variable, and I was iterating
+over an array using `forEach`. Inside the loop, I needed to get some content from each object and 
+push it to another array. I was getting some problems because even though I was able to see the content
+in my console, the final array was not being populated as expected. It was something similar to this:
+
+
+```typescript
+
+const finalArray: string[] = []
+
+// ... some previous psuhes of text content in this array
+finalArray.push('title of some content')
+
+const items = [
+  { id: 1, content: 'First item content' },
+  { id: 2, content: 'Second item content' },
+  { id: 3, content: 'Third item content' },
+];
+
+items.forEach(async (item) => {
+  const content = await fetchContent(item.id); 
+  finalArray.push(content);
+});
+
+console.log(finalArray);
+```
+
+
+We might expect something like this:
+
+```typescript
+[
+  'title of some content',
+  'Content for item 1',
+  'Content for item 2',
+  'Content for item 3'
+]
+
+```
+
+But instead we get:
+
+```typescript
+[
+  'title of some content'
+]
+```
+
+You might be thinking: "Why this is happening? Even if i can see the content 
+in the console, why the final array is not being populated?"
+
+That's what i was asking myself earlier and then I came across the solution
+
+
+# How can we fix/solve this?
+
+I'm going to dig a little deeper into this issue later on this note, but for now, you have two options 
+to solve this problem:
+
+1. Use a `for...of` loop instead of `forEach`. This allows you to use `await` properly within the loop.
+
+```typescript
+const finalArray: string[] = []
+
+// ... some previous psuhes of text content in this array
+finalArray.push('title of some content')
+
+const items = [
+  { id: 1, content: 'First item content' },
+  { id: 2, content: 'Second item content' },
+  { id: 3, content: 'Third item content' },
+];
+
+for (const item of items) {
+  const content = await fetchContent(item.id); 
+  finalArray.push(content);
+}
+console.log(finalArray);
+
+const fetchAllContent = async () => {
+  for (const item of items) {
+    const content = await fetchContent(item.id);
+    finalArray.push(content);
+  }
+};
+
+fetchAllContent();
+
+// [
+//   'title of some content',
+//   'Content for item 1',
+//   'Content for item 2',
+//   'Content for item 3'
+// ]
+```
+
+2. Use `Promise.all` with `map` to handle the asynchronous operations concurrently.
+
+```typescript
+
+const fetchContent = async (id: number): Promise<string> => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(`Content for item ${id}`), 1000);
+  });
+};
+
+const finalArray: string[] = [];
+
+finalArray.push("title of some content");
+
+const items = [
+  { id: 1, content: "First item content" },
+  { id: 2, content: "Second item content" },
+  { id: 3, content: "Third item content" },
+];
+
+Promise.all(
+  items.map(async (item) => {
+    const content = await fetchContent(item.id);
+    finalArray.push(content);
+  })
+).then(() => {
+  console.log(finalArray);
+}).catch((error) => {
+  console.error('Error fetching content:', error);
+});
+```
+
+
+The key difference here is that with the `for...of` loop, each iteration waits for the previous one to complete before moving on,
+while the  `Promise.all` approach runs all the fetch operations in parallel and waits for all of them to complete before proceeding. 
+
+
+There is also a third approach to this, but I'm not going to cover it here because I'm not so familiar to use it,
+but just for the sake of completeness, you can also use `reduce` to chain promises sequentially.
+
+
+You can read more about this approach [here](https://gist.github.com/joeytwiddle/37d2085425c049629b80956d3c618971) 
+
+
+
+# Why does this happen?
+
+If you was just interested in the solution, you can stop reading here, but now we are going to explore why this happens
+
+I believe sometimes it's more important than solving a problem to understand why it happens in the first place.
+
+## The key issue with forEach and async/await
+
+The main reason why using `async` and `await` inside a `forEach` loop doesn't work as expected is that `forEach` does not handle asynchronous operations properly. 
+
+When you use `forEach`, it doesn't wait for the promises returned by the async function to resolve before moving on to the next iteration. This means that all the 
+asynchronous operations are initiated almost simultaneously,
+ and the loop completes before any of the promises have resolved. 
+ As a result, when you log the final array, it only contains the initial values,
+  as the asynchronous operations haven't completed yet.
+
+1. The `forEach` loop starts and creates multiple async functions (one for each item)
+2. Each async function returns a Promise that gets added to the microtask queue
+3. The `forEach` loop completes its synchronous iteration almost instantly
+4. Your `console.log` executes immediately after
+5. Only **then** does the event loop process the microtask queue and resolve the Promises
+6. The `finalArray.push()` operations happen, but too late - you've already logged the array
+
+
+# Conclusion
+Well that's it, I hope this note was helpful to you.
+
+Here are some other resources/discussions related to this topic that you might find interesting:
+
+- [JavaScript: Why doesn't async/await work inside forEach?](https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop) -> Pretty cool concepts here
+- [Microstask](https://javascript.info/microtask-queue)
+
+And remember:
+- Drink water
+- Eat fruits
+- Avoid deploys on Fridays
+- Don't compare yourself to others
+- Get some rest and respect your time and limits :)
