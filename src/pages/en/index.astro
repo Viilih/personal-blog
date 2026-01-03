@@ -2,9 +2,9 @@
 import { getCollection } from "astro:content";
 import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { ClientRouter } from "astro:transitions";
+import Link from "components/Link.astro";
 
-const posts = await getCollection("en", (post) => !post.data.draft );
+const posts = await getCollection("en", (post) => !post.data.draft);
 
 const sortedPosts = posts.sort((a, b) => {
   const dateA = new Date(a.data.pubDate).getTime();
@@ -19,27 +19,27 @@ const sortedPosts = posts.sort((a, b) => {
       <h1>Guilherme Nascimento</h1>
       <p class="subtitle">Fullstack Developer</p>
       <p>
-        I'm a Brazilian software engineer working with .NET, Azure, React, and
-        TypeScript. Currently studying DevOps, .NET,Typescript,Node and other cool (or random) stuff. If you become interested to know what I'm doing right now
-         you  can check the <a href="en/now">/now page</a> 
+        I'm a Brazilian software engineer currently working with
+        React, TypeScript, and Java. Currently studying fundamental computer science concepts and data structures and algorithms.
+        If you're interested in knowing what I'm doing right now, you can check the <a
+          href="/en/now">/now page</a
+        >
       </p>
+      <section class="bio">
+        <p>
+          I enjoy magic (who doesn't?), astronomy, listening to good music, and reading
+          some books
+        </p>
+        <p>
+          You can check out my <Link href="https://github.com/Viilih"
+            >GitHub profile</Link
+          > where I put some projects and the code for all articles written here.
+        </p>
+      </section>
+      <section class="posts">
+        <h2>Latest Posts</h2>
+        <PostList posts={sortedPosts} />
+      </section>
     </section>
-    <section class="bio">
-      <p>I enjoy Magic, astronomy, music, and reading.</p>
-      <p>
-        Visit my <a href="https://github.com/Viilih">GitHub</a> for my projects and the code for each article written.
-      </p>
-    </section>
-    <section class="posts">
-      <h2>Posts</h2>
-      <PostList posts={sortedPosts} />
-    </section>
-    <ClientRouter />
   </main>
 </BaseLayout>
-
-<style>
-  .blog-container > p{{
-    margin-bottom: 0;
-  }}
-</style>

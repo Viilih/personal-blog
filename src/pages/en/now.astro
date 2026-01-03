@@ -8,48 +8,48 @@ import BaseLayout from "layouts/BaseLayout.astro";
   <GoBackButton />
   <div>
     <h1>What am I doing right now?</h1>
-    <span>Last update: March 21, 2025 - 1:04 AM</span>
+    <span>{
+      new Date().toLocaleString()}</span>
   </div>
   <div>
     <h3>Work</h3>
     <p>
-      Currently I am working as a fullstack developer at <Link href="#"
-        >DBC Company</Link
-      >
-      I usually work with this tecnologies:
+      Currently I am working as a fullstack developer at <Link href="https://www.dbccompany.com.br/">DBC Company</Link>
+    </p>
+    <p>
+      I usually work with these technologies:
       <ul>
-        <li>.NET</li>
-        <li>C#</li>
+        <li>NodeJS</li>
+        <li>NestJS</li>
         <li>React</li>
         <li>Typescript</li>
-        <li>Azure DevOps (Docker and kubernetes also)</li>
+        <li>Azure DevOps</li>        
+        <li>Java / Spring Boot</li>
+        <li>Postgres</li>
       </ul>
     </p>
   </div>
   <div>
     <h3>Studies</h3>
     <p>
-      By the time you are reading this, I'm studing one of those topics:
+      By the time you are reading this, I'm studying one of these topics:
       <ul>
+        <li>Computer Science Fundamentals</li>
+        <li>Data Structures and Algorithms</li>
+        <li>System Design</li>
         <li>DevOps (Kubernetes and Docker)</li>
-        <li>
-          Javascript fundalmentals/ Principles (closures, async javascript and
-          functions) more under the hood
-        </li>
-        <li>Typescript</li>
-        <li>NodeJS</li>
-        <li>.NET Ecosystem</li>
-        <li>Web frontend frameworks</li>
+        <li>TypeScript</li>
+        <li>Java / Spring Boot</li>
       </ul>
     </p>
   </div>
   <div>
     <h3>What am I Building?</h3>
-    <p>This blog and a website explaining the fundamentals of javascript</p>
+    <p>This blog and a website explaining the fundamentals of JavaScript</p>
   </div>
   <div>
     <h3>Hobbies</h3>
-    <p>Playing guitar (electric and acoustic one)</p>
+    <p>Playing guitar (electric and acoustic)</p>
     <p>Brazilian Jiu Jitsu (BJJ)</p>
   </div>
 </BaseLayout>

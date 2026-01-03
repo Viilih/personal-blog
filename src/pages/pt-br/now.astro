@@ -8,20 +8,22 @@ import BaseLayout from "layouts/BaseLayout.astro";
   <GoBackButton />
   <div>
     <h1>O que estou fazendo agora?</h1>
-    <span>Última atualização: 21 de Março de 2025 - 01:04</span>
+    <span>{
+      new Date().toLocaleString('pt-br')}</span>
   </div>
   <div>
     <h3>Trabalho</h3>
     <p>
-      Atualmente, trabalho como desenvolvedor fullstack na
-      <Link href="#">DBC Company</Link>. Normalmente, trabalho com as seguintes
-      tecnologias:
+      Atualmente, trabalho como desenvolvedor na
+      <Link href="https://stefanini.com/pt-br">Stefanini</Link> lidando com essas tecnologias:
       <ul>
-        <li>.NET</li>
-        <li>C#</li>
+        <li>NodeJS</li>
+        <li>NestJS</li>
         <li>React</li>
         <li>Typescript</li>
-        <li>Azure DevOps (também Docker e Kubernetes)</li>
+        <li>Azure DevOps</li>        
+        <li>Java / Spring Boot</li>
+        <li>Postgres</li>
       </ul>
     </p>
   </div>
@@ -31,20 +33,17 @@ import BaseLayout from "layouts/BaseLayout.astro";
       No momento em que você está lendo isto, estou estudando um desses tópicos:
       <ul>
         <li>DevOps (Kubernetes e Docker)</li>
-        <li>
-          Fundamentos/Princípios do Javascript (closures, async javascript e
-          funções) mais a fundo
-        </li>
+        <li>Conceitos fundamentais de Ciência da Computação</li>
         <li>Typescript</li>
-        <li>Node</li>
-        <li>Ecossistema .NET</li>
-        <li>Frameworks de frontend para web</li>
+        <li>Estruturas de Dados e Algoritmos</li>
+        <li>System design</li>
+        <li>Java / Spring Boot</li>
       </ul>
     </p>
   </div>
   <div>
     <h3>O que estou construindo?</h3>
-    <p>Este blog e um site explicando os princípios do JavaScript</p>
+    <p>Este blog até o momento</p>
   </div>
   <div>
     <h3>Hobbies</h3>

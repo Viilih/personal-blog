@@ -1,0 +1,75 @@
+---
+title: Implementando Meu Próprio Web Server
+pubDate: 2026-01-03
+draft: false
+---
+
+
+# Por que decidi implementar meu próprio Web Server?
+
+Muitas vezes me peguei pensando que, como desenvolvedores, usamos ferramentas incríveis sem entender de fato a base do funcionamento delas.
+
+Vale ressaltar: não acho que seja necessário ter um entendimento profundo e acadêmico sobre absolutamente tudo o que você toca, mas acredito que conhecer o fluxo, a estrutura e o "como a mágica acontece" é o que nos diferencia.
+
+### O problema das abstrações
+
+Hoje em dia, lidamos com diversos níveis de abstração (no meu caso, usando frameworks de Node.js e JavaScript). Percebendo que eu lidava com requisições web diariamente, decidi dedicar meus estudos para entender o que acontece por baixo dessas abstrações. E qual o melhor jeito de fazer isso? **Implementando um web server do zero.**
+
+---
+
+## Conceitos e Desafios
+
+Quando a gente se propõe a construir algo da base, acaba fortalecendo conceitos fundamentais. Aqui estão os pontos principais que encontrei nessa jornada:
+
+### TCP, UDP e o Modelo TCP/IP
+
+Entender a camada de transporte é essencial. O **TCP (Transmission Control Protocol)** e o **UDP (User Datagram Protocol)** são os protocolos que ditam como os dados viajam. Antes de seguir adiante, vale apresentar as principais diferenças entre eles:
+
+- **TCP (O "Confiável"):**
+    - Utiliza o **Three-way handshake** para estabelecer conexão.
+    - Garante que o dado chegue completo e na ordem correta.
+    - É um pouco mais lento devido ao controle de erros e confirmações (ACKs).
+    - **Uso comum:** Navegação Web (HTTP), E-mail, Transferência de arquivos.
+- **UDP (O "Veloz"):**
+    - Sem handshake ("manda e esquece").
+    - Não garante a entrega nem a ordem dos pacotes.
+    - Muito mais rápido por ter menos "burocracia" no transporte.
+    - **Uso comum:** Streaming de vídeo, jogos online e DNS.
+
+Um ponto interessante foi notar como o modelo **TCP/IP** simplifica o modelo **OSI**. Enquanto o OSI tem 7 camadas, o TCP/IP agrupa as três primeiras (Aplicação, Apresentação e Sessão) em uma única camada de **Aplicação**, e as duas últimas (Enlace e Física) em uma camada de **Acesso à Rede**.
+
+---
+
+### O que foi mais divertido de aprender:
+
+- **Three-way Handshake:** O processo de "aperto de mão" entre cliente e servidor para estabelecer uma conexão segura.
+- **Buffers e Bytes:** Como lidar com as requisições utilizando buffers e identificar o fim de uma linha analisando bytes específicos (como o `\r\n`).
+- **Parsing de Requisições:** Interpretar manualmente o verbo HTTP (GET, POST), os headers, a versão do protocolo e o corpo da mensagem.
+- **Evitar Backpressure:** Entender como gerenciar o fluxo de dados para que o servidor não seja inundado por mais informações do que consegue processar.
+
+---
+
+## Overview do Aprendizado
+
+Além dos tópicos técnicos, o maior ganho foi fortalecer a base sobre como a internet se estrutura. Hoje, tenho uma visão muito mais clara do caminho que um dado percorre:
+
+1. **O Cliente** monta uma requisição em um formato específico.
+2. **O Servidor** recebe esses dados brutos, faz o *parsing* (interpretação) e direciona para a lógica de negócio.
+3. **A Resposta** é construída e enviada de volta pelo mesmo caminho.
+
+Obviamente, este é um modelo simplificado, mas entender esse "esqueleto" é transformador. Não sei se algum dia implementarei algo tão complexo do zero em produção, mas o conhecimento adquirido me dá muito mais segurança para debugar e otimizar as ferramentas que já utilizo.
+
+---
+
+## Links Interessantes e Repositório
+
+- [**Meu Repositório (Web Server em Node)**](https://github.com/Viilih/web-server-node) - Confira o código-fonte da minha implementação.
+- [**Vídeo: OSI and TCP IP Models Explained**](https://www.youtube.com/watch?v=3b_TAYtzuho) - Uma excelente explicação visual sobre como as camadas se comunicam e o processo de encapsulamento.
+- [**Artigo: Backpressure Explained**](https://medium.com/@jayphelps/backpressure-explained-the-flow-of-data-through-software-2350b3e77ce7) - Entenda como o fluxo de dados funciona através do software.
+- [**GeeksforGeeks: TCP 3-Way Handshake**](https://www.geeksforgeeks.org/computer-networks/tcp-3-way-handshake-process/) - Detalhes técnicos sobre o processo de conexão do TCP.
+
+---
+
+## Conclusão
+
+A minha implementação está no repositório mencionado acima caso queira dar uma conferida. Espero que tenha aprendido algo útil e, caso você tenha lido algo que ainda não dominava bem, acredito que seja um ótimo motivo para você também tentar fazer seu próprio web server! :)
