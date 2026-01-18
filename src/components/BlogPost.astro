@@ -1,12 +1,15 @@
 ---
+import PostBadge from "./PostBadge.astro";
+
 interface Props {
   postTitle: string;
   url: string | undefined;
   pubDate: Date;
+  postType?: "article" | "note" | "weekly";
 }
 
-const { postTitle, url, pubDate } = Astro.props;
-const currentLocale = Astro.currentLocale || "en";
+const { postTitle, url, pubDate, postType } = Astro.props;
+const currentLocale = (Astro.currentLocale || "en") as "en" | "pt-br";
 
 const formatDate = (date: Date, locale: string) => {
   const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
@@ -27,7 +30,10 @@ const formattedDate = formatDate(publishDate, currentLocale);
 
 <li>
   <a href={url} class="post-link">
-    <span class="post-title">{postTitle}</span>
+    <span class="post-title-wrapper">
+      {postType && <PostBadge type={postType} lang={currentLocale} />}
+      <span class="post-title">{postTitle}</span>
+    </span>
     <span class="post-date">{formattedDate}</span>
   </a>
 </li>
@@ -55,6 +61,13 @@ const formattedDate = formatDate(publishDate, currentLocale);
     transform: translate(4px, -4px) scale(1.02);
     box-shadow: -4px 4px 10px rgba(0, 0, 0, 0.1);
     color: var(--link-color);
+  }
+
+  .post-title-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .post-title {

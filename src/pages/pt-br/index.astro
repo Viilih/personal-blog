@@ -4,13 +4,26 @@ import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Link from "components/Link.astro";
 
-const posts = await getCollection("pt-br", (post) => !post.data.draft);
+// Fetch from all collections
+const blogPosts = await getCollection("pt-br", (post) => !post.data.draft);
+const notePosts = await getCollection("pt-br-notes", (post) => !post.data.draft);
+const weeklyPosts = await getCollection("pt-br-weekly", (post) => !post.data.draft);
 
-const sortedPosts = posts.sort((a, b) => {
-  const dateA = new Date(a.data.pubDate).getTime();
-  const dateB = new Date(b.data.pubDate).getTime();
-  return dateB - dateA;
-});
+// Add type metadata
+const allPosts = [
+  ...blogPosts.map(post => ({ ...post, _type: 'article' as const })),
+  ...notePosts.map(post => ({ ...post, _type: 'note' as const })),
+  ...weeklyPosts.map(post => ({ ...post, _type: 'weekly' as const }))
+];
+
+// Sort by date and take top 5
+const sortedPosts = allPosts
+  .sort((a, b) => {
+    const dateA = new Date(a.data.pubDate).getTime();
+    const dateB = new Date(b.data.pubDate).getTime();
+    return dateB - dateA;
+  })
+  .slice(0, 5);
 ---
 
 <BaseLayout>

@@ -13,7 +13,9 @@ const t = useTranslations(lang);
   </div>
 
   <ul class="sidebar">
-    <li><a href={`/${lang}`}>{t("sidebar.articles")}</a></li>
+    <li><a href={`/${lang}`}>{t("sidebar.home")}</a></li>
+    <li><a href={`/${lang}/articles`}>{t("sidebar.blog")}</a></li>
+    <li><a href={`/${lang}/learning/weekly`}>{t("sidebar.weekly")}</a></li>
     <li><a href={`/${lang}/now`}>{t("sidebar.now")}</a></li>
     <li><a href={`/${lang}/learning`}>{t("sidebar.learning")}</a></li>
     <li><a href={`/${lang}/notes`}>{t("sidebar.notes")}</a></li>

@@ -1,14 +1,26 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import BlogPost from "./BlogPost.astro";
 
 interface Props {
-  posts: CollectionEntry<"en" | "pt-br">[];
+  posts: Array<{
+    id: string;
+    data: {
+      title: string;
+      pubDate: Date;
+      draft: boolean;
+    };
+    _type?: "article" | "note" | "weekly";
+  }>;
 }
 
-const currentLang = Astro.currentLocale;
-console.log(currentLang);
+const currentLang = Astro.currentLocale || "en";
 const { posts } = Astro.props;
+
+const getPostUrl = (post: any, lang: string) => {
+  if (post._type === "note") return `/${lang}/notes/${post.id}`;
+  if (post._type === "weekly") return `/${lang}/learning/weekly/${post.id}`;
+  return `/${lang}/blog/${post.id}`;
+};
 ---
 
 <ul>
@@ -17,8 +29,9 @@ const { posts } = Astro.props;
       return (
         <BlogPost
           postTitle={post.data.title}
-          url={`/${currentLang}/blog/${post.id}`}
+          url={getPostUrl(post, currentLang)}
           pubDate={post.data.pubDate}
+          postType={post._type}
         />
       );
     })

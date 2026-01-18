@@ -49,9 +49,35 @@ const ptBrNotesCollection = defineCollection({
   }),
 });
 
+const enWeeklyCollection = defineCollection({
+  loader: glob({
+    pattern: ["**/*.{md,mdx}"],
+    base: "./src/content/en/weekly",
+  }),
+  schema: z.object({
+    title: z.string(),
+    pubDate: z.date(),
+    draft: z.boolean(),
+  }),
+});
+
+const ptBrWeeklyCollection = defineCollection({
+  loader: glob({
+    pattern: ["**/*.{md,mdx}"],
+    base: "./src/content/pt-br/weekly",
+  }),
+  schema: z.object({
+    title: z.string(),
+    pubDate: z.date(),
+    draft: z.boolean(),
+  }),
+});
+
 export const collections = {
   "en-notes": enNotesCollection,
+  "en-weekly": enWeeklyCollection,
   en: enBlogCollection,
   "pt-br": ptBrBlogCollection,
   "pt-br-notes": ptBrNotesCollection,
+  "pt-br-weekly": ptBrWeeklyCollection,
 };

@@ -1,0 +1,35 @@
+---
+import { getCollection } from "astro:content";
+import PostList from "../../../components/PostList.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const posts = await getCollection("pt-br", (post) => !post.data.draft);
+
+const sortedPosts = posts.sort((a, b) => {
+  const dateA = new Date(a.data.pubDate).getTime();
+  const dateB = new Date(b.data.pubDate).getTime();
+  return dateB - dateA;
+});
+---
+
+<BaseLayout>
+  <main class="blog-container">
+    <section class="articles">
+      <h1>Blog</h1>
+      <PostList posts={sortedPosts} />
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .blog-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .articles h1 {
+    margin-bottom: 2rem;
+  }
+</style>
