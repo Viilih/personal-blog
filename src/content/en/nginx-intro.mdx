@@ -1,0 +1,103 @@
+---
+title: First steps with NGINX
+pubDate: 2026-02-11
+draft: false
+---
+
+## Introduction
+
+### What is NGINX?
+It's a web server that can be used as a reverse proxy, load balancer, static content server, API Gateway, among others.
+### What are the use cases?
+As I mentioned before, but it's worth listing again, NGINX can be used as
+
+
+- **Reverse Proxy**: A server that sits in front of one or more servers, intercepting client requests. Think of it as a doorman who decides which apartment (backend server) to direct each visitor (request) to.
+
+- **Load Balancer**: A component responsible for distributing the traffic your system is receiving across different servers using various techniques (like Round Robin or Least Connections). Like a restaurant manager distributing tables among waiters.
+
+- **API Gateway**: A component that acts as a single entry point for a microservices architecture, managing, routing, and protecting traffic between clients and backend services. It handles authentication and Rate Limiting, for example.
+
+- **Content Cache**: The ability to store request responses in memory or disk, reducing latency. If 1000 people request the same image, NGINX avoids processing the same request on the backend repeatedly.
+
+- **Static file server**: HTML, CSS, JS, images — everything that doesn't need dynamic processing. This is what we'll focus on in this article.
+
+
+### How does NGINX work?
+
+NGINX uses an event-driven architecture allowing its scalability and performance while respecting modern hardware limits.
+
+
+Without needing to dive into every process happening under the hood, NGINX has the following structure:
+
+**One master process:**
+- Reads configuration file (`nginx.conf`)
+- Creates and coordinates workers
+- Handles sent signals (reload, stop, restart)
+- Does NOT process HTTP requests directly
+
+**Worker processes**
+- Each worker can handle thousands of concurrent connections
+- By default, we have 1 worker per available CPU core
+- Instead of creating a thread per connection, a worker manages all its connections via I/O events, meaning they use the event loop
+
+### First application with NGINX
+
+For this first example, we'll create a small application responsible only for serving static content from our nginx.
+
+I'm using `docker-compose.yaml` to spin up an nginx server without needing to install it on my machine, you can check the structure in this [file](link)
+
+#### nginx.conf structure
+
+```nginx
+events {
+    worker_connections 1024;  # capacity per worker
+}
+
+http {
+    # Maps extensions → Content-Type 
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    server {
+        listen 80;                    # port NGINX listens on
+        server_name localhost;        # domain (or IP)
+
+        root /usr/share/nginx/html;   # where the files are
+        index index.html;             # default file when accessing /
+
+        error_page 404 /404.html;     # custom error page
+
+        location = /404.html {
+            internal;  # only accessible via internal redirect, not directly
+        }
+
+        location / {
+            # Tries to serve:
+            # 1. The exact file ($uri)
+            # 2. As a directory ($uri/)
+            # 3. Adds .html ($uri.html) ← /about becomes /about.html
+            # 4. If nothing works, returns 404
+            try_files $uri $uri/ $uri.html =404;
+        }
+    }
+}
+```
+
+From this, we can define that when I access the URL `https://localhost/about`, we have the following steps
+
+- Browser sends: GET /about
+- NGINX receives on worker (port 80)
+- try_files attempts:
+      1. /usr/share/nginx/html/about (exists, since we have $uri.html)
+- NGINX reads the file from disk
+- Sends response with content-type: text/html
+- Browser renders
+
+This is the same process for non-existent pages, the only difference is that it will render our default 404.html page that we created
+
+### Conclusion and introduction to the series about the next topics
+
+Serving static files is the simplest use case of NGINX, but the idea of this article was to introduce the concept and the NGINX tool.
+
+In the next article of the series, I'll use NGINX as a reverse proxy and in future articles explore other use cases, the idea is to present the different applicabilities of NGINX.

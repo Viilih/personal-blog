@@ -1,0 +1,106 @@
+---
+title: Primeiros passos com NGINX
+pubDate: 2026-02-11
+draft: false
+---
+
+
+## Introdução
+
+### O que é o NGINX?
+É um web server que pode ser utilizado como proxy reverso, load balancer, servir conteúdos estáticos e servidores, API Gateway entre outros.
+### Quais os casos de uso?
+Assim como mencionei antes, mas vale listar novamente, o NGINX pode ser utilizado como
+
+
+- **Reverse Proxy**: Um servidor que fica na frente de um ou mais servidores, interceptando as requisições dos clientes. Pensa num porteiro que decide pra qual apartamento (servidor backend) encaminhar cada visitante (request).
+
+- **Load Balancer**: É um componente que tem a responsabilidade de distribuir o tráfego que seu sistema está recebendo em diferentes servidores a partir de algumas técnicas (como Round Robin ou Least Connections). Tipo um gerente de restaurante que distribui mesas entre garçons.
+
+- **API Gateway**: É um componente que atua como ponto de entrada único para uma arquitetura de microsserviços, gerenciando, roteando e protegendo o tráfego entre clientes e serviços de backend. Ele lida com autenticação e Rate Limiting por exemplo.
+
+- **Content Cache**: É a capacidade de armazenar respostas de requisições em memória ou disco, reduzindo a latência. Se 1000 pessoas pedirem a mesma imagem, NGINX evita processar a mesma requisição no backend repetidamente.
+
+- **Servidor de arquivos estáticos**: HTML, CSS, JS, imagens — tudo que não precisa de processamento dinâmico. É nisso que vamos focar nesse artigo.
+
+
+### Como o NGINX funciona?
+
+O NGINX utiliza uma arquitetura orientada a eventos permitindo sua escalabilidade e performance respeitando os limites hardwares modernos.
+
+
+Sem precisar escovar cada processo que acontece por debaixo dos panos, o NGINX tem a seguinte estrutura:
+
+**Um processo master:**
+- Lê arquivo de configuração (`nginx.conf`)
+- Cria e coordena workers
+- Lida com sinais enviados (reload,stop, restar)
+- NÃO processa requisições HTTP diretamente
+
+**Os processos workers**
+- Cada worker consegue lidar com milhares de conexões concorrentes
+- Por padrão, temos 1 worker por core de CPU disponível
+- AO invés de criar uma thread por conexão, um worker gerencia todas as suas conexões via eventos de I/O, ou seja, utilizam o event loop
+
+### Primeira aplicação com NGINX
+
+Para esse primeiro exemplo iremos, criar uma pequena aplicação responsável apenas por servir conteúdos estáticos a partir do nosso nginx.
+
+Estou utilizando o `docker-compose.yaml` para subir um servidor nginx sem precisar instalar na minha máquina, você pode conferir a estrutura nesse [arquivo](https://github.com/Viilih/nginx-resources/blob/main/01-static-server/docker-compose.yml)
+
+#### Estrutura do nginx.conf
+
+```nginx
+events {
+    worker_connections 1024;  # capacidade por worker
+}
+
+http {
+    # Mapeia extensões → Content-Type 
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    server {
+        listen 80;                    # porta que NGINX escuta
+        server_name localhost;        # domínio (ou IP)
+
+        root /usr/share/nginx/html;   # onde estão os arquivos
+        index index.html;             # arquivo padrão quando acessa /
+
+        error_page 404 /404.html;     # página customizada de erro
+
+        location = /404.html {
+            internal;  # só acessa via redirect interno, não direto
+        }
+
+        location / {
+            # Tenta servir:
+            # 1. O arquivo exato ($uri)
+            # 2. Como diretório ($uri/)
+            # 3. Adiciona .html ($uri.html) ← /sobre vira /sobre.html
+            # 4. Se nada funcionar, retorna 404
+            try_files $uri $uri/ $uri.html =404;
+        }
+    }
+}
+```
+
+A partir disso a gente pode definir que quando eu acesso a url `https://localhost/sobre`, tenho as seguitnes etapas
+
+- Browser envia: GET /sobre
+- NGINX Recebe no worker (porta 80)
+- try_files temta:
+      1. /usr/share/nginx/html/sobre (existe, pois temos $uri.html)
+- NGINX lê o arquivo do disco
+- Envia resposta com content-type: text/html
+- Browser renderiza
+
+Esse é o mesmo processo para páginas não existentes, a única diferença é que ele irá renderizar a nossa página default 404.html que criamos
+
+### Conclusão e apresentação da série sobre os próximos 
+
+Servir arquivos estáticos é o caso de uso mais simples do NGINX, mas a ideia desse artigo foi introduzir o conceito e a ferramente NGINX.
+
+No próximo artigo da série, vou utilizar o NGINX como proxy reverso e em futuros artigos explorar outros casos de uso, a ideia é apresentar as diferentes aplicabilidades do NGINX.
+
+Repositorio com os arquivos utilizados nesse artigo: [link](https://github.com/Viilih/nginx-resources/tree/main/01-static-server)
