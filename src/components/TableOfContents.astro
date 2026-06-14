@@ -1,6 +1,5 @@
 ---
 // src/components/TableOfContents.astro
-import { Icon } from "astro-icon/components";
 
 interface Heading {
   depth: number;
@@ -33,7 +32,14 @@ const validToc = toc.filter(
       >
         <span class="toc-title">CONTENTS</span>
         <span class="toc-count">({validToc.length})</span>
-        <Icon name="down-arrow" class="toc-icon" aria-hidden="true" />
+        <svg
+          class="toc-icon"
+          aria-hidden="true"
+          viewBox="0 0 330 330"
+          fill="currentColor"
+        >
+          <path d="M325.607 79.393a15 15 0 0 0-21.213.001L165.004 218.787 25.607 79.393a15 15 0 0 0-21.213 21.214l150.004 150a15 15 0 0 0 21.212-.001l149.996-150a15 15 0 0 0 .001-21.213Z" />
+        </svg>
       </button>
       <ul class="toc-list" id="toc-content">
         {validToc.map((heading) => (
