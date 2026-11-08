@@ -1,12 +1,17 @@
 ---
 import { getCollection } from "astro:content";
+import BuildLog from "../../components/BuildLog.astro";
 import PostList from "../../components/PostList.astro";
+import Projects from "../../components/Projects.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Link from "components/Link.astro";
 
 const blogPosts = await getCollection("en", (post) => !post.data.draft);
 const notePosts = await getCollection("en-notes", (post) => !post.data.draft);
-const weeklyPosts = await getCollection("en-weekly", (post) => !post.data.draft);
+const weeklyPosts = await getCollection(
+  "en-weekly",
+  (post) => !post.data.draft,
+);
 
 const allPosts = [
   ...blogPosts.map((post) => ({ ...post, _type: "article" as const })),
@@ -30,10 +35,11 @@ const sortedPosts = allPosts
         <span class="home__prompt-symbol">$</span> whoami
       </p>
       <h1 class="home__name">Guilherme Nascimento</h1>
-      <p class="home__tagline">Software engineer · fullstack</p>
+      <p class="home__tagline">Software engineer · backend</p>
       <p class="home__lead">
-        I work with React, TypeScript, and Java. Currently studying computer
-        science fundamentals, data structures, and algorithms. What I'm up to:
+        Backend-focused — Java, Spring Boot, PostgreSQL, payments and ledgers —
+        with a fullstack background in React, TypeScript, .NET, and NestJS, and
+        an interest in AI engineering (agents, LLMs, RAG, MCP). This month:
         <a href="/en/now">/now</a>.
       </p>
       <p class="home__links">
@@ -51,6 +57,9 @@ const sortedPosts = allPosts
       <span class="home__sep" aria-hidden="true">/</span>
       <a href="/en/learning">learning</a>
     </nav>
+
+    <Projects />
+    <BuildLog />
 
     <section class="content-section">
       <h2>Recent</h2>

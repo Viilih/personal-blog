@@ -1,12 +1,20 @@
 ---
 import { getCollection } from "astro:content";
+import BuildLog from "../../components/BuildLog.astro";
 import PostList from "../../components/PostList.astro";
+import Projects from "../../components/Projects.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Link from "components/Link.astro";
 
 const blogPosts = await getCollection("pt-br", (post) => !post.data.draft);
-const notePosts = await getCollection("pt-br-notes", (post) => !post.data.draft);
-const weeklyPosts = await getCollection("pt-br-weekly", (post) => !post.data.draft);
+const notePosts = await getCollection(
+  "pt-br-notes",
+  (post) => !post.data.draft,
+);
+const weeklyPosts = await getCollection(
+  "pt-br-weekly",
+  (post) => !post.data.draft,
+);
 
 const allPosts = [
   ...blogPosts.map((post) => ({ ...post, _type: "article" as const })),
@@ -30,10 +38,11 @@ const sortedPosts = allPosts
         <span class="home__prompt-symbol">$</span> whoami
       </p>
       <h1 class="home__name">Guilherme Nascimento</h1>
-      <p class="home__tagline">Engenheiro de software · fullstack</p>
+      <p class="home__tagline">Engenheiro de software · backend</p>
       <p class="home__lead">
-        Trabalho com React, TypeScript e Java. Estudo fundamentos de ciência da
-        computação, estruturas de dados e algoritmos. Atualizações em
+        Foco em backend — Java, Spring Boot, PostgreSQL, pagamentos e ledgers —
+        com base fullstack em React, TypeScript, .NET e NestJS, e interesse em
+        AI engineering (agentes, LLMs, RAG, MCP). Este mês:
         <a href="/pt-br/now">/now</a>.
       </p>
       <p class="home__links">
@@ -51,6 +60,9 @@ const sortedPosts = allPosts
       <span class="home__sep" aria-hidden="true">/</span>
       <a href="/pt-br/learning">learning</a>
     </nav>
+
+    <Projects />
+    <BuildLog />
 
     <section class="content-section">
       <h2>Recentes</h2>

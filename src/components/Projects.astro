@@ -1,0 +1,31 @@
+---
+import Link from "./Link.astro";
+
+// https://github.com/Viilih/ledger-pay is private; the link only works once the repo is public.
+const ledgerPayUrl = "https://github.com/Viilih/ledger-pay";
+
+const lang = Astro.currentLocale === "pt-br" ? "pt-br" : "en";
+
+const copy =
+  lang === "pt-br"
+    ? {
+        heading: "Projetos",
+        status: "em andamento",
+        summary:
+          "um fluxo de ledger com Java 21, Spring Boot 4, PostgreSQL, Flyway e GitHub Actions.",
+      }
+    : {
+        heading: "Projects",
+        status: "in progress",
+        summary:
+          "a ledger flow built with Java 21, Spring Boot 4, PostgreSQL, Flyway and GitHub Actions.",
+      };
+---
+
+<section class="content-section" id="projects">
+  <h2>{copy.heading}</h2>
+  <p>
+    <Link href={ledgerPayUrl}>LedgerPay</Link>
+    <span class="mono"> · {copy.status}</span>: {copy.summary}
+  </p>
+</section>
