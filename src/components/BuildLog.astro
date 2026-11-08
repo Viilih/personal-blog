@@ -1,0 +1,108 @@
+---
+import { loadPublicGithubActivity } from "../lib/github-activity";
+
+const lang = Astro.currentLocale === "pt-br" ? "pt-br" : "en";
+const items = await loadPublicGithubActivity();
+const heading = lang === "pt-br" ? "Atividade" : "Build log";
+
+const formatDate = (iso: string) => {
+  const [date] = iso.split("T");
+  if (!date) return iso;
+  const [year, month, day] = date.split("-");
+  if (!year || !month || !day) return iso;
+  return lang === "pt-br"
+    ? `${day}/${month}/${year}`
+    : `${year}-${month}-${day}`;
+};
+---
+
+{
+  items.length > 0 && (
+    <section class="content-section">
+      <h2>{heading}</h2>
+      <ul class="activity-list">
+        {items.map((item) => (
+          <li class="activity-row">
+            <a class="activity-link" href={item.href}>
+              <span class="activity-title">{item.label}</span>
+              <time class="activity-date" datetime={item.date}>
+                {formatDate(item.date)}
+              </time>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .activity-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .activity-row {
+    list-style: none;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .activity-row:last-child {
+    border-bottom: none;
+  }
+
+  .activity-link {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    text-decoration: none;
+    color: var(--color);
+    transition: color var(--transition-speed) ease;
+  }
+
+  .activity-link:hover {
+    text-decoration: none;
+    color: var(--link-color);
+  }
+
+  .activity-title {
+    flex: 1;
+    min-width: 0;
+    font-weight: 500;
+    color: var(--heading-color);
+    line-height: 1.4;
+  }
+
+  .activity-link:hover .activity-title {
+    color: var(--link-color);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .activity-date {
+    flex-shrink: 0;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .activity-link {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
+      padding: 1rem 0;
+    }
+  }
+</style>

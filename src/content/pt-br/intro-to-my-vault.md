@@ -16,7 +16,7 @@ Talvez até alguns conselhos para mim mesmo e coisas sobre meus hobbies.
 
 ## Quem sou eu?
 
-Sou um engenheiro de software baseado no Brasil que gosta de astronomia, mágica e música. Conforme for escrevendo mais posts, espero abordar diferentes tópicos na área de tecnologia, não apenas desenvolvimento frontend e backend, mas também outras áreas (IA, talvez? LLMs? Compiladores? Quem sabe). Porém, só o tempo dirá, à medida que ele voa.
+Sou um engenheiro de software baseado no Brasil, focado em sistemas backend (Java, Spring Boot, PostgreSQL, pagamentos e ledgers), com base fullstack (React, TypeScript, .NET, NestJS) e interesse em AI engineering (agentes, LLMs, RAG, MCP).
 
 Se você, meu caro leitor, quiser saber mais sobre mim, pode conferir meu [site](https://guilherme-dev-pi.vercel.app/).
 

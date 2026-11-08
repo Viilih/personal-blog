@@ -1,0 +1,94 @@
+---
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import GoBackButton from "components/GoBackButton.astro";
+import BaseLayout from "layouts/BaseLayout.astro";
+import Inline from "./Inline.astro";
+import { parseNow } from "../lib/now-page";
+
+interface Props {
+  lang: "en" | "pt-br";
+}
+
+const { lang } = Astro.props;
+const source = readFileSync(join(process.cwd(), "src/content/now.md"), "utf8");
+const now = parseNow(source, lang);
+---
+
+<BaseLayout title="Now · Guilherme">
+  <GoBackButton />
+  <header class="now-header">
+    <p class="now-path" aria-hidden="true">~/now</p>
+    <h1 class="page-title">{now.title}</h1>
+    <p class="now-updated mono">
+      {
+        now.updated ? (
+          <time datetime={now.updated}>{now.label}</time>
+        ) : (
+          now.label
+        )
+      }
+    </p>
+  </header>
+
+  {
+    now.sections.map((section) => (
+      <section class="now-section">
+        <h2>{section.heading}</h2>
+        {section.blocks.map((block) =>
+          block.type === "ul" ? (
+            <ul>
+              {block.items.map((item) => (
+                <li>
+                  <Inline parts={item} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>
+              <Inline parts={block.inlines} />
+            </p>
+          ),
+        )}
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .now-header {
+    margin: 0.75rem 0 2rem;
+  }
+
+  .now-path {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--prompt-color);
+  }
+
+  .now-updated {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .now-section {
+    margin-bottom: 1.75rem;
+    max-width: 40rem;
+  }
+
+  .now-section h2 {
+    margin: 0 0 0.65rem;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .now-section ul {
+    margin: 0.5rem 0 0;
+  }
+</style>

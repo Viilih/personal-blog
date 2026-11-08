@@ -16,7 +16,7 @@ Maybe advice for myself and some of my hobbies.
 
 ## Who am I?
 
-I'm a software engineer based in Brazil who likes astronomy, magic and music. As i write more posts hopefully I will get into more different topics in tech filed in general, not only frontend and backend development, but into more different areas (AI maybe? LLMs? Compilers? who knows).However only the time will tell this as it flies by.
+I'm a software engineer based in Brazil, focused on backend systems (Java, Spring Boot, PostgreSQL, payments and ledgers), with a fullstack background (React, TypeScript, .NET, NestJS) and an interest in AI engineering (agents, LLMs, RAG, MCP).
 
 If you, my dear reader, want to know more about me you can check my [website](https://guilherme-dev-pi.vercel.app/)
 
