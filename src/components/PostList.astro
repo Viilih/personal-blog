@@ -11,10 +11,11 @@ interface Props {
     };
     _type?: "article" | "note" | "weekly";
   }>;
+  showType?: boolean;
 }
 
 const currentLang = Astro.currentLocale || "en";
-const { posts } = Astro.props;
+const { posts, showType = true } = Astro.props;
 
 const getPostUrl = (post: any, lang: string) => {
   if (post._type === "note") return `/${lang}/notes/${post.id}`;
@@ -31,7 +32,7 @@ const getPostUrl = (post: any, lang: string) => {
           postTitle={post.data.title}
           url={getPostUrl(post, currentLang)}
           pubDate={post.data.pubDate}
-          postType={post._type}
+          postType={showType ? post._type : undefined}
         />
       );
     })

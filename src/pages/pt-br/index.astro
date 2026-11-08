@@ -20,7 +20,22 @@ const sortedPosts = allPosts
     const dateB = new Date(b.data.pubDate).getTime();
     return dateB - dateA;
   })
-  .slice(0, 5);
+  .slice(0, 6);
+
+const typeOrder = ["article", "note", "weekly"] as const;
+const typeLabels = {
+  article: "artigos",
+  note: "anotações",
+  weekly: "semanal",
+} as const;
+
+const recentByType = typeOrder
+  .map((type) => ({
+    type,
+    label: typeLabels[type],
+    posts: sortedPosts.filter((post) => post._type === type),
+  }))
+  .filter((group) => group.posts.length > 0);
 ---
 
 <BaseLayout title="Guilherme Nascimento">
@@ -32,9 +47,12 @@ const sortedPosts = allPosts
       <h1 class="home__name">Guilherme Nascimento</h1>
       <p class="home__tagline">Engenheiro de software · fullstack</p>
       <p class="home__lead">
-        Trabalho com React, TypeScript e Java. Estudo fundamentos de ciência da
-        computação, estruturas de dados e algoritmos. Atualizações em
-        <a href="/pt-br/now">/now</a>.
+        Trabalho com React, TypeScript, Java, Spring Boot e Postgres. Estudo
+        fundamentos de ciência da computação, estruturas de dados e algoritmos.
+        Veja o que estou fazendo agora em <a href="/pt-br/now">/now</a>.
+      </p>
+      <p class="home__hobbies">
+        Fora do trabalho: mágica, astronomia, música e livros.
       </p>
       <p class="home__links">
         Código e projetos no
@@ -43,6 +61,7 @@ const sortedPosts = allPosts
     </header>
 
     <nav class="home__explore" aria-label="Explorar">
+      <span class="home__explore-label" aria-hidden="true">~/</span>
       <a href="/pt-br/articles">articles</a>
       <span class="home__sep" aria-hidden="true">/</span>
       <a href="/pt-br/notes">notes</a>
@@ -50,11 +69,20 @@ const sortedPosts = allPosts
       <a href="/pt-br/learning/weekly">weekly</a>
       <span class="home__sep" aria-hidden="true">/</span>
       <a href="/pt-br/learning">learning</a>
+      <span class="home__sep" aria-hidden="true">/</span>
+      <a href="/pt-br/now">now</a>
     </nav>
 
-    <section class="content-section">
+    <section class="content-section home__recent">
       <h2>Recentes</h2>
-      <PostList posts={sortedPosts} />
+      {
+        recentByType.map((group) => (
+          <div class="home__group">
+            <h3 class="home__group-label">{group.label}</h3>
+            <PostList posts={group.posts} showType={false} />
+          </div>
+        ))
+      }
     </section>
   </section>
 </BaseLayout>
@@ -90,9 +118,14 @@ const sortedPosts = allPosts
   }
 
   .home__lead,
+  .home__hobbies,
   .home__links {
     margin: 0 0 0.85rem;
     color: var(--color);
+  }
+
+  .home__hobbies {
+    color: var(--text-muted);
   }
 
   .home__links {
@@ -113,6 +146,11 @@ const sortedPosts = allPosts
     font-size: 0.85rem;
   }
 
+  .home__explore-label {
+    color: var(--prompt-color);
+    font-weight: 500;
+  }
+
   .home__explore a {
     color: var(--heading-color);
     text-decoration: none;
@@ -126,5 +164,27 @@ const sortedPosts = allPosts
   .home__sep {
     color: var(--text-muted);
     opacity: 0.6;
+  }
+
+  .home__recent :global(.post-list) {
+    border-top: none;
+  }
+
+  .home__group {
+    margin-bottom: 1.25rem;
+  }
+
+  .home__group:last-child {
+    margin-bottom: 0;
+  }
+
+  .home__group-label {
+    margin: 0 0 0.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--prompt-color);
   }
 </style>
