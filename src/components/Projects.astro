@@ -12,13 +12,13 @@ const copy =
         heading: "Projetos",
         status: "em andamento",
         summary:
-          "Ledger digital e backend de pagamentos em Java 21, Spring Boot 4, PostgreSQL, Flyway e GitHub Actions.",
+          "um fluxo de ledger com Java 21, Spring Boot 4, PostgreSQL, Flyway e GitHub Actions.",
       }
     : {
         heading: "Projects",
         status: "in progress",
         summary:
-          "Digital ledger and payments backend in Java 21, Spring Boot 4, PostgreSQL, Flyway, and GitHub Actions.",
+          "a ledger flow built with Java 21, Spring Boot 4, PostgreSQL, Flyway and GitHub Actions.",
       };
 ---
 
@@ -26,6 +26,6 @@ const copy =
   <h2>{copy.heading}</h2>
   <p>
     <Link href={ledgerPayUrl}>LedgerPay</Link>
-    <span class="mono"> · {copy.status}</span>. {copy.summary}
+    <span class="mono"> · {copy.status}</span>: {copy.summary}
   </p>
 </section>

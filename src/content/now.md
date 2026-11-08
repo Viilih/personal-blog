@@ -16,7 +16,7 @@ LedgerPay (https://github.com/Viilih/ledger-pay) is private; the link only works
 
 ## Building
 
-[LedgerPay](https://github.com/Viilih/ledger-pay): transfer flow with idempotency. Studying race conditions and locks in Postgres.
+[LedgerPay](https://github.com/Viilih/ledger-pay) · in progress: a ledger flow built with Java 21, Spring Boot 4, PostgreSQL, Flyway and GitHub Actions.
 
 ## Practice
 
@@ -30,7 +30,7 @@ System design and AI engineering (agents, LLMs, RAG, and MCP).
 
 ## Construindo
 
-[LedgerPay](https://github.com/Viilih/ledger-pay): fluxo de transferências com idempotência. Estudando race conditions e locks no Postgres.
+[LedgerPay](https://github.com/Viilih/ledger-pay) · em andamento: um fluxo de ledger com Java 21, Spring Boot 4, PostgreSQL, Flyway e GitHub Actions.
 
 ## Prática
 
