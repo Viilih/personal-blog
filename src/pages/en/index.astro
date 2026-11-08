@@ -4,19 +4,16 @@ import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Link from "components/Link.astro";
 
-// Fetch from all collections
 const blogPosts = await getCollection("en", (post) => !post.data.draft);
 const notePosts = await getCollection("en-notes", (post) => !post.data.draft);
 const weeklyPosts = await getCollection("en-weekly", (post) => !post.data.draft);
 
-// Add type metadata
 const allPosts = [
-  ...blogPosts.map(post => ({ ...post, _type: 'article' as const })),
-  ...notePosts.map(post => ({ ...post, _type: 'note' as const })),
-  ...weeklyPosts.map(post => ({ ...post, _type: 'weekly' as const }))
+  ...blogPosts.map((post) => ({ ...post, _type: "article" as const })),
+  ...notePosts.map((post) => ({ ...post, _type: "note" as const })),
+  ...weeklyPosts.map((post) => ({ ...post, _type: "weekly" as const })),
 ];
 
-// Sort by date and take top 5
 const sortedPosts = allPosts
   .sort((a, b) => {
     const dateA = new Date(a.data.pubDate).getTime();
@@ -26,33 +23,108 @@ const sortedPosts = allPosts
   .slice(0, 5);
 ---
 
-<BaseLayout>
-  <main class="blog-container">
-    <section class="intro">
-      <h1>Guilherme Nascimento</h1>
-      <p class="subtitle">Fullstack Developer</p>
-      <p>
-        I'm a Brazilian software engineer currently working with
-        React, TypeScript, and Java. Currently studying fundamental computer science concepts and data structures and algorithms.
-        If you're interested in knowing what I'm doing right now, you can check the <a
-          href="/en/now">/now page</a
-        >
+<BaseLayout title="Guilherme Nascimento">
+  <section class="home">
+    <header class="home__hero">
+      <p class="home__prompt" aria-hidden="true">
+        <span class="home__prompt-symbol">$</span> whoami
       </p>
-      <section class="bio">
-        <p>
-          I enjoy magic (who doesn't?), astronomy, listening to good music, and reading
-          some books
-        </p>
-        <p>
-          You can check out my <Link href="https://github.com/Viilih"
-            >GitHub profile</Link
-          > where I put some projects and the code for all articles written here.
-        </p>
-      </section>
-      <section class="posts">
-        <h2>Latest Posts</h2>
-        <PostList posts={sortedPosts} />
-      </section>
+      <h1 class="home__name">Guilherme Nascimento</h1>
+      <p class="home__tagline">Software engineer · fullstack</p>
+      <p class="home__lead">
+        I work with React, TypeScript, and Java. Currently studying computer
+        science fundamentals, data structures, and algorithms. What I'm up to:
+        <a href="/en/now">/now</a>.
+      </p>
+      <p class="home__links">
+        Projects and article code on
+        <Link href="https://github.com/Viilih">GitHub</Link>.
+      </p>
+    </header>
+
+    <nav class="home__explore" aria-label="Explore">
+      <a href="/en/articles">articles</a>
+      <span class="home__sep" aria-hidden="true">/</span>
+      <a href="/en/notes">notes</a>
+      <span class="home__sep" aria-hidden="true">/</span>
+      <a href="/en/learning/weekly">weekly</a>
+      <span class="home__sep" aria-hidden="true">/</span>
+      <a href="/en/learning">learning</a>
+    </nav>
+
+    <section class="content-section">
+      <h2>Recent</h2>
+      <PostList posts={sortedPosts} />
     </section>
-  </main>
+  </section>
 </BaseLayout>
+
+<style>
+  .home__hero {
+    max-width: 38rem;
+    margin-bottom: 2rem;
+  }
+
+  .home__prompt {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .home__prompt-symbol {
+    color: var(--prompt-color);
+    font-weight: 500;
+  }
+
+  .home__name {
+    margin: 0 0 0.5rem;
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    letter-spacing: -0.03em;
+  }
+
+  .home__tagline {
+    margin: 0 0 1.25rem;
+    font-size: 1.05rem;
+    color: var(--text-muted);
+  }
+
+  .home__lead,
+  .home__links {
+    margin: 0 0 0.85rem;
+    color: var(--color);
+  }
+
+  .home__links {
+    margin-bottom: 0;
+    color: var(--text-muted);
+  }
+
+  .home__explore {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.5rem;
+    padding: 0.85rem 0;
+    margin-bottom: 0.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .home__explore a {
+    color: var(--heading-color);
+    text-decoration: none;
+  }
+
+  .home__explore a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+  }
+
+  .home__sep {
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+</style>

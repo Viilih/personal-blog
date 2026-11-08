@@ -4,9 +4,7 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 
 const currentPath = Astro.url.pathname;
 const currentLang = Astro.currentLocale ?? "en";
-
 const newLang = currentLang === "en" ? "pt-br" : "en";
-
 const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
 ---
 
@@ -19,7 +17,8 @@ const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
           href={getRelativeLocaleUrl(newLang, cleanPath)}
           class={`language-link ${currentLang === lang ? "active" : ""}`}
         >
-          {label}
+          {lang === "pt-br" ? "PT" : "EN"}
+          <span class="sr-only">{label}</span>
         </a>
       </>
     ))
@@ -30,59 +29,44 @@ const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
   .language-picker {
     display: flex;
     align-items: center;
+    font-family: var(--font-mono);
   }
 
   .language-link {
-    font-size: 14px;
+    font-size: 0.75rem;
     font-weight: 500;
     text-decoration: none;
-    padding: 4px 8px;
+    padding: 0.2rem 0.35rem;
     transition: color 0.2s ease;
-    color: var(--language-inactive); /* Use the inactive color by default */
+    color: var(--language-inactive);
   }
 
   .language-link:hover {
     color: var(--language-hover);
+    text-decoration: none;
   }
 
   .language-link.active {
     color: var(--language-active);
-    font-weight: 600; /* Make active language slightly bolder */
+    font-weight: 600;
   }
 
   .language-separator {
-    height: 16px;
+    height: 12px;
     width: 1px;
     background-color: var(--language-separator);
-    margin: 0 4px;
+    margin: 0 2px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>
-<!-- <style>
-  .language-picker {
-    display: flex;
-    align-items: center;
-  }
-
-  .language-link {
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    padding: 4px 8px;
-    transition: color 0.2s ease;
-  }
-
-  .language-link:hover {
-    color: #111827;
-  }
-
-  .language-link.active {
-    color: var(--language-active);
-  }
-
-  .language-separator {
-    height: 16px;
-    width: 1px;
-    background-color: #d1d5db;
-    margin: 0 4px;
-  }
-</style> -->

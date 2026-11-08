@@ -12,34 +12,28 @@ const sortedPosts = posts
     const dateB = new Date(b.data.pubDate).getTime();
     return dateB - dateA;
   })
-  .map(post => ({ ...post, _type: 'weekly' as const }));
+  .map((post) => ({ ...post, _type: "weekly" as const }));
 ---
 
-<BaseLayout>
-  <main class="weekly-container">
-    <GoBackButton />
-    <section class="weekly">
-      <h1>Semanal</h1>
-      <p>Estudos, reflexões e ideias semanais</p>
-      <PostList posts={sortedPosts} />
-    </section>
-  </main>
+<BaseLayout title="Weekly · Guilherme">
+  <GoBackButton />
+  <header class="weekly-header">
+    <p class="weekly-path" aria-hidden="true">~/learning/weekly</p>
+    <h1 class="page-title">Semanal</h1>
+    <p class="page-lead">Estudos, reflexões e ideias semanais.</p>
+  </header>
+  <PostList posts={sortedPosts} />
 </BaseLayout>
 
 <style>
-  .weekly-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
+  .weekly-header {
+    margin: 0.75rem 0 1.5rem;
   }
 
-  .weekly h1 {
-    margin-bottom: 1rem;
-  }
-
-  .weekly p {
-    margin-bottom: 2rem;
-    color: var(--text-secondary);
+  .weekly-path {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--prompt-color);
   }
 </style>

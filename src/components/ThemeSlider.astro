@@ -3,25 +3,24 @@ const { id } = Astro.props;
 ---
 
 <div class="toggle-container">
-  <span class="light"> light </span>
+  <span class="light">light</span>
   <div>
     <label class="switch" aria-label="Switch theme">
       <input id={id} class="theme-toggle" type="checkbox" />
       <span class="slider round"></span>
     </label>
   </div>
-  <span class="dark"> dark </span>
+  <span class="dark">dark</span>
 </div>
 
 <style>
-  .theme-toggle {
-  }
-
   .toggle-container {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.5em;
+    gap: 0.45em;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
   }
 
   .light {
@@ -35,8 +34,8 @@ const { id } = Astro.props;
   .switch {
     position: relative;
     display: inline-block;
-    width: 48px;
-    height: 24px;
+    width: 40px;
+    height: 22px;
   }
 
   .switch input {
@@ -48,46 +47,40 @@ const { id } = Astro.props;
   .slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--link-color);
-    transition: 0.4s;
+    inset: 0;
+    background-color: var(--border);
+    transition: background-color 0.25s ease;
   }
 
   .slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
+    height: 16px;
+    width: 16px;
     left: 3px;
     bottom: 3px;
-    background-color: var(--color); /* Or specific light/dark color */
-    transition: transform 0.4s; /* Transition the transform */
-    transform: translateX(0px); /* Default (light) */
+    background-color: var(--surface-color);
+    border: 1px solid var(--border);
+    transition: transform 0.25s ease;
+    transform: translateX(0);
     border-radius: 50%;
   }
+
   input.theme-toggle:checked + .slider:before {
-    transform: translateX(
-      24px
-    ); /* Adjust value based on your switch dimensions (width-height or width-handle_width-padding) */
+    transform: translateX(18px);
   }
 
-  input.theme-toggle:focus + .slider {
-    box-shadow: 0 0 5px var(--link-color);
+  input.theme-toggle:focus-visible + .slider {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
   }
 
   input:checked + .slider {
-    background-color: var(--link-color);
-  }
-
-  input:focus + .slider {
-    box-shadow: 0 0 5px var(--link-color);
+    background-color: var(--accent-color);
   }
 
   .slider.round {
-    border-radius: 34px;
+    border-radius: 999px;
   }
 
   .slider.round:before {

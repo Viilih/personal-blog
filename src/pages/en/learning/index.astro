@@ -3,15 +3,50 @@ import GoBackButton from "components/GoBackButton.astro";
 import BaseLayout from "layouts/BaseLayout.astro";
 ---
 
-<BaseLayout>
+<BaseLayout title="Learning · Guilherme">
   <GoBackButton />
-
-  <div>
-    <h2>Learning</h2>
-    <p>
-      In this section I will share some thoughts and notes during my learning
-      process
+  <header class="learning-header">
+    <p class="learning-path" aria-hidden="true">~/learning</p>
+    <h1 class="page-title">Learning</h1>
+    <p class="page-lead">
+      Thoughts and notes from the middle of learning something new.
     </p>
-    <a href="/en/learning/weekly">Weekly reflections, studies and ideas </a>
-  </div>
+  </header>
+  <p class="learning-link">
+    <a href="/en/learning/weekly">
+      <span class="mono" aria-hidden="true">→</span>
+      Weekly reflections, studies, and ideas
+    </a>
+  </p>
 </BaseLayout>
+
+<style>
+  .learning-header {
+    margin: 0.75rem 0 1.5rem;
+  }
+
+  .learning-path {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--prompt-color);
+  }
+
+  .learning-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--heading-color);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .learning-link a:hover {
+    color: var(--link-color);
+    text-decoration: underline;
+  }
+
+  .learning-link .mono {
+    color: var(--accent-color);
+  }
+</style>
