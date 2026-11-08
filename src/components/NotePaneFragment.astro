@@ -1,0 +1,91 @@
+---
+import type { VaultItem } from "../lib/vault";
+
+interface Props {
+  noteId: string;
+  title: string;
+  pubDateIso: string;
+  formattedDate: string;
+  closeLabel: string;
+  relatedLabel: string;
+  backlinksLabel: string;
+  backlinksEmpty: string;
+  related: VaultItem[];
+  backlinks: VaultItem[];
+}
+
+const {
+  noteId,
+  title,
+  pubDateIso,
+  formattedDate,
+  closeLabel,
+  relatedLabel,
+  backlinksLabel,
+  backlinksEmpty,
+  related,
+  backlinks,
+} = Astro.props;
+---
+
+<template data-note-fragment={noteId}>
+  <article class="note-pane" data-note-pane data-note-id={noteId}>
+    <header class="note-pane__header">
+      <div class="note-pane__heading">
+        <h1 class="note-pane__title">{title}</h1>
+        <div class="note-pane__meta">
+          <time datetime={pubDateIso}>{formattedDate}</time>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="note-pane__close"
+        data-pane-close
+        aria-label={closeLabel}
+      >
+        ×
+      </button>
+    </header>
+    <div class="note-pane__body" data-note-body>
+      <slot />
+    </div>
+    {
+      related.length > 0 && (
+        <section class="note-pane__related">
+          <h2>{relatedLabel}</h2>
+          <ul>
+            {related.map((item) => (
+              <li>
+                <a href={item.href} data-note-link={item.id}>
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+    <section class="backlinks">
+      <h2 class="backlinks__title">{backlinksLabel}</h2>
+      {
+        backlinks.length === 0 ? (
+          <p class="backlinks__empty">{backlinksEmpty}</p>
+        ) : (
+          <ul class="backlinks__list">
+            {backlinks.map((item) => (
+              <li>
+                <a
+                  class="backlinks__link"
+                  href={item.href}
+                  data-note-link={item.id}
+                >
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
+  </article>
+</template>

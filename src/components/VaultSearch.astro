@@ -1,0 +1,123 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { getSearchIndex } from "../lib/vault";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const index = await getSearchIndex(lang);
+---
+
+<div class="vault-search" data-vault-search>
+  <label class="vault-search__label" for="vault-search-input">
+    <span class="sr-only">{t("vault.search.placeholder")}</span>
+  </label>
+  <input
+    id="vault-search-input"
+    class="vault-search__input"
+    type="search"
+    placeholder={t("vault.search.placeholder")}
+    autocomplete="off"
+    spellcheck="false"
+    data-vault-search-input
+  />
+  <ul
+    class="vault-search__results"
+    data-vault-search-results
+    hidden
+    role="listbox"
+  >
+  </ul>
+  <p class="vault-search__empty" data-vault-search-empty hidden>
+    {t("vault.search.noResults")}
+  </p>
+  <script
+    is:inline
+    type="application/json"
+    data-vault-search-index
+    set:html={JSON.stringify(index)}
+  />
+</div>
+
+<script>
+  import "../scripts/vault-search.js";
+</script>
+
+<style>
+  .vault-search {
+    position: relative;
+    width: 100%;
+  }
+
+  .vault-search__input {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--language-separator);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--color);
+  }
+
+  .vault-search__input:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 1px;
+  }
+
+  .vault-search__results {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0;
+    max-height: 14rem;
+    overflow-y: auto;
+    border: 1px solid var(--language-separator);
+    border-radius: 4px;
+    background: var(--background-color);
+  }
+
+  .vault-search__result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.45rem 0.55rem;
+    text-decoration: none;
+    color: var(--color);
+    border-bottom: 1px solid var(--language-separator);
+  }
+
+  .vault-search__result:hover {
+    color: var(--link-color);
+    background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  }
+
+  .vault-search__kind {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--language-inactive);
+  }
+
+  .vault-search__title {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .vault-search__empty {
+    margin: 0.35rem 0 0;
+    font-size: 0.75rem;
+    color: var(--language-inactive);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

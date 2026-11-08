@@ -148,4 +148,8 @@ The **Event Loop** is JavaScript's traffic controller that manages the coordinat
 
 **Why do we need it?** Because JavaScript is single-threaded, but the browser isn't! The browser can handle multiple Web API tasks simultaneously (timers, network requests, etc.) while JavaScript continues executing. The event loop ensures that when these browser tasks complete, their callbacks get executed in JavaScript at the right time - when the main thread is free.
 
-**In simple terms:** The event loop is what allows JavaScript to be non-blocking despite being single-threaded. It's the bridge between JavaScript's synchronous nature and the asynchronous world of Web APIs
+**In simple terms:** The event loop is what allows JavaScript to be non-blocking despite being single-threaded. It's the bridge between JavaScript's synchronous nature and the asynchronous world of Web APIs.
+
+## Related notes
+
+Callbacks passed to `setTimeout` are often closures over outer state — see [Closures](/en/notes/closures). A common footgun with async work in loops is covered in [Don't use async and await inside forEach](/en/notes/tricky-foreach).

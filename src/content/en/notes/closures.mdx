@@ -147,3 +147,7 @@ function debounce(callback, interval) {
 
 - **Closures** allow inner functions to access variables from their outer scope even after the outer function has finished executing
 - The "backpack" metaphor helps visualize how closures preserve the lexical environment
+
+## Related notes
+
+Closures show up constantly once you dig into async callbacks and timers — continue with [Javascript asynchronicity and event loop](/en/notes/asynchronous-js). They also matter when you accidentally close over values inside `forEach` async handlers — see [Don't use async and await inside forEach](/en/notes/tricky-foreach).

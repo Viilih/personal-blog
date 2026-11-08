@@ -2,7 +2,9 @@
 import { getCollection } from "astro:content";
 import GoBackButton from "components/GoBackButton.astro";
 import BaseLayout from "layouts/BaseLayout.astro";
+import { useTranslations } from "i18n/utils";
 
+const t = useTranslations("en");
 const posts = await getCollection("en-notes", (post) => !post.data.draft);
 
 const sortedPosts = posts.sort(
@@ -11,10 +13,11 @@ const sortedPosts = posts.sort(
 );
 ---
 
-<BaseLayout>
+<BaseLayout title="Notes">
   <div class="notes-container">
     <GoBackButton />
     <h1 class="page-title">Notes</h1>
+    <p class="notes-hint">{t("notes.explore.hint")}</p>
 
     {
       sortedPosts.length === 0 ? (
@@ -23,7 +26,11 @@ const sortedPosts = posts.sort(
         <div class="notes-list">
           {sortedPosts.map((post) => (
             <article class="note-item">
-              <a href={`/en/notes/${post.id}`} class="note-link">
+              <a
+                href={`/en/notes/${post.id}`}
+                class="note-link"
+                data-note-link={post.id}
+              >
                 <div class="note-content">
                   <h2 class="note-title">{post.data.title}</h2>
                   <time
@@ -48,13 +55,18 @@ const sortedPosts = posts.sort(
 </BaseLayout>
 
 <style>
-  .notes-container {
-  }
-
   .page-title {
     font-size: 2rem;
     font-weight: 600;
     color: var(--heading-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .notes-hint {
+    margin: 0 0 1.5rem;
+    font-size: 0.9rem;
+    color: var(--language-inactive);
+    max-width: 40rem;
   }
 
   .no-notes {
@@ -129,7 +141,6 @@ const sortedPosts = posts.sort(
     transform: translateX(4px);
   }
 
-  /* Responsive design */
   @media (max-width: 768px) {
     .notes-container {
       padding: 1rem;
@@ -137,7 +148,6 @@ const sortedPosts = posts.sort(
 
     .page-title {
       font-size: 1.75rem;
-      margin-bottom: 2rem;
     }
 
     .note-link {

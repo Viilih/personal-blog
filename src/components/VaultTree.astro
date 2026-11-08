@@ -1,0 +1,196 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { getVaultSections } from "../lib/vault";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const sections = await getVaultSections(lang);
+const pathname = Astro.url.pathname.replace(/\/$/, "") || `/${lang}`;
+
+function isActive(href: string): boolean {
+  const normalized = href.replace(/\/$/, "");
+  if (normalized === `/${lang}`) return pathname === normalized;
+  return pathname === normalized || pathname.startsWith(`${normalized}/`);
+}
+
+function sectionOpen(sectionId: string, href: string): boolean {
+  if (sectionId === "notes") return pathname.includes("/notes");
+  if (sectionId === "articles") {
+    return pathname.includes("/articles") || pathname.includes("/blog/");
+  }
+  if (sectionId === "weekly") return pathname.includes("/weekly");
+  return isActive(href);
+}
+---
+
+<nav class="vault-tree" aria-label="Vault">
+  <ul class="vault-tree__root">
+    {
+      sections.map((section) => {
+        const active = isActive(section.href);
+        const open = sectionOpen(section.id, section.href);
+
+        if (!section.collapsible || section.items.length === 0) {
+          return (
+            <li class:list={["vault-tree__section", { "is-active": active }]}>
+              <a class="vault-tree__link" href={section.href}>
+                {t(section.labelKey)}
+              </a>
+            </li>
+          );
+        }
+
+        return (
+          <li
+            class:list={[
+              "vault-tree__section",
+              "vault-tree__section--branch",
+              { "is-active": active },
+            ]}
+            data-vault-branch
+          >
+            <div class="vault-tree__branch-head">
+              <a class="vault-tree__link" href={section.href}>
+                {t(section.labelKey)}
+              </a>
+              <button
+                type="button"
+                class="vault-tree__toggle"
+                aria-expanded={open ? "true" : "false"}
+                aria-label={
+                  open ? t("vault.tree.collapse") : t("vault.tree.expand")
+                }
+                data-vault-toggle
+              >
+                <span aria-hidden="true">{open ? "▾" : "▸"}</span>
+              </button>
+            </div>
+            <ul
+              class="vault-tree__children"
+              data-vault-children
+              hidden={!open}
+            >
+              {section.items.map((item) => {
+                const itemActive = pathname === item.href.replace(/\/$/, "");
+                return (
+                  <li
+                    class:list={[
+                      "vault-tree__item",
+                      { "is-active": itemActive },
+                    ]}
+                  >
+                    <a
+                      class="vault-tree__child-link"
+                      href={item.href}
+                      data-note-link={item.kind === "note" ? item.id : undefined}
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>
+
+<script>
+  import "../scripts/vault-tree.js";
+</script>
+
+<style>
+  .vault-tree {
+    width: 100%;
+  }
+
+  .vault-tree__root {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .vault-tree__section {
+    margin-bottom: 0.55rem;
+  }
+
+  .vault-tree__branch-head {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+  }
+
+  .vault-tree__link {
+    text-decoration: none;
+    color: var(--color);
+    font-size: 0.95rem;
+  }
+
+  .vault-tree__section.is-active > .vault-tree__link,
+  .vault-tree__section.is-active > .vault-tree__branch-head > .vault-tree__link {
+    color: var(--link-color);
+    font-weight: 600;
+  }
+
+  .vault-tree__link:hover,
+  .vault-tree__child-link:hover {
+    color: var(--link-color);
+  }
+
+  .vault-tree__toggle {
+    border: none;
+    background: transparent;
+    color: var(--language-inactive);
+    cursor: pointer;
+    padding: 0.1rem 0.25rem;
+    font: inherit;
+    line-height: 1;
+  }
+
+  .vault-tree__toggle:hover {
+    color: var(--link-color);
+  }
+
+  .vault-tree__children {
+    list-style: none;
+    margin: 0.35rem 0 0.25rem;
+    padding: 0 0 0 0.5rem;
+    border-left: 1px solid var(--language-separator);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-height: 12rem;
+    overflow-y: auto;
+  }
+
+  .vault-tree__child-link {
+    display: block;
+    text-align: right;
+    text-decoration: none;
+    color: var(--language-inactive);
+    font-size: 0.75rem;
+    line-height: 1.35;
+    padding: 0.15rem 0;
+  }
+
+  .vault-tree__item.is-active .vault-tree__child-link {
+    color: var(--link-color);
+  }
+
+  @media (max-width: 768px) {
+    .vault-tree__branch-head {
+      justify-content: flex-start;
+    }
+
+    .vault-tree__child-link {
+      text-align: left;
+    }
+
+    .vault-tree__children {
+      margin-left: 0.6rem;
+    }
+  }
+</style>

@@ -1,0 +1,82 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { getNoteBacklinks, type VaultItem } from "../lib/vault";
+
+interface Props {
+  noteId: string;
+  /** Optional precomputed backlinks to avoid a second graph walk */
+  items?: VaultItem[];
+}
+
+const { noteId, items } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const backlinks = items ?? (await getNoteBacklinks(lang, noteId));
+---
+
+<section class="backlinks" aria-labelledby={`backlinks-${noteId}`}>
+  <h2 class="backlinks__title" id={`backlinks-${noteId}`}>
+    {t("notes.backlinks")}
+  </h2>
+  {
+    backlinks.length === 0 ? (
+      <p class="backlinks__empty">{t("notes.backlinks.empty")}</p>
+    ) : (
+      <ul class="backlinks__list">
+        {backlinks.map((item) => (
+          <li>
+            <a
+              class="backlinks__link"
+              href={item.href}
+              data-note-link={item.id}
+            >
+              {item.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</section>
+
+<style>
+  .backlinks {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--language-separator);
+  }
+
+  .backlinks__title {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--language-inactive);
+  }
+
+  .backlinks__empty {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--language-inactive);
+  }
+
+  .backlinks__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .backlinks__link {
+    color: var(--link-color);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  .backlinks__link:hover {
+    text-decoration: underline;
+  }
+</style>
