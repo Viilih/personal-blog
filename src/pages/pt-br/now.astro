@@ -2,6 +2,8 @@
 import GoBackButton from "components/GoBackButton.astro";
 import Link from "components/Link.astro";
 import BaseLayout from "layouts/BaseLayout.astro";
+
+const lastUpdated = "8 de novembro de 2026";
 ---
 
 <BaseLayout title="Now · Guilherme">
@@ -9,45 +11,70 @@ import BaseLayout from "layouts/BaseLayout.astro";
   <header class="now-header">
     <p class="now-path" aria-hidden="true">~/now</p>
     <h1 class="page-title">O que estou fazendo agora?</h1>
-    <p class="now-updated mono">
-      {new Date().toLocaleDateString("pt-BR", { dateStyle: "medium" })}
-    </p>
+    <p class="now-updated mono">Atualizado em · {lastUpdated}</p>
   </header>
 
   <section class="now-section">
     <h2>Trabalho</h2>
     <p>
-      Desenvolvedor na
-      <Link href="https://stefanini.com/pt-br">Stefanini</Link>, com:
+      Desenvolvedor fullstack na
+      <Link href="https://stefanini.com/pt-br">Stefanini</Link>. No dia a dia
+      trabalho principalmente com <strong>Spring Boot</strong> e
+      <strong>Postgres</strong>, junto com o restante da stack:
     </p>
-    <ul>
-      <li>NodeJS / NestJS</li>
-      <li>React / TypeScript</li>
-      <li>Java / Spring Boot</li>
-      <li>Azure DevOps · Postgres</li>
+    <ul class="now-groups">
+      <li>
+        <span class="now-group-label">Backend</span>
+        Spring Boot · Postgres · Node.js / NestJS
+      </li>
+      <li>
+        <span class="now-group-label">Frontend</span>
+        React · TypeScript
+      </li>
+      <li>
+        <span class="now-group-label">Ferramentas</span>
+        Azure DevOps
+      </li>
     </ul>
   </section>
 
   <section class="now-section">
     <h2>Estudos</h2>
-    <ul>
-      <li>DevOps (Kubernetes e Docker)</li>
-      <li>Fundamentos de Ciência da Computação</li>
-      <li>TypeScript</li>
-      <li>Estruturas de Dados e Algoritmos</li>
-      <li>System design</li>
-      <li>Java / Spring Boot</li>
+    <ul class="now-groups">
+      <li>
+        <span class="now-group-label">Ledger Pay / sistemas</span>
+        Bancos de dados · locks · idempotência
+      </li>
+      <li>
+        <span class="now-group-label">Algoritmos</span>
+        Estruturas de dados e algoritmos
+      </li>
     </ul>
   </section>
 
   <section class="now-section">
     <h2>Construindo</h2>
-    <p>Este site, continuamente.</p>
+    <ul>
+      <li>Este digital garden / blog</li>
+      <li>Ledger Pay — um projeto pessoal de pagamentos</li>
+    </ul>
   </section>
 
   <section class="now-section">
     <h2>Hobbies</h2>
-    <p>Guitarra e violão · Jiu-Jitsu (BJJ)</p>
+    <ul>
+      <li>Guitarra e violão</li>
+      <li>Jiu-Jitsu brasileiro — faixa azul</li>
+      <li>Surf</li>
+    </ul>
+  </section>
+
+  <section class="now-section">
+    <h2>Leitura</h2>
+    <ul>
+      <li><em>Grokking Algorithms</em>, 2ª edição</li>
+      <li><em>O Adversário Secreto</em> (Agatha Christie)</li>
+    </ul>
   </section>
 </BaseLayout>
 
@@ -84,7 +111,40 @@ import BaseLayout from "layouts/BaseLayout.astro";
     color: var(--text-muted);
   }
 
+  .now-section p {
+    margin: 0 0 0.75rem;
+  }
+
   .now-section ul {
-    margin: 0.5rem 0 0;
+    margin: 0.35rem 0 0;
+    padding-left: 1.15rem;
+  }
+
+  .now-section li {
+    margin-bottom: 0.4rem;
+  }
+
+  .now-groups {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .now-groups li {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .now-groups li:last-child {
+    border-bottom: none;
+  }
+
+  .now-group-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-color);
   }
 </style>
