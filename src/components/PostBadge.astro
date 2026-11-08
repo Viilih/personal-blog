@@ -17,43 +17,30 @@ const t = useTranslations(lang);
 <style>
   .post-badge {
     display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
   }
 
   .post-badge-article {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    color: var(--link-color);
+    border-color: color-mix(in srgb, var(--link-color) 35%, var(--border));
   }
 
   .post-badge-note {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #10b981;
+    color: var(--accent-color);
+    border-color: color-mix(in srgb, var(--accent-color) 40%, var(--border));
   }
 
   .post-badge-weekly {
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #f59e0b;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .post-badge-article {
-      background-color: rgba(59, 130, 246, 0.2);
-      color: #60a5fa;
-    }
-
-    .post-badge-note {
-      background-color: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-    }
-
-    .post-badge-weekly {
-      background-color: rgba(245, 158, 11, 0.2);
-      color: #fbbf24;
-    }
+    color: var(--text-muted);
   }
 </style>

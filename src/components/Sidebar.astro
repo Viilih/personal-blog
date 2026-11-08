@@ -2,68 +2,175 @@
 import LanguagePicker from "../components/LanguagePicker.astro";
 import { getLangFromUrl, useTranslations } from "../i18n/utils";
 import ThemeSlider from "./ThemeSlider.astro";
+
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+const path = Astro.url.pathname;
+
+const items = [
+  { href: `/${lang}`, label: t("sidebar.home"), match: "home" },
+  { href: `/${lang}/articles`, label: t("sidebar.blog"), match: "articles" },
+  { href: `/${lang}/notes`, label: t("sidebar.notes"), match: "notes" },
+  { href: `/${lang}/learning/weekly`, label: t("sidebar.weekly"), match: "weekly" },
+  { href: `/${lang}/learning`, label: t("sidebar.learning"), match: "learning" },
+  { href: `/${lang}/now`, label: t("sidebar.now"), match: "now" },
+] as const;
+
+function isActive(match: string): boolean {
+  if (match === "home") {
+    return path === `/${lang}` || path === `/${lang}/`;
+  }
+  if (match === "weekly") {
+    return path.includes("/learning/weekly");
+  }
+  if (match === "learning") {
+    return path.includes("/learning") && !path.includes("/weekly");
+  }
+  return path.includes(`/${match}`);
+}
 ---
 
-<div class="sidebar-container">
-  <div class="language-switcher">
+<nav class="site-nav">
+  <a class="site-nav__brand" href={`/${lang}`}>
+    <span class="site-nav__prompt" aria-hidden="true">~/</span>
+    <span class="site-nav__name">guilherme</span>
+  </a>
+
+  <ul class="site-nav__list">
+    {
+      items.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            class:list={["site-nav__link", { "is-active": isActive(item.match) }]}
+            aria-current={isActive(item.match) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="site-nav__controls">
     <LanguagePicker />
     <ThemeSlider id="theme-toggle" />
   </div>
-
-  <ul class="sidebar">
-    <li><a href={`/${lang}`}>{t("sidebar.home")}</a></li>
-    <li><a href={`/${lang}/articles`}>{t("sidebar.blog")}</a></li>
-    <li><a href={`/${lang}/learning/weekly`}>{t("sidebar.weekly")}</a></li>
-    <li><a href={`/${lang}/now`}>{t("sidebar.now")}</a></li>
-    <li><a href={`/${lang}/learning`}>{t("sidebar.learning")}</a></li>
-    <li><a href={`/${lang}/notes`}>{t("sidebar.notes")}</a></li>
-  </ul>
-</div>
+</nav>
 
 <style>
-  .sidebar-container {
+  .site-nav {
+    position: sticky;
+    top: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.75rem;
+    padding-bottom: 1rem;
   }
 
-  .language-switcher {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
-    margin-bottom: 0.5rem;
+  .site-nav__brand {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.15rem;
+    text-decoration: none;
+    color: var(--heading-color);
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
-  .sidebar {
+  .site-nav__brand:hover {
+    text-decoration: none;
+    color: var(--heading-color);
+  }
+
+  .site-nav__prompt {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--prompt-color);
+  }
+
+  .site-nav__name {
+    font-size: 1.05rem;
+  }
+
+  .site-nav__list {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: calc(100vh - 5rem);
-    overflow-y: auto;
-  }
-
-  .sidebar li {
-    margin-bottom: 1rem;
     display: flex;
-    justify-content: end;
+    flex-direction: column;
+    gap: 0.15rem;
   }
 
-  .sidebar a {
+  .site-nav__link {
+    display: block;
+    padding: 0.4rem 0.65rem;
+    margin-left: -0.65rem;
+    border-radius: 6px;
+    color: var(--text-muted);
     text-decoration: none;
-    color: var(--color);
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-left: 2px solid transparent;
+    transition:
+      color var(--transition-speed) ease,
+      background-color var(--transition-speed) ease,
+      border-color var(--transition-speed) ease;
   }
 
-  .sidebar a:hover {
-    color: var(--link-color);
+  .site-nav__link:hover {
+    color: var(--heading-color);
+    text-decoration: none;
+    background: var(--nav-active-bg);
   }
 
-  @media (max-width: 768px) {
-    .sidebar li {
-      justify-content: start;
-      margin-left: 0.6rem;
+  .site-nav__link.is-active {
+    color: var(--heading-color);
+    background: var(--nav-active-bg);
+    border-left-color: var(--accent-color);
+  }
+
+  .site-nav__controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 860px) {
+    .site-nav {
+      position: static;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .site-nav__list {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .site-nav__link {
+      margin-left: 0;
+      border-left: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 4px;
+    }
+
+    .site-nav__link.is-active {
+      border-left: none;
+      border-bottom-color: var(--accent-color);
+    }
+
+    .site-nav__controls {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
     }
   }
 </style>

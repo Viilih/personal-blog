@@ -19,78 +19,93 @@ const formatDate = (date: Date, locale: string) => {
 
   if (locale === "pt-br") {
     return `${day}/${month}/${year}`;
-  } else {
-    return `${month}-${day}-${year}`;
   }
+  return `${year}-${month}-${day}`;
 };
 
 const publishDate = new Date(pubDate);
 const formattedDate = formatDate(publishDate, currentLocale);
 ---
 
-<li>
+<li class="post-row">
   <a href={url} class="post-link">
-    <span class="post-title-wrapper">
+    <span class="post-main">
       {postType && <PostBadge type={postType} lang={currentLocale} />}
       <span class="post-title">{postTitle}</span>
     </span>
-    <span class="post-date">{formattedDate}</span>
+    <time class="post-date" datetime={publishDate.toISOString()}
+      >{formattedDate}</time
+    >
   </a>
 </li>
 
 <style>
-  li {
+  .post-row {
     list-style: none;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .post-row:last-child {
+    border-bottom: none;
   }
 
   .post-link {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    align-items: center;
-    border: 1px solid var(--border);
-    padding: 8px;
-    border-radius: 8px;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.85rem 0;
     text-decoration: none;
     color: var(--color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 30px;
+    transition: color var(--transition-speed) ease;
   }
 
   .post-link:hover {
-    transform: translate(4px, -4px) scale(1.02);
-    box-shadow: -4px 4px 10px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
     color: var(--link-color);
   }
 
-  .post-title-wrapper {
+  .post-link:hover .post-title {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .post-main {
     flex: 1;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: baseline;
+    gap: 0.65rem;
+    min-width: 0;
   }
 
   .post-title {
     flex: 1;
+    font-weight: 500;
+    color: var(--heading-color);
+    line-height: 1.4;
+  }
+
+  .post-link:hover .post-title {
+    color: var(--link-color);
   }
 
   .post-date {
+    flex-shrink: 0;
     margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--text-muted);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     .post-link {
-      gap: 8px;
-      height: auto;
       flex-direction: column;
       align-items: flex-start;
-    }
-
-    .post-link:hover {
-      transform: translate(2px, -2px) scale(1.01);
+      gap: 0.35rem;
+      padding: 1rem 0;
     }
   }
-
 </style>

@@ -2,7 +2,7 @@
 import GoBackButton from "../components/GoBackButton.astro";
 import BaseLayout from "./BaseLayout.astro";
 import TableOfContents from "../components/TableOfContents.astro";
-import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { getLangFromUrl } from "../i18n/utils";
 
 interface Heading {
   depth: number;
@@ -12,16 +12,12 @@ interface Heading {
 }
 const { frontmatter, headings = [], minutesRead } = Astro.props;
 
-// Get the current language from URL
 const lang = getLangFromUrl(Astro.url);
 
-// Use the current language for date formatting
 const formatDate = (date: Date) => {
-  // Use the appropriate locale based on the language
   const locale = lang === "pt-br" ? "pt-BR" : "en-US";
-
   return date.toLocaleDateString(locale, {
-    month: "long",
+    month: "short",
     day: "numeric",
     year: "numeric",
   });
@@ -45,12 +41,10 @@ function buildToc(headings: Heading[]) {
     if (heading.depth === 2) {
       toc.push(heading);
     } else {
-      // Check if parent heading exists before adding
       const parentHeading = parentHeadings.get(heading.depth - 1);
       if (parentHeading) {
         parentHeading.subheadings.push(heading);
       } else {
-        // Add to top level if no parent exists
         toc.push(heading);
       }
     }
@@ -62,116 +56,91 @@ function buildToc(headings: Heading[]) {
 const toc = buildToc(headings);
 ---
 
-<BaseLayout pageTitle={frontmatter.title}>
-  <div class="layout">
-    <article class="post">
+<BaseLayout title={frontmatter.title}>
+  <div class="doc">
+    <article class="doc__article">
       <GoBackButton />
-      <header class="post__header">
-        <h1 class="post__title">{frontmatter.title}</h1>
-        <div class="post__meta">
-          <span class="post__date">
-            {formattedDate}
-          </span>
-          {minutesRead && <p>{minutesRead}</p>}
+      <header class="doc__header">
+        <h1 class="doc__title">{frontmatter.title}</h1>
+        <div class="doc__meta">
+          <time datetime={publishDate.toISOString()}>{formattedDate}</time>
+          {minutesRead && <span aria-hidden="true">·</span>}
+          {minutesRead && <span>{minutesRead}</span>}
         </div>
       </header>
-      <div class="post__content-wrapper">
-        <div class="post__content">
-          <slot />
-        </div>
+      <div class="doc__body">
+        <slot />
       </div>
     </article>
-    <aside class="toc-sidebar">
+    <aside class="doc__toc">
       <TableOfContents toc={toc} />
     </aside>
   </div>
 </BaseLayout>
 
 <style>
-  .layout {
+  .doc {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .doc__article {
+    max-width: var(--measure);
+    min-width: 0;
+  }
+
+  .doc__header {
+    margin: 1rem 0 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .doc__title {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.65rem, 2.4vw, 2.1rem);
+    line-height: 1.2;
+  }
+
+  .doc__meta {
     display: flex;
-    gap: 3rem;
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 0 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--text-muted);
   }
 
-  .post {
-    width: 100%;
-    max-width: 65vw;
+  .doc__body {
+    text-align: left;
+  }
+
+  .doc__body :global(h2),
+  .doc__body :global(h3) {
+    margin-top: 2rem;
+    scroll-margin-top: 1.5rem;
+  }
+
+  .doc__toc {
     position: relative;
-    text-align: justify;
-    height: 100%;
-    overflow: hidden;
   }
 
-  .post__title {
-    color: var(--heading-color);
-    line-height: 1;
-    font-size: 3rem;
-  }
-  .post__date {
-    line-height: 1rem;
-    color: var(--heading-color);
-  }
-  .post__author {
-  }
-
-  .toc-sidebar {
-    position: relative;
-    width: 280px;
-    margin-left: auto;
-  }
-
-  .toc-content {
-    position: sticky;
-    top: 2rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .toc-divider {
-    width: 1px;
-    height: 120px;
-    background-color: rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
-  }
-  .rounded-diagram img {
-    border-radius: 8px; /* Or use rem, em, % */
-    display: block; /* Ensures proper block layout if needed */
-  }
   @media (max-width: 1024px) {
-    .layout {
-      max-width: 90%;
+    .doc {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .doc__toc {
+      order: -1;
     }
   }
 
-  @media (max-width: 768px) {
-    .layout {
-      flex-direction: column;
-    }
-
-    .toc-sidebar {
-      width: 100%;
-    }
-
-    .post {
-      max-width: 100%;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .post {
-      max-width: 100%;
-    }
-    .toc-sidebar {
+  @media (max-width: 640px) {
+    .doc__toc {
       display: none;
-    }
-    .post__title {
-      font-size: 2rem;
-      line-height: 1.2;
-      text-align: start;
     }
   }
 </style>

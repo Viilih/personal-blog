@@ -2,12 +2,31 @@
 import Link from "./Link.astro";
 
 const currentLocale = Astro.currentLocale || "en";
-
-const backText = currentLocale === "pt-br" ? "Voltar" : "Go back";
-
+const backText = currentLocale === "pt-br" ? "voltar" : "back";
 const baseUrlBasedOnLocale = currentLocale === "pt-br" ? "/pt-br" : "/en";
 ---
 
-<Link href={baseUrlBasedOnLocale}>
-  <p>{backText}</p>
-</Link>
+<p class="go-back">
+  <Link href={baseUrlBasedOnLocale}>
+    <span aria-hidden="true">←</span>
+    {backText}
+  </Link>
+</p>
+
+<style>
+  .go-back {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .go-back :global(a) {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .go-back :global(a:hover) {
+    color: var(--link-color);
+    text-decoration: underline;
+  }
+</style>

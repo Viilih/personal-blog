@@ -1,6 +1,4 @@
 ---
-// src/components/TableOfContents.astro
-
 interface Heading {
   depth: number;
   text: string;
@@ -12,10 +10,8 @@ interface Props {
   toc: Heading[];
 }
 
-// Ensure toc is always an array, even if null/undefined is passed
 const { toc = [] } = Astro.props;
 
-// Filter out potential empty/invalid headings just in case
 const validToc = toc.filter(
   (heading) => heading && heading.slug && heading.text,
 );
@@ -30,7 +26,7 @@ const validToc = toc.filter(
         aria-expanded="false"
         aria-controls="toc-content"
       >
-        <span class="toc-title">CONTENTS</span>
+        <span class="toc-title">contents</span>
         <span class="toc-count">({validToc.length})</span>
         <svg
           class="toc-icon"
@@ -66,84 +62,51 @@ const validToc = toc.filter(
 }
 
 <style>
-  /* Ensure global variables like --transition-speed are defined elsewhere */
-  :root {
-    /* Example: define if not already defined */
-    /* --transition-speed: 0.25s; */
-    /* Define TOC specific colors, assuming they might vary */
-    --toc-bg: #f8f8f8;
-    --toc-text-primary: #333;
-    --toc-text-secondary: #555;
-    --toc-border-color: rgba(0, 0, 0, 0.1);
-    --toc-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --toc-scrollbar-thumb: #aaa;
-    --toc-scrollbar-thumb-hover: #888;
-    --toc-scrollbar-track: var(--toc-bg);
-    /* Assumes --link-color is defined globally */
-    /* --link-color: #007bff; */
-  }
-
-  :root[data-theme="dark"] {
-    --toc-bg: #2c2c2c;
-    --toc-text-primary: #eee;
-    --toc-text-secondary: #bbb;
-    --toc-border-color: rgba(255, 255, 255, 0.15);
-    --toc-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-    --toc-scrollbar-thumb: #555;
-    --toc-scrollbar-thumb-hover: #666;
-  }
-
   .toc {
     position: sticky;
-    top: 2rem; /* Adjust as needed based on your header */
-    background: var(--toc-bg);
-    border-radius: 8px;
-    padding: 1rem;
-    width: min(220px, 100%); /* Slightly wider? */
-    box-shadow: var(--toc-shadow);
-    border: 1px solid var(--toc-border-color);
-    transition:
-      background-color var(--transition-speed) ease,
-      border-color var(--transition-speed) ease,
-      box-shadow var(--transition-speed) ease;
-    max-height: calc(
-      100vh - 4rem
-    ); /* Prevent TOC from being taller than viewport */
-    /* max-height transition handled by .toc-list */
+    top: 2rem;
+    background: transparent;
+    padding: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    max-height: calc(100vh - 4rem);
   }
 
   .toc-header {
     display: flex;
     align-items: center;
-    gap: 0.35rem; /* Increased gap slightly */
+    gap: 0.35rem;
     width: 100%;
-    padding: 0;
+    padding: 0 0 0.5rem;
     border: 0;
+    border-bottom: 1px solid var(--border);
     background: transparent;
     cursor: pointer;
-    text-align: left; /* Ensure alignment */
-    color: inherit; /* Inherit color for accessibility */
+    text-align: left;
+    color: inherit;
+    font-family: var(--font-mono);
   }
 
   .toc-title {
-    font-weight: 600;
-    color: var(--toc-text-primary);
-    transition: color var(--transition-speed) ease;
-    margin-right: 0.25rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--toc-text-secondary);
   }
 
   .toc-count {
-    font-size: 0.85em;
+    font-size: 0.75rem;
     color: var(--toc-text-secondary);
-    transition: color var(--transition-speed) ease;
   }
 
   .toc-icon {
     margin-left: auto;
     color: var(--toc-text-secondary);
-    transition: transform var(--transition-speed) ease; /* Smoother cubic-bezier */
-    width: 1em; /* Explicit size */
-    height: 1em;
+    transition: transform var(--transition-speed) ease;
+    width: 0.7em;
+    height: 0.7em;
   }
 
   .toc-icon.rotated {
@@ -158,108 +121,71 @@ const validToc = toc.filter(
     overflow: hidden;
     opacity: 0;
     margin-top: 0;
-    /* Consistent easing, applied to properties that change */
     transition:
       max-height var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
       opacity calc(var(--transition-speed) * 0.8) ease,
-      /* Fade slightly faster */ margin-top var(--transition-speed)
-        cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .toc-list.show {
-    max-height: 60vh; /* Use viewport height fraction */
+    max-height: 60vh;
     opacity: 1;
     margin-top: 0.75rem;
     overflow-y: auto;
-    /* Add space for scrollbar only when shown and needed */
-    padding-right: 0.5rem; /* Adjust if scrollbar width differs */
-
-    /* Firefox Scrollbar */
+    padding-right: 0.25rem;
     scrollbar-width: thin;
-    scrollbar-color: var(--toc-scrollbar-thumb) var(--toc-scrollbar-track);
-  }
-
-  /* Webkit Scrollbar */
-  .toc-list.show::-webkit-scrollbar {
-    width: 6px;
-  }
-  .toc-list.show::-webkit-scrollbar-track {
-    background: var(--toc-scrollbar-track);
-    border-radius: 10px;
-  }
-  .toc-list.show::-webkit-scrollbar-thumb {
-    background-color: var(--toc-scrollbar-thumb);
-    border-radius: 10px;
-    border: 1px solid var(--toc-scrollbar-track); /* Match track bg for inset look */
-  }
-  .toc-list.show::-webkit-scrollbar-thumb:hover {
-    background-color: var(--toc-scrollbar-thumb-hover);
   }
 
   .toc-link,
   .toc-sublink {
     display: block;
     text-decoration: none;
-    line-height: 1.6; /* Improved line height */
-    transition:
-      color var(--transition-speed) ease,
-      transform var(--transition-speed) ease;
-    padding: 0.2rem 0; /* Adjusted padding */
-    border-left: 3px solid transparent; /* Indicator space */
-    padding-left: 0.5rem; /* Indent text */
-    margin-left: -0.5rem; /* Counteract padding for alignment */
+    line-height: 1.45;
+    transition: color var(--transition-speed) ease;
+    padding: 0.25rem 0 0.25rem 0.65rem;
+    border-left: 2px solid transparent;
   }
 
   .toc-link {
     color: var(--toc-text-primary);
-    font-size: 0.9rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    margin-top: 0.3rem;
-  }
-  li:first-child > .toc-link {
-    margin-top: 0;
   }
 
   .toc-sublink {
     color: var(--toc-text-secondary);
-    font-size: 0.85rem;
-    padding-left: 0.75rem; /* Further indent sublinks */
-    margin-left: -0.75rem;
+    font-size: 0.78rem;
+    padding-left: 1.1rem;
   }
 
   .toc-link:hover,
   .toc-sublink:hover {
     color: var(--link-color);
-    transform: translateX(3px);
+    text-decoration: none;
   }
 
   .toc-link.current,
   .toc-sublink.current {
-    color: var(--link-color);
-    font-weight: 600; /* Make current stand out more */
-    border-left-color: var(--link-color); /* Use border as indicator */
+    color: var(--accent-color);
+    border-left-color: var(--accent-color);
   }
 
   .toc-sublist {
     list-style: none;
-    padding-left: 0.75rem; /* Align with sublink padding */
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    border-left: 1px solid var(--toc-border-color); /* Subtle guide line */
-    transition: border-color var(--transition-speed) ease;
+    padding-left: 0;
+    margin: 0.15rem 0 0.35rem;
   }
 
   @media (max-width: 1024px) {
     .toc {
       position: relative;
       top: 0;
-      margin-top: 2rem;
-      margin-bottom: 2rem;
-      width: 100%;
+      margin: 0 0 1rem;
       max-height: none;
     }
+
     .toc-list.show {
-      max-height: 400px;
+      max-height: 280px;
     }
   }
 </style>
@@ -290,7 +216,7 @@ const validToc = toc.filter(
 
   function initializeTOC() {
     const tocContainer = document.querySelector(".toc");
-    if (!tocContainer) return; // Exit if no TOC on the page
+    if (!tocContainer) return;
 
     const tocToggle = tocContainer.querySelector("#toc-toggle");
     const tocContent = tocContainer.querySelector("#toc-content");
@@ -300,12 +226,10 @@ const validToc = toc.filter(
     );
 
     if (!tocToggle || !tocContent || !tocIcon || tocLinks.length === 0) {
-      // If no links, maybe hide the toggle? Or ensure it doesn't run JS.
-      tocContainer.style.display = "none"; // Hide TOC if no links found
+      tocContainer.style.display = "none";
       return;
     }
 
-    // --- Toggle Functionality ---
     const toggle = (isOpen) => {
       const shouldBeOpen =
         typeof isOpen === "boolean"
@@ -316,7 +240,7 @@ const validToc = toc.filter(
       tocIcon.classList.toggle("rotated", shouldBeOpen);
     };
 
-    toggle(false);
+    toggle(true);
 
     tocToggle.addEventListener("click", () => toggle());
 
@@ -366,10 +290,8 @@ const validToc = toc.filter(
         const targetElement = document.getElementById(targetId);
 
         if (targetElement) {
-          const headerOffset = 0;
           const elementPosition = targetElement.getBoundingClientRect().top;
-          const offsetPosition =
-            elementPosition + window.scrollY - headerOffset;
+          const offsetPosition = elementPosition + window.scrollY;
 
           window.scrollTo({
             top: offsetPosition,
@@ -384,6 +306,5 @@ const validToc = toc.filter(
   }
 
   initializeTOC();
-
   document.addEventListener("astro:after-swap", initializeTOC);
 </script>

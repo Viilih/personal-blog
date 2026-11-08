@@ -11,145 +11,110 @@ const sortedPosts = posts.sort(
 );
 ---
 
-<BaseLayout>
+<BaseLayout title="Notes · Guilherme">
   <div class="notes-container">
     <GoBackButton />
-    <h1 class="page-title">Notes</h1>
+    <header class="notes-header">
+      <p class="notes-path" aria-hidden="true">~/notes</p>
+      <h1 class="page-title">Notes</h1>
+      <p class="page-lead">Short notes, still evolving.</p>
+    </header>
 
     {
       sortedPosts.length === 0 ? (
         <p class="no-notes">No notes available yet.</p>
       ) : (
-        <div class="notes-list">
+        <ul class="notes-list">
           {sortedPosts.map((post) => (
-            <article class="note-item">
+            <li class="note-item">
               <a href={`/en/notes/${post.id}`} class="note-link">
-                <div class="note-content">
-                  <h2 class="note-title">{post.data.title}</h2>
-                  <time
-                    class="note-date"
-                    datetime={post.data.pubDate.toISOString()}
-                  >
-                    {post.data.pubDate.toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </time>
-                </div>
-                <div class="note-arrow">→</div>
+                <span class="note-title">{post.data.title}</span>
+                <time
+                  class="note-date"
+                  datetime={post.data.pubDate.toISOString()}
+                >
+                  {post.data.pubDate.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </time>
               </a>
-            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       )
     }
   </div>
 </BaseLayout>
 
 <style>
-  .notes-container {
+  .notes-header {
+    margin: 0.75rem 0 1.5rem;
   }
 
-  .page-title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--heading-color);
+  .notes-path {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--prompt-color);
   }
 
   .no-notes {
-    color: var(--language-inactive);
-    font-size: 1rem;
-    margin-top: 2rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
   }
 
   .notes-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--border);
   }
 
   .note-item {
-    border-bottom: 1px solid var(--language-separator);
-  }
-
-  .note-item:last-child {
-    border-bottom: none;
+    border-bottom: 1px solid var(--border);
   }
 
   .note-link {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    padding: 1.5rem 0;
+    gap: 1rem;
+    padding: 0.9rem 0;
     text-decoration: none;
     color: inherit;
-    transition: all var(--transition-speed) ease;
   }
 
   .note-link:hover {
-    color: var(--link-color);
     text-decoration: none;
   }
 
-  .note-content {
-    flex: 1;
-  }
-
   .note-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 500;
     color: var(--heading-color);
-    margin: 0 0 0.25rem 0;
     line-height: 1.4;
-    transition: color var(--transition-speed) ease;
   }
 
   .note-link:hover .note-title {
     color: var(--link-color);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
 
   .note-date {
-    font-size: 0.85rem;
-    color: var(--language-inactive);
-    font-family: inherit;
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
   }
 
-  .note-arrow {
-    color: var(--language-inactive);
-    font-size: 1.2rem;
-    transition: all var(--transition-speed) ease;
-    margin-left: 1rem;
-    opacity: 0;
-  }
-
-  .note-link:hover .note-arrow {
-    color: var(--link-color);
-    opacity: 1;
-    transform: translateX(4px);
-  }
-
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .notes-container {
-      padding: 1rem;
-    }
-
-    .page-title {
-      font-size: 1.75rem;
-      margin-bottom: 2rem;
-    }
-
+  @media (max-width: 640px) {
     .note-link {
-      padding: 1.25rem 0;
-    }
-
-    .note-title {
-      font-size: 1rem;
-    }
-
-    .note-date {
-      font-size: 0.8rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.3rem;
     }
   }
 </style>
