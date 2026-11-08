@@ -1,0 +1,15 @@
+---
+import type { InlinePart } from "../lib/now-page";
+
+interface Props {
+  parts: InlinePart[];
+}
+
+const { parts } = Astro.props;
+---
+
+{
+  parts.map((part) =>
+    part.type === "link" ? <a href={part.href}>{part.label}</a> : part.value,
+  )
+}

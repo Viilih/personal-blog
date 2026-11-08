@@ -1,0 +1,31 @@
+---
+import Link from "./Link.astro";
+
+// https://github.com/Viilih/ledger-pay is private; the link only works once the repo is public.
+const ledgerPayUrl = "https://github.com/Viilih/ledger-pay";
+
+const lang = Astro.currentLocale === "pt-br" ? "pt-br" : "en";
+
+const copy =
+  lang === "pt-br"
+    ? {
+        heading: "Projetos",
+        status: "em andamento",
+        summary:
+          "Ledger digital em Java 21 e Spring Boot 4, com PostgreSQL e Flyway. Ledger de partidas dobradas, valores em centavos, ciclo de vida de contas e transferências idempotentes com chaves de idempotência. CI no GitHub Actions com Postgres.",
+      }
+    : {
+        heading: "Projects",
+        status: "in progress",
+        summary:
+          "Digital ledger in Java 21 and Spring Boot 4 with PostgreSQL and Flyway. Double-entry ledger with amounts in cents, account lifecycle, and idempotent transfers via idempotency keys. GitHub Actions CI with Postgres.",
+      };
+---
+
+<section class="content-section" id="projects">
+  <h2>{copy.heading}</h2>
+  <p>
+    <Link href={ledgerPayUrl}>LedgerPay</Link>
+    <span class="mono"> · {copy.status}</span>. {copy.summary}
+  </p>
+</section>
