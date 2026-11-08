@@ -18,6 +18,7 @@
   --transition-speed: 0.2s;
   --border: #e5e7eb; /* Modo claro */
   --accent-color: #f59e0b;
+  --pane-chrome: #f7f7f5;
 }
 :root[data-theme="dark"] {
   --background-color: rgb(10, 10, 10);
@@ -37,8 +38,8 @@
   --toc-text-primary: #f1f1f1; /* Light text for visibility */
   --toc-text-secondary: #a1a1a1;
   --border: #4b5563; /* Cinza médio para modo escuro */
-  --accent-color: #fbbf24; 
-
+  --accent-color: #fbbf24;
+  --pane-chrome: #1a1a1a;
 }
 
 body {

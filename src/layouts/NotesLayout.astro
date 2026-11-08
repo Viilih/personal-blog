@@ -1,0 +1,377 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Backlinks from "../components/Backlinks.astro";
+import NotePaneFragment from "../components/NotePaneFragment.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import {
+  buildNoteLinkGraph,
+  getNoteBacklinks,
+  getVaultItems,
+  type VaultItem,
+} from "../lib/vault";
+import { getCollection, render } from "astro:content";
+
+interface Props {
+  noteId: string;
+  title: string;
+  pubDate: Date;
+  minutesRead?: string;
+}
+
+const { noteId, title, pubDate, minutesRead } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const locale = lang === "pt-br" ? "pt-BR" : "en-US";
+const formattedDate = new Date(pubDate).toLocaleDateString(locale, {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
+
+const notesCollection = lang === "en" ? "en-notes" : "pt-br-notes";
+const allNotes = await getCollection(notesCollection, (n) => !n.data.draft);
+const graph = await buildNoteLinkGraph(lang);
+const { notes: noteItems } = await getVaultItems(lang);
+const noteById = new Map(noteItems.map((n) => [n.id, n]));
+
+const backlinks = await getNoteBacklinks(lang, noteId);
+const relatedIds = [
+  ...new Set([
+    ...(graph.outbound[noteId] ?? []),
+    ...(graph.inbound[noteId] ?? []),
+  ]),
+].filter((id) => id !== noteId);
+const related = relatedIds
+  .map((id) => noteById.get(id))
+  .filter((n): n is VaultItem => Boolean(n));
+
+const catalog = allNotes.map((note) => ({
+  id: note.id,
+  title: note.data.title,
+  href: `/${lang}/notes/${note.id}`,
+  pubDate: note.data.pubDate.toISOString(),
+  outbound: graph.outbound[note.id] ?? [],
+  backlinks: (graph.inbound[note.id] ?? [])
+    .map((id) => noteById.get(id))
+    .filter((n): n is VaultItem => Boolean(n)),
+}));
+
+const otherNotes = await Promise.all(
+  allNotes
+    .filter((note) => note.id !== noteId)
+    .map(async (note) => {
+      const { Content } = await render(note);
+      const noteBacklinks = (graph.inbound[note.id] ?? [])
+        .map((id) => noteById.get(id))
+        .filter((n): n is VaultItem => Boolean(n));
+      const noteRelated = [
+        ...new Set([
+          ...(graph.outbound[note.id] ?? []),
+          ...(graph.inbound[note.id] ?? []),
+        ]),
+      ]
+        .filter((id) => id !== note.id)
+        .map((id) => noteById.get(id))
+        .filter((n): n is VaultItem => Boolean(n));
+
+      return {
+        note,
+        Content,
+        backlinks: noteBacklinks,
+        related: noteRelated,
+        formattedDate: note.data.pubDate.toLocaleDateString(locale, {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        }),
+      };
+    }),
+);
+
+const catalogJson = JSON.stringify(catalog);
+---
+
+<BaseLayout title={title}>
+  <div
+    class="notes-workspace"
+    data-notes-workspace
+    data-lang={lang}
+    data-active-note={noteId}
+  >
+    <div class="notes-workspace__toolbar">
+      <p class="notes-workspace__hint">{t("notes.explore.hint")}</p>
+      <button
+        type="button"
+        class="notes-workspace__clear"
+        data-stack-clear
+        hidden
+      >
+        {t("notes.stack.clear")}
+      </button>
+    </div>
+
+    <div class="notes-stack" data-notes-stack>
+      <article
+        class="note-pane is-primary"
+        data-note-pane
+        data-note-id={noteId}
+      >
+        <header class="note-pane__header">
+          <div class="note-pane__heading">
+            <h1 class="note-pane__title">{title}</h1>
+            <div class="note-pane__meta">
+              <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+              {minutesRead && <span>{minutesRead}</span>}
+            </div>
+          </div>
+        </header>
+        <div class="note-pane__body" data-note-body>
+          <slot />
+        </div>
+        {
+          related.length > 0 && (
+            <section class="note-pane__related">
+              <h2>{t("notes.related")}</h2>
+              <ul>
+                {related.map((item) => (
+                  <li>
+                    <a href={item.href} data-note-link={item.id}>
+                      {item.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        <Backlinks noteId={noteId} items={backlinks} />
+      </article>
+    </div>
+
+    <div class="notes-fragments" data-notes-fragments hidden>
+      {
+        otherNotes.map(
+          ({ note, Content, related: noteRelated, backlinks: noteBacklinks, formattedDate: noteDate }) => (
+            <NotePaneFragment
+              noteId={note.id}
+              title={note.data.title}
+              pubDateIso={note.data.pubDate.toISOString()}
+              formattedDate={noteDate}
+              closeLabel={t("notes.stack.close")}
+              relatedLabel={t("notes.related")}
+              backlinksLabel={t("notes.backlinks")}
+              backlinksEmpty={t("notes.backlinks.empty")}
+              related={noteRelated}
+              backlinks={noteBacklinks}
+            >
+              <Content />
+            </NotePaneFragment>
+          ),
+        )
+      }
+    </div>
+
+    <script
+      is:inline
+      type="application/json"
+      data-notes-catalog
+      set:html={catalogJson}
+    ></script>
+  </div>
+</BaseLayout>
+
+<script>
+  import "../scripts/stacked-notes.js";
+</script>
+
+<style is:global>
+  .notes-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .notes-workspace__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .notes-workspace__hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--language-inactive);
+    max-width: 40rem;
+  }
+
+  .notes-workspace__clear {
+    font: inherit;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--language-separator);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--color);
+    cursor: pointer;
+  }
+
+  .notes-workspace__clear:hover {
+    color: var(--link-color);
+    border-color: var(--link-color);
+  }
+
+  .notes-stack {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    border: 1px solid var(--language-separator);
+    border-radius: 6px;
+    background: var(--pane-chrome);
+    min-height: 70vh;
+  }
+
+  .note-pane {
+    flex: 0 0 min(28rem, 85vw);
+    max-width: min(28rem, 85vw);
+    min-width: min(22rem, 85vw);
+    border-right: 1px solid var(--language-separator);
+    padding: 1.25rem 1.35rem 2rem;
+    overflow-y: auto;
+    max-height: 75vh;
+    scroll-snap-align: start;
+    background: var(--background-color);
+  }
+
+  .note-pane.is-primary {
+    flex-basis: min(34rem, 90vw);
+    max-width: min(34rem, 90vw);
+  }
+
+  .note-pane:last-child {
+    border-right: none;
+  }
+
+  .note-pane__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .note-pane__title {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.2;
+  }
+
+  .note-pane__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.45rem;
+    font-size: 0.8rem;
+    color: var(--language-inactive);
+  }
+
+  .note-pane__close {
+    border: none;
+    background: transparent;
+    color: var(--language-inactive);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.1rem 0.35rem;
+  }
+
+  .note-pane__close:hover {
+    color: var(--link-color);
+  }
+
+  .note-pane__body {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    text-align: start;
+  }
+
+  .note-pane__body h1 {
+    font-size: 1.25rem;
+  }
+
+  .note-pane__body h2 {
+    font-size: 1.05rem;
+  }
+
+  .note-pane__body pre {
+    font-size: 0.78rem;
+  }
+
+  .note-pane__related {
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--language-separator);
+  }
+
+  .note-pane__related h2 {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--language-inactive);
+  }
+
+  .note-pane__related ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .note-pane .backlinks {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--language-separator);
+  }
+
+  .note-pane .backlinks__title {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--language-inactive);
+  }
+
+  .note-pane .backlinks__empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--language-inactive);
+  }
+
+  .note-pane .backlinks__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  @media (max-width: 768px) {
+    .note-pane,
+    .note-pane.is-primary {
+      flex-basis: 88vw;
+      max-width: 88vw;
+      min-width: 88vw;
+      max-height: 70vh;
+    }
+  }
+</style>

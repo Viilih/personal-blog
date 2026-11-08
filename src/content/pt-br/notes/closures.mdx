@@ -147,3 +147,7 @@ function debounce(callback, interval) {
 
 - **Closures** permitem que funções internas acessem variáveis do seu escopo externo mesmo depois que a função externa terminou de executar
 - A metáfora da "mochila" ajuda a visualizar como closures preservam o lexical environment
+
+## Notas relacionadas
+
+Closures aparecem o tempo todo quando você entra em callbacks assíncronos e timers — continue em [Asynchronicidade e event loop](/pt-br/notes/asynchronous-js). Também importam quando você fecha sobre valores dentro de handlers async no `forEach` — veja [Não use async e await dentro do forEach](/pt-br/notes/tricky-foreach).
