@@ -18,6 +18,8 @@ export const ui = {
     "post.type.article": "Article",
     "post.type.note": "Note",
     "post.type.weekly": "Weekly",
+    "toc.contents": "contents",
+    "reading.minutes": "{n} min read",
   },
   "pt-br": {
     "sidebar.home": "Início",
@@ -30,5 +32,7 @@ export const ui = {
     "post.type.article": "Artigo",
     "post.type.note": "Anotação",
     "post.type.weekly": "Semanal",
+    "toc.contents": "sumário",
+    "reading.minutes": "{n} min de leitura",
   },
 } as const;

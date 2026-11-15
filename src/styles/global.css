@@ -27,7 +27,7 @@
   --shadow-soft: 0 0 0 1px var(--border);
   --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --measure: 68ch;
+  --measure: min(65ch, 38rem);
   --shell-max: 1120px;
   --nav-width: 200px;
 }
@@ -60,7 +60,7 @@
   --shadow-soft: 0 0 0 1px var(--border);
   --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --measure: 68ch;
+  --measure: min(65ch, 38rem);
   --shell-max: 1120px;
   --nav-width: 200px;
 }
@@ -132,15 +132,36 @@ samp {
 }
 
 figure:has(> pre) {
-  margin: 1.5rem 0;
+  margin: 1.6rem 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--code-background-color);
+  overflow: hidden;
+}
+
+figure:has(> pre) > figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-color) 70%, var(--code-background-color));
 }
 
 pre {
   overflow-x: auto;
-  padding: 1rem 0;
+  padding: 0.95rem 0;
   margin: 0;
   border-radius: 6px;
   border: 1px solid var(--border);
+  background: var(--code-background-color);
+  -webkit-overflow-scrolling: touch;
+}
+
+figure:has(> pre) > pre {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 code {
@@ -174,7 +195,9 @@ code > [data-line]::before {
   text-align: right;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.8em;
+  font-size: 0.75em;
+  opacity: 0.75;
+  user-select: none;
 }
 
 code[data-line-numbers-max-digits="2"] > [data-line]::before {

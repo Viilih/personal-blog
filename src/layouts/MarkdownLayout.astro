@@ -1,8 +1,9 @@
 ---
 import GoBackButton from "../components/GoBackButton.astro";
+import PostBadge from "../components/PostBadge.astro";
 import BaseLayout from "./BaseLayout.astro";
 import TableOfContents from "../components/TableOfContents.astro";
-import { getLangFromUrl } from "../i18n/utils";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
 
 interface Heading {
   depth: number;
@@ -13,6 +14,7 @@ interface Heading {
 const { frontmatter, headings = [], minutesRead } = Astro.props;
 
 const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 const formatDate = (date: Date) => {
   const locale = lang === "pt-br" ? "pt-BR" : "en-US";
@@ -25,6 +27,22 @@ const formatDate = (date: Date) => {
 
 const publishDate = new Date(frontmatter.pubDate);
 const formattedDate = formatDate(publishDate);
+
+const minutesMatch = String(minutesRead ?? "").match(/\d+/);
+const readingLabel = minutesMatch
+  ? t("reading.minutes").replace("{n}", minutesMatch[0])
+  : minutesRead;
+
+const pathname = Astro.url.pathname;
+const postType: "article" | "note" | "weekly" | undefined = pathname.includes(
+  "/notes/",
+)
+  ? "note"
+  : pathname.includes("/weekly/")
+    ? "weekly"
+    : pathname.includes("/blog/")
+      ? "article"
+      : undefined;
 
 function buildToc(headings: Heading[]) {
   if (!headings || !Array.isArray(headings)) {
@@ -54,59 +72,84 @@ function buildToc(headings: Heading[]) {
 }
 
 const toc = buildToc(headings);
+const hasToc = toc.length > 0;
 ---
 
 <BaseLayout title={frontmatter.title}>
-  <div class="doc">
+  <div class:list={["doc", { "doc--with-toc": hasToc }]}>
     <article class="doc__article">
       <GoBackButton />
       <header class="doc__header">
         <h1 class="doc__title">{frontmatter.title}</h1>
         <div class="doc__meta">
+          {
+            postType && (
+              <PostBadge type={postType} lang={lang as "en" | "pt-br"} />
+            )
+          }
           <time datetime={publishDate.toISOString()}>{formattedDate}</time>
-          {minutesRead && <span aria-hidden="true">·</span>}
-          {minutesRead && <span>{minutesRead}</span>}
+          {readingLabel && <span aria-hidden="true">·</span>}
+          {readingLabel && <span>{readingLabel}</span>}
         </div>
       </header>
+      {
+        hasToc && (
+          <div class="doc__toc doc__toc--inline">
+            <TableOfContents toc={toc} idSuffix="inline" />
+          </div>
+        )
+      }
       <div class="doc__body">
         <slot />
       </div>
     </article>
-    <aside class="doc__toc">
-      <TableOfContents toc={toc} />
-    </aside>
+    {
+      hasToc && (
+        <aside class="doc__toc doc__toc--rail">
+          <TableOfContents toc={toc} idSuffix="rail" includeScript />
+        </aside>
+      )
+    }
   </div>
 </BaseLayout>
 
 <style>
   .doc {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 200px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2.5rem;
     align-items: start;
+  }
+
+  .doc--with-toc {
+    grid-template-columns: minmax(0, var(--measure)) 13.5rem;
+    justify-content: start;
   }
 
   .doc__article {
     max-width: var(--measure);
     min-width: 0;
+    width: 100%;
   }
 
   .doc__header {
-    margin: 1rem 0 2rem;
-    padding-bottom: 1.25rem;
+    margin: 0.75rem 0 1.75rem;
+    padding-bottom: 1.15rem;
     border-bottom: 1px solid var(--border);
   }
 
   .doc__title {
-    margin: 0 0 0.75rem;
-    font-size: clamp(1.65rem, 2.4vw, 2.1rem);
+    margin: 0 0 0.85rem;
+    font-size: clamp(1.6rem, 2.2vw, 2rem);
     line-height: 1.2;
+    letter-spacing: -0.025em;
+    font-weight: 600;
   }
 
   .doc__meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.45rem 0.55rem;
     align-items: center;
     font-family: var(--font-mono);
     font-size: 0.8125rem;
@@ -115,32 +158,109 @@ const toc = buildToc(headings);
 
   .doc__body {
     text-align: left;
+    font-size: 1.015rem;
+    line-height: 1.7;
+    max-width: var(--measure);
   }
 
-  .doc__body :global(h2),
-  .doc__body :global(h3) {
-    margin-top: 2rem;
+  .doc__body :global(> :first-child) {
+    margin-top: 0;
+  }
+
+  .doc__body :global(h2) {
+    margin: 2.35rem 0 0.85rem;
+    padding-top: 0.35rem;
+    font-size: 1.28rem;
     scroll-margin-top: 1.5rem;
   }
 
-  .doc__toc {
+  .doc__body :global(h3) {
+    margin: 1.75rem 0 0.65rem;
+    font-size: 1.08rem;
+    scroll-margin-top: 1.5rem;
+  }
+
+  .doc__body :global(h4) {
+    margin: 1.4rem 0 0.5rem;
+    font-size: 1rem;
+    scroll-margin-top: 1.5rem;
+  }
+
+  .doc__body :global(p) {
+    margin-bottom: 1.2rem;
+  }
+
+  .doc__body :global(ul),
+  .doc__body :global(ol) {
+    margin: 0 0 1.2rem;
+  }
+
+  .doc__body :global(li + li) {
+    margin-top: 0.35rem;
+  }
+
+  .doc__body :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  .doc__body :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .doc__body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    margin: 1.5rem 0;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .doc__body :global(th),
+  .doc__body :global(td) {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+
+  .doc__body :global(th) {
+    background: var(--code-background-color);
+    font-weight: 600;
+  }
+
+  .doc__body :global(pre) {
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .doc__toc--inline {
+    display: none;
+    margin: 0 0 1.75rem;
+  }
+
+  .doc__toc--rail {
     position: relative;
+    min-width: 0;
   }
 
   @media (max-width: 1024px) {
-    .doc {
+    .doc,
+    .doc--with-toc {
       grid-template-columns: 1fr;
-      gap: 1.5rem;
+      gap: 0;
     }
 
-    .doc__toc {
-      order: -1;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .doc__toc {
+    .doc__toc--rail {
       display: none;
+    }
+
+    .doc__toc--inline {
+      display: block;
     }
   }
 </style>
