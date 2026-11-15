@@ -25,16 +25,20 @@ const ptBrBlogCollection = defineCollection({
   schema: blogSchema,
 });
 
+const notesSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  pubDate: z.date(),
+  draft: z.boolean(),
+  tags: z.array(z.string()).optional(),
+});
+
 const enNotesCollection = defineCollection({
   loader: glob({
     pattern: ["**/*.{md,mdx}"],
     base: "./src/content/en/notes",
   }),
-  schema: z.object({
-    title: z.string(),
-    pubDate: z.date(),
-    draft: z.boolean(),
-  }),
+  schema: notesSchema,
 });
 
 const ptBrNotesCollection = defineCollection({
@@ -42,11 +46,7 @@ const ptBrNotesCollection = defineCollection({
     pattern: ["**/*.{md,mdx}"],
     base: "./src/content/pt-br/notes",
   }),
-  schema: z.object({
-    title: z.string(),
-    pubDate: z.date(),
-    draft: z.boolean(),
-  }),
+  schema: notesSchema,
 });
 
 const enWeeklyCollection = defineCollection({
