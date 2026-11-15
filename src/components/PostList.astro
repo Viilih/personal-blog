@@ -1,9 +1,11 @@
 ---
 import BlogPost from "./BlogPost.astro";
+import { previewText } from "../utils/excerpt";
 
 interface Props {
   posts: Array<{
     id: string;
+    body?: string;
     data: {
       title: string;
       pubDate: Date;
@@ -13,13 +15,14 @@ interface Props {
     _type?: "article" | "note" | "weekly";
   }>;
   showType?: boolean;
-  showDescription?: boolean;
+  /** Hover/focus preview + coarse inline synopsis. Default true. */
+  enablePreview?: boolean;
 }
 
 const currentLang = Astro.currentLocale || "en";
-const { posts, showType = true, showDescription = false } = Astro.props;
+const { posts, showType = true, enablePreview = true } = Astro.props;
 
-const getPostUrl = (post: any, lang: string) => {
+const getPostUrl = (post: (typeof posts)[number], lang: string) => {
   if (post._type === "note") return `/${lang}/notes/${post.id}`;
   if (post._type === "weekly") return `/${lang}/learning/weekly/${post.id}`;
   return `/${lang}/blog/${post.id}`;
@@ -29,15 +32,22 @@ const getPostUrl = (post: any, lang: string) => {
 <ul class="post-list">
   {
     posts.map((post) => {
+      const preview = enablePreview
+        ? previewText(post.data.description, post.body)
+        : undefined;
+
+      const previewId = preview
+        ? `post-preview-${post._type ?? "post"}-${post.id}`
+        : undefined;
+
       return (
         <BlogPost
           postTitle={post.data.title}
           url={getPostUrl(post, currentLang)}
           pubDate={post.data.pubDate}
           postType={showType ? post._type : undefined}
-          description={
-            showDescription ? post.data.description : undefined
-          }
+          preview={preview}
+          previewId={previewId}
         />
       );
     })

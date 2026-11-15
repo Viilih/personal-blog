@@ -6,10 +6,12 @@ interface Props {
   url: string | undefined;
   pubDate: Date;
   postType?: "article" | "note" | "weekly";
-  description?: string;
+  /** Description or excerpt — shown in hover/focus preview and inline on coarse pointers. */
+  preview?: string;
+  previewId?: string;
 }
 
-const { postTitle, url, pubDate, postType, description } = Astro.props;
+const { postTitle, url, pubDate, postType, preview, previewId } = Astro.props;
 const currentLocale = (Astro.currentLocale || "en") as "en" | "pt-br";
 
 const formatDate = (date: Date, locale: string) => {
@@ -26,24 +28,40 @@ const formatDate = (date: Date, locale: string) => {
 
 const publishDate = new Date(pubDate);
 const formattedDate = formatDate(publishDate, currentLocale);
+const describedBy = preview && previewId ? previewId : undefined;
 ---
 
 <li class="post-row">
-  <a href={url} class="post-link">
-    <span class="post-main">
-      {postType && <PostBadge type={postType} lang={currentLocale} />}
-      <span class="post-text">
+  <a href={url} class="post-link" aria-describedby={describedBy}>
+    <span class="post-link__row">
+      <span class="post-main">
+        {postType && <PostBadge type={postType} lang={currentLocale} />}
         <span class="post-title">{postTitle}</span>
-        {
-          description && (
-            <span class="post-description">{description}</span>
-          )
-        }
       </span>
+      <time class="post-date" datetime={publishDate.toISOString()}
+        >{formattedDate}</time
+      >
     </span>
-    <time class="post-date" datetime={publishDate.toISOString()}
-      >{formattedDate}</time
-    >
+
+    {
+      preview && (
+        <>
+          <span class="post-description" id={previewId}>
+            {preview}
+          </span>
+          <span class="post-preview" aria-hidden="true">
+            <span class="post-preview__title">{postTitle}</span>
+            <time
+              class="post-preview__date mono"
+              datetime={publishDate.toISOString()}
+            >
+              {formattedDate}
+            </time>
+            <span class="post-preview__body">{preview}</span>
+          </span>
+        </>
+      )
+    }
   </a>
 </li>
 
@@ -60,10 +78,9 @@ const formattedDate = formatDate(publishDate, currentLocale);
 
   .post-link {
     display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
     width: 100%;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
     padding: 0.85rem 0;
     text-decoration: none;
     color: var(--color);
@@ -75,9 +92,27 @@ const formattedDate = formatDate(publishDate, currentLocale);
     color: var(--link-color);
   }
 
+  .post-link:focus {
+    outline: none;
+  }
+
+  .post-link:focus-visible {
+    outline: 1px solid var(--accent-color);
+    outline-offset: 3px;
+  }
+
+  .post-link__row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
   .post-link:hover .post-title {
     text-decoration: underline;
     text-underline-offset: 0.15em;
+    color: var(--link-color);
   }
 
   .post-main {
@@ -88,29 +123,11 @@ const formattedDate = formatDate(publishDate, currentLocale);
     min-width: 0;
   }
 
-  .post-text {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 0;
-  }
-
   .post-title {
+    flex: 1;
     font-weight: 500;
     color: var(--heading-color);
     line-height: 1.4;
-  }
-
-  .post-description {
-    font-size: 0.875rem;
-    line-height: 1.45;
-    color: var(--text-muted);
-    max-width: 42rem;
-  }
-
-  .post-link:hover .post-title {
-    color: var(--link-color);
   }
 
   .post-date {
@@ -122,12 +139,81 @@ const formattedDate = formatDate(publishDate, currentLocale);
     color: var(--text-muted);
   }
 
+  /* Default / coarse: synopsis stays in the list. */
+  .post-description {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    max-width: 42rem;
+  }
+
+  .post-preview {
+    display: none;
+    width: 100%;
+    max-width: 42rem;
+    margin: 0.15rem 0 0;
+    padding: 0.55rem 0 0.15rem 0.75rem;
+    border-left: 2px solid var(--prompt-color);
+    background: transparent;
+  }
+
+  .post-preview__title {
+    display: block;
+    font-weight: 500;
+    color: var(--heading-color);
+    line-height: 1.35;
+    margin-bottom: 0.2rem;
+  }
+
+  .post-preview__date {
+    display: block;
+    margin: 0 0 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .post-preview__body {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    /* Keep text for aria-describedby; hide visually in favor of hover panel. */
+    .post-description {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .post-link:hover .post-preview,
+    .post-link:focus-visible .post-preview {
+      display: block;
+    }
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .post-preview {
+      display: none !important;
+    }
+  }
+
   @media (max-width: 640px) {
     .post-link {
+      padding: 1rem 0;
+    }
+
+    .post-link__row {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.35rem;
-      padding: 1rem 0;
     }
   }
 </style>
