@@ -26,7 +26,7 @@ export const ui = {
     "sidebar.articles": "Artigos",
     "sidebar.blog": "Blog",
     "sidebar.weekly": "Semanal",
-    "sidebar.now": "Now",
+    "sidebar.now": "Agora",
     "sidebar.learning": "Aprendizado",
     "sidebar.notes": "Anotações",
     "post.type.article": "Artigo",
