@@ -156,6 +156,12 @@ const describedBy = preview && previewId ? previewId : undefined;
     background: transparent;
   }
 
+  /* Preview panel is date + excerpt only — never a title. */
+  .post-preview :global(.post-title),
+  .post-preview :global(.post-preview__title) {
+    display: none !important;
+  }
+
   .post-preview__date {
     display: block;
     margin: 0 0 0.35rem;
