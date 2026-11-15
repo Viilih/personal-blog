@@ -6,12 +6,11 @@ interface Props {
   url: string | undefined;
   pubDate: Date;
   postType?: "article" | "note" | "weekly";
-  /** Description or excerpt — shown in hover/focus preview and inline on coarse pointers. */
-  preview?: string;
-  previewId?: string;
+  /** Optional frontmatter description — shown inline when present. */
+  description?: string;
 }
 
-const { postTitle, url, pubDate, postType, preview, previewId } = Astro.props;
+const { postTitle, url, pubDate, postType, description } = Astro.props;
 const currentLocale = (Astro.currentLocale || "en") as "en" | "pt-br";
 
 const formatDate = (date: Date, locale: string) => {
@@ -28,11 +27,10 @@ const formatDate = (date: Date, locale: string) => {
 
 const publishDate = new Date(pubDate);
 const formattedDate = formatDate(publishDate, currentLocale);
-const describedBy = preview && previewId ? previewId : undefined;
 ---
 
 <li class="post-row">
-  <a href={url} class="post-link" aria-describedby={describedBy}>
+  <a href={url} class="post-link">
     <span class="post-link__row">
       <span class="post-main">
         {postType && <PostBadge type={postType} lang={currentLocale} />}
@@ -42,23 +40,9 @@ const describedBy = preview && previewId ? previewId : undefined;
         >{formattedDate}</time
       >
     </span>
-
     {
-      preview && (
-        <>
-          <span class="post-description" id={previewId}>
-            {preview}
-          </span>
-          <span class="post-preview" aria-hidden="true">
-            <time
-              class="post-preview__date mono"
-              datetime={publishDate.toISOString()}
-            >
-              {formattedDate}
-            </time>
-            <span class="post-preview__body">{preview}</span>
-          </span>
-        </>
+      description && (
+        <span class="post-description">{description}</span>
       )
     }
   </a>
@@ -78,7 +62,7 @@ const describedBy = preview && previewId ? previewId : undefined;
   .post-link {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.25rem;
     width: 100%;
     padding: 0.85rem 0;
     text-decoration: none;
@@ -138,68 +122,11 @@ const describedBy = preview && previewId ? previewId : undefined;
     color: var(--text-muted);
   }
 
-  /* Default / coarse: synopsis stays in the list. */
   .post-description {
     font-size: 0.875rem;
     line-height: 1.45;
     color: var(--text-muted);
     max-width: 42rem;
-  }
-
-  .post-preview {
-    display: none;
-    width: 100%;
-    max-width: 42rem;
-    margin: 0.15rem 0 0;
-    padding: 0.55rem 0 0.15rem 0.75rem;
-    border-left: 2px solid var(--prompt-color);
-    background: transparent;
-  }
-
-  /* Preview panel is date + excerpt only — never a title. */
-  .post-preview :global(.post-title),
-  .post-preview :global(.post-preview__title) {
-    display: none !important;
-  }
-
-  .post-preview__date {
-    display: block;
-    margin: 0 0 0.35rem;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .post-preview__body {
-    display: block;
-    font-size: 0.875rem;
-    line-height: 1.45;
-    color: var(--text-muted);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    /* Keep text for aria-describedby; hide visually in favor of hover panel. */
-    .post-description {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .post-link:hover .post-preview,
-    .post-link:focus-visible .post-preview {
-      display: block;
-    }
-  }
-
-  @media (hover: none), (pointer: coarse) {
-    .post-preview {
-      display: none !important;
-    }
   }
 
   @media (max-width: 640px) {

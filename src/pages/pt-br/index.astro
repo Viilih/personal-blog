@@ -1,11 +1,9 @@
 ---
 import { getCollection } from "astro:content";
 import PostList from "../../components/PostList.astro";
-import { nowMeta } from "../../data/now";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Link from "components/Link.astro";
 
-const now = nowMeta["pt-br"];
 const blogPosts = await getCollection("pt-br", (post) => !post.data.draft);
 const notePosts = await getCollection("pt-br-notes", (post) => !post.data.draft);
 const weeklyPosts = await getCollection("pt-br-weekly", (post) => !post.data.draft);
@@ -68,23 +66,8 @@ const recentByType = typeOrder
       <span class="home__sep" aria-hidden="true">/</span>
       <a href="/pt-br/notes">notes</a>
       <span class="home__sep" aria-hidden="true">/</span>
-      <a
-        class="home__now-link"
-        href="/pt-br/now"
-        aria-describedby="home-now-preview"
-      >
-        now
-      </a>
+      <a href="/pt-br/now">now</a>
     </nav>
-    <span class="home__now-preview-sr" id="home-now-preview">
-      {now.updatedPrefix} · {now.lastUpdatedDisplay}. {now.blurb}
-    </span>
-    <div class="home__now-preview" aria-hidden="true">
-      <time class="mono" datetime={now.lastUpdatedIso}>
-        {now.updatedPrefix} · {now.lastUpdatedDisplay}
-      </time>
-      <span class="home__now-preview-body">{now.blurb}</span>
-    </div>
 
     <section class="content-section home__recent">
       <h2>Recentes</h2>
@@ -174,59 +157,9 @@ const recentByType = typeOrder
     text-decoration: underline;
   }
 
-  .home__explore a:focus {
-    outline: none;
-  }
-
-  .home__explore a:focus-visible {
-    outline: 1px solid var(--accent-color);
-    outline-offset: 2px;
-  }
-
   .home__sep {
     color: var(--text-muted);
     opacity: 0.6;
-  }
-
-  .home__now-preview-sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .home__now-preview {
-    display: none;
-    max-width: 42rem;
-    margin: -0.25rem 0 1rem;
-    padding: 0.55rem 0 0.2rem 0.75rem;
-    border-left: 2px solid var(--prompt-color);
-  }
-
-  .home__now-preview time {
-    display: block;
-    margin: 0 0 0.3rem;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .home__now-preview-body {
-    display: block;
-    font-size: 0.875rem;
-    line-height: 1.45;
-    color: var(--text-muted);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .home:has(.home__now-link:hover) .home__now-preview,
-    .home:has(.home__now-link:focus-visible) .home__now-preview {
-      display: block;
-    }
   }
 
   .home__recent :global(.post-list) {
