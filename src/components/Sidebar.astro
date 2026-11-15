@@ -9,22 +9,14 @@ const path = Astro.url.pathname;
 
 const items = [
   { href: `/${lang}`, label: t("sidebar.home"), match: "home" },
-  { href: `/${lang}/articles`, label: t("sidebar.blog"), match: "articles" },
+  { href: `/${lang}/articles`, label: t("sidebar.articles"), match: "articles" },
   { href: `/${lang}/notes`, label: t("sidebar.notes"), match: "notes" },
-  { href: `/${lang}/learning/weekly`, label: t("sidebar.weekly"), match: "weekly" },
-  { href: `/${lang}/learning`, label: t("sidebar.learning"), match: "learning" },
   { href: `/${lang}/now`, label: t("sidebar.now"), match: "now" },
 ] as const;
 
 function isActive(match: string): boolean {
   if (match === "home") {
     return path === `/${lang}` || path === `/${lang}/`;
-  }
-  if (match === "weekly") {
-    return path.includes("/learning/weekly");
-  }
-  if (match === "learning") {
-    return path.includes("/learning") && !path.includes("/weekly");
   }
   return path.includes(`/${match}`);
 }
