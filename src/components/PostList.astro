@@ -8,14 +8,16 @@ interface Props {
       title: string;
       pubDate: Date;
       draft: boolean;
+      description?: string;
     };
     _type?: "article" | "note" | "weekly";
   }>;
   showType?: boolean;
+  showDescription?: boolean;
 }
 
 const currentLang = Astro.currentLocale || "en";
-const { posts, showType = true } = Astro.props;
+const { posts, showType = true, showDescription = false } = Astro.props;
 
 const getPostUrl = (post: any, lang: string) => {
   if (post._type === "note") return `/${lang}/notes/${post.id}`;
@@ -33,6 +35,9 @@ const getPostUrl = (post: any, lang: string) => {
           url={getPostUrl(post, currentLang)}
           pubDate={post.data.pubDate}
           postType={showType ? post._type : undefined}
+          description={
+            showDescription ? post.data.description : undefined
+          }
         />
       );
     })

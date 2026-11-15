@@ -6,9 +6,10 @@ interface Props {
   url: string | undefined;
   pubDate: Date;
   postType?: "article" | "note" | "weekly";
+  description?: string;
 }
 
-const { postTitle, url, pubDate, postType } = Astro.props;
+const { postTitle, url, pubDate, postType, description } = Astro.props;
 const currentLocale = (Astro.currentLocale || "en") as "en" | "pt-br";
 
 const formatDate = (date: Date, locale: string) => {
@@ -31,7 +32,14 @@ const formattedDate = formatDate(publishDate, currentLocale);
   <a href={url} class="post-link">
     <span class="post-main">
       {postType && <PostBadge type={postType} lang={currentLocale} />}
-      <span class="post-title">{postTitle}</span>
+      <span class="post-text">
+        <span class="post-title">{postTitle}</span>
+        {
+          description && (
+            <span class="post-description">{description}</span>
+          )
+        }
+      </span>
     </span>
     <time class="post-date" datetime={publishDate.toISOString()}
       >{formattedDate}</time
@@ -80,11 +88,25 @@ const formattedDate = formatDate(publishDate, currentLocale);
     min-width: 0;
   }
 
-  .post-title {
+  .post-text {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .post-title {
     font-weight: 500;
     color: var(--heading-color);
     line-height: 1.4;
+  }
+
+  .post-description {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    max-width: 42rem;
   }
 
   .post-link:hover .post-title {

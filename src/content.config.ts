@@ -1,16 +1,20 @@
 import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
 
+const blogSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  pubDate: z.date(),
+  draft: z.boolean(),
+  tags: z.array(z.string()).optional(),
+});
+
 const enBlogCollection = defineCollection({
   loader: glob({
     pattern: ["**/*.{md,mdx}", "!weekly/**", "!notes/**"],
     base: "./src/content/en",
   }),
-  schema: z.object({
-    title: z.string(),
-    pubDate: z.date(),
-    draft: z.boolean(),
-  }),
+  schema: blogSchema,
 });
 
 const ptBrBlogCollection = defineCollection({
@@ -18,11 +22,7 @@ const ptBrBlogCollection = defineCollection({
     pattern: ["**/*.{md,mdx}", "!weekly/**", "!notes/**"],
     base: "./src/content/pt-br",
   }),
-  schema: z.object({
-    title: z.string(),
-    pubDate: z.date(),
-    draft: z.boolean(),
-  }),
+  schema: blogSchema,
 });
 
 const enNotesCollection = defineCollection({

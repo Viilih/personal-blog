@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import GoBackButton from "../../../components/GoBackButton.astro";
 import PostList from "../../../components/PostList.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 
@@ -12,22 +13,31 @@ const sortedPosts = posts
     const dateB = new Date(b.data.pubDate).getTime();
     return dateB - dateA;
   });
+
+const count = sortedPosts.length;
 ---
 
 <BaseLayout title="Articles · Guilherme">
   <section class="index-page">
+    <GoBackButton />
     <header class="index-page__header">
       <p class="index-page__path" aria-hidden="true">~/articles</p>
       <h1 class="page-title">Articles</h1>
-      <p class="page-lead">Longer technical writing.</p>
+      <p class="page-lead">
+        Longer technical writing — tutorials, deep dives, and project write-ups.
+        Short notes live under <a href="/en/notes">Notes</a>.
+      </p>
+      <p class="index-page__meta mono" aria-hidden="true">
+        {count} {count === 1 ? "entry" : "entries"}
+      </p>
     </header>
-    <PostList posts={sortedPosts} />
+    <PostList posts={sortedPosts} showType={false} showDescription={true} />
   </section>
 </BaseLayout>
 
 <style>
   .index-page__header {
-    margin-bottom: 1.5rem;
+    margin: 0.75rem 0 1.5rem;
   }
 
   .index-page__path {
@@ -35,5 +45,15 @@ const sortedPosts = posts
     font-family: var(--font-mono);
     font-size: 0.8125rem;
     color: var(--prompt-color);
+  }
+
+  .index-page__header :global(.page-lead) {
+    margin-bottom: 0.75rem;
+  }
+
+  .index-page__meta {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
   }
 </style>
