@@ -20,6 +20,25 @@ export const ui = {
     "post.type.weekly": "Weekly",
     "toc.contents": "contents",
     "reading.minutes": "{n} min read",
+    "seo.siteName": "Guilherme Nascimento",
+    "seo.defaultDescription":
+      "Software engineer and digital garden — articles, notes, and what I'm doing now.",
+    "seo.home.description":
+      "Software engineer · fullstack. Writing on React, TypeScript, Java, and computer science fundamentals.",
+    "seo.now.title": "Now",
+    "seo.now.description":
+      "What I'm doing now — work, studies, building, hobbies, and reading.",
+    "seo.articles.title": "Articles",
+    "seo.articles.description":
+      "Longer technical writing — tutorials, deep dives, and project write-ups.",
+    "seo.notes.title": "Notes",
+    "seo.notes.description":
+      "Short, evolving notes — ideas and snippets still taking shape.",
+    "seo.learning.title": "Learning",
+    "seo.learning.description":
+      "Thoughts and notes from the middle of learning something new.",
+    "seo.weekly.title": "Weekly",
+    "seo.weekly.description": "Weekly studies, reflections, and ideas.",
   },
   "pt-br": {
     "sidebar.home": "Início",
@@ -34,5 +53,24 @@ export const ui = {
     "post.type.weekly": "Semanal",
     "toc.contents": "sumário",
     "reading.minutes": "{n} min de leitura",
+    "seo.siteName": "Guilherme Nascimento",
+    "seo.defaultDescription":
+      "Engenheiro de software e digital garden — artigos, anotações e o que estou fazendo agora.",
+    "seo.home.description":
+      "Engenheiro de software · fullstack. Escrevo sobre React, TypeScript, Java e fundamentos de ciência da computação.",
+    "seo.now.title": "Agora",
+    "seo.now.description":
+      "O que estou fazendo agora — trabalho, estudos, projetos, hobbies e leitura.",
+    "seo.articles.title": "Artigos",
+    "seo.articles.description":
+      "Escritos técnicos mais longos — tutoriais, aprofundamentos e relatos de projetos.",
+    "seo.notes.title": "Anotações",
+    "seo.notes.description":
+      "Anotações curtas e em evolução — ideias e trechos ainda tomando forma.",
+    "seo.learning.title": "Aprendizado",
+    "seo.learning.description":
+      "Projetos, anotações e ideias durante o estudo de um tópico.",
+    "seo.weekly.title": "Semanal",
+    "seo.weekly.description": "Estudos, reflexões e ideias semanais.",
   },
 } as const;
