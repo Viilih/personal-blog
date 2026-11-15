@@ -8,6 +8,7 @@ import rehypeExternalLinks from "rehype-external-links";
 import mdx from "@astrojs/mdx";
 
 export default defineConfig({
+  site: "https://vilih.com",
   integrations: [mdx()],
   redirects: {
     "/": "/en",
