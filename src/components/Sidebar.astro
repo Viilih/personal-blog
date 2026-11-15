@@ -34,7 +34,10 @@ function isActive(match: string): boolean {
         <li>
           <a
             href={item.href}
-            class:list={["site-nav__link", { "is-active": isActive(item.match) }]}
+            class:list={[
+              "site-nav__link",
+              { "is-active": isActive(item.match) },
+            ]}
             aria-current={isActive(item.match) ? "page" : undefined}
           >
             {item.label}

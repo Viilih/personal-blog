@@ -1,22 +1,25 @@
 ---
 import { getCollection } from "astro:content";
 import GoBackButton from "components/GoBackButton.astro";
+import PostList from "components/PostList.astro";
 import BaseLayout from "layouts/BaseLayout.astro";
 
 const posts = await getCollection("pt-br-notes", (post) => !post.data.draft);
 
-const sortedPosts = posts.sort(
-  (a, b) =>
-    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
-);
+const sortedPosts = posts
+  .map((post) => ({ ...post, _type: "note" as const }))
+  .sort(
+    (a, b) =>
+      new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
+  );
 ---
 
-<BaseLayout title="Notes · Guilherme">
+<BaseLayout title="Anotações · Guilherme">
   <div class="notes-container">
     <GoBackButton />
     <header class="notes-header">
       <p class="notes-path" aria-hidden="true">~/notes</p>
-      <h1 class="page-title">Notes</h1>
+      <h1 class="page-title">Anotações</h1>
       <p class="page-lead">Anotações curtas e em evolução.</p>
     </header>
 
@@ -24,25 +27,7 @@ const sortedPosts = posts.sort(
       sortedPosts.length === 0 ? (
         <p class="no-notes">Nenhuma nota ainda.</p>
       ) : (
-        <ul class="notes-list">
-          {sortedPosts.map((post) => (
-            <li class="note-item">
-              <a href={`/pt-br/notes/${post.id}`} class="note-link">
-                <span class="note-title">{post.data.title}</span>
-                <time
-                  class="note-date"
-                  datetime={post.data.pubDate.toISOString()}
-                >
-                  {post.data.pubDate.toLocaleDateString("pt-BR", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </time>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <PostList posts={sortedPosts} showType={false} />
       )
     }
   </div>
@@ -62,59 +47,5 @@ const sortedPosts = posts.sort(
 
   .no-notes {
     color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-
-  .notes-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    border-top: 1px solid var(--border);
-  }
-
-  .note-item {
-    border-bottom: 1px solid var(--border);
-  }
-
-  .note-link {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.9rem 0;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .note-link:hover {
-    text-decoration: none;
-  }
-
-  .note-title {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--heading-color);
-    line-height: 1.4;
-  }
-
-  .note-link:hover .note-title {
-    color: var(--link-color);
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
-  .note-date {
-    flex-shrink: 0;
-    font-size: 0.8125rem;
-    font-family: var(--font-mono);
-    color: var(--text-muted);
-  }
-
-  @media (max-width: 640px) {
-    .note-link {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.3rem;
-    }
   }
 </style>

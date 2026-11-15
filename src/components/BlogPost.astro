@@ -6,9 +6,11 @@ interface Props {
   url: string | undefined;
   pubDate: Date;
   postType?: "article" | "note" | "weekly";
+  /** Optional frontmatter description — shown inline when present. */
+  description?: string;
 }
 
-const { postTitle, url, pubDate, postType } = Astro.props;
+const { postTitle, url, pubDate, postType, description } = Astro.props;
 const currentLocale = (Astro.currentLocale || "en") as "en" | "pt-br";
 
 const formatDate = (date: Date, locale: string) => {
@@ -29,13 +31,20 @@ const formattedDate = formatDate(publishDate, currentLocale);
 
 <li class="post-row">
   <a href={url} class="post-link">
-    <span class="post-main">
-      {postType && <PostBadge type={postType} lang={currentLocale} />}
-      <span class="post-title">{postTitle}</span>
+    <span class="post-link__row">
+      <span class="post-main">
+        {postType && <PostBadge type={postType} lang={currentLocale} />}
+        <span class="post-title">{postTitle}</span>
+      </span>
+      <time class="post-date" datetime={publishDate.toISOString()}
+        >{formattedDate}</time
+      >
     </span>
-    <time class="post-date" datetime={publishDate.toISOString()}
-      >{formattedDate}</time
-    >
+    {
+      description && (
+        <span class="post-description">{description}</span>
+      )
+    }
   </a>
 </li>
 
@@ -52,10 +61,9 @@ const formattedDate = formatDate(publishDate, currentLocale);
 
   .post-link {
     display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     width: 100%;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
     padding: 0.85rem 0;
     text-decoration: none;
     color: var(--color);
@@ -67,9 +75,27 @@ const formattedDate = formatDate(publishDate, currentLocale);
     color: var(--link-color);
   }
 
+  .post-link:focus {
+    outline: none;
+  }
+
+  .post-link:focus-visible {
+    outline: 1px solid var(--accent-color);
+    outline-offset: 3px;
+  }
+
+  .post-link__row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
   .post-link:hover .post-title {
     text-decoration: underline;
     text-underline-offset: 0.15em;
+    color: var(--link-color);
   }
 
   .post-main {
@@ -87,10 +113,6 @@ const formattedDate = formatDate(publishDate, currentLocale);
     line-height: 1.4;
   }
 
-  .post-link:hover .post-title {
-    color: var(--link-color);
-  }
-
   .post-date {
     flex-shrink: 0;
     margin: 0;
@@ -100,12 +122,22 @@ const formattedDate = formatDate(publishDate, currentLocale);
     color: var(--text-muted);
   }
 
+  .post-description {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    max-width: 42rem;
+  }
+
   @media (max-width: 640px) {
     .post-link {
+      padding: 1rem 0;
+    }
+
+    .post-link__row {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.35rem;
-      padding: 1rem 0;
     }
   }
 </style>
