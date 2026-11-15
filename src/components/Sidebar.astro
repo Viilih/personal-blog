@@ -1,11 +1,13 @@
 ---
 import LanguagePicker from "../components/LanguagePicker.astro";
+import { nowMeta, type NowLang } from "../data/now";
 import { getLangFromUrl, useTranslations } from "../i18n/utils";
 import ThemeSlider from "./ThemeSlider.astro";
 
-const lang = getLangFromUrl(Astro.url);
+const lang = getLangFromUrl(Astro.url) as NowLang;
 const t = useTranslations(lang);
 const path = Astro.url.pathname;
+const now = nowMeta[lang] ?? nowMeta.en;
 
 const items = [
   { href: `/${lang}`, label: t("sidebar.home"), match: "home" },
@@ -31,14 +33,33 @@ function isActive(match: string): boolean {
   <ul class="site-nav__list">
     {
       items.map((item) => (
-        <li>
+        <li class="site-nav__item">
           <a
             href={item.href}
-            class:list={["site-nav__link", { "is-active": isActive(item.match) }]}
+            class:list={[
+              "site-nav__link",
+              { "is-active": isActive(item.match) },
+            ]}
             aria-current={isActive(item.match) ? "page" : undefined}
+            aria-describedby={
+              item.match === "now" ? "nav-now-preview" : undefined
+            }
           >
             {item.label}
           </a>
+          {item.match === "now" && (
+            <>
+              <span class="site-nav__preview-sr" id="nav-now-preview">
+                {now.updatedPrefix} · {now.lastUpdatedDisplay}. {now.blurb}
+              </span>
+              <span class="site-nav__preview" aria-hidden="true">
+                <time class="mono" datetime={now.lastUpdatedIso}>
+                  {now.updatedPrefix} · {now.lastUpdatedDisplay}
+                </time>
+                <span class="site-nav__preview-body">{now.blurb}</span>
+              </span>
+            </>
+          )}
         </li>
       ))
     }
@@ -95,6 +116,10 @@ function isActive(match: string): boolean {
     gap: 0.15rem;
   }
 
+  .site-nav__item {
+    position: relative;
+  }
+
   .site-nav__link {
     display: block;
     padding: 0.4rem 0.65rem;
@@ -117,10 +142,60 @@ function isActive(match: string): boolean {
     background: var(--nav-active-bg);
   }
 
+  .site-nav__link:focus {
+    outline: none;
+  }
+
+  .site-nav__link:focus-visible {
+    outline: 1px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+
   .site-nav__link.is-active {
     color: var(--heading-color);
     background: var(--nav-active-bg);
     border-left-color: var(--accent-color);
+  }
+
+  .site-nav__preview-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .site-nav__preview {
+    display: none;
+    margin: 0.25rem 0 0.35rem;
+    padding: 0.45rem 0 0.2rem 0.65rem;
+    border-left: 2px solid var(--prompt-color);
+    max-width: 14rem;
+  }
+
+  .site-nav__preview time {
+    display: block;
+    margin: 0 0 0.3rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  .site-nav__preview-body {
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .site-nav__item:has(a[href*="/now"]):hover .site-nav__preview,
+    .site-nav__link[href*="/now"]:focus-visible ~ .site-nav__preview {
+      display: block;
+    }
   }
 
   .site-nav__controls {
@@ -155,6 +230,10 @@ function isActive(match: string): boolean {
     .site-nav__link.is-active {
       border-left: none;
       border-bottom-color: var(--accent-color);
+    }
+
+    .site-nav__preview {
+      display: none !important;
     }
 
     .site-nav__controls {

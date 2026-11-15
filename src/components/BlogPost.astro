@@ -50,7 +50,6 @@ const describedBy = preview && previewId ? previewId : undefined;
             {preview}
           </span>
           <span class="post-preview" aria-hidden="true">
-            <span class="post-preview__title">{postTitle}</span>
             <time
               class="post-preview__date mono"
               datetime={publishDate.toISOString()}
@@ -155,14 +154,6 @@ const describedBy = preview && previewId ? previewId : undefined;
     padding: 0.55rem 0 0.15rem 0.75rem;
     border-left: 2px solid var(--prompt-color);
     background: transparent;
-  }
-
-  .post-preview__title {
-    display: block;
-    font-weight: 500;
-    color: var(--heading-color);
-    line-height: 1.35;
-    margin-bottom: 0.2rem;
   }
 
   .post-preview__date {

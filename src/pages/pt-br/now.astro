@@ -1,9 +1,10 @@
 ---
 import GoBackButton from "components/GoBackButton.astro";
 import Link from "components/Link.astro";
+import { nowMeta } from "../../data/now";
 import BaseLayout from "layouts/BaseLayout.astro";
 
-const lastUpdated = "9 de novembro de 2026";
+const now = nowMeta["pt-br"];
 ---
 
 <BaseLayout title="Now · Guilherme">
@@ -11,7 +12,9 @@ const lastUpdated = "9 de novembro de 2026";
   <header class="now-header">
     <p class="now-path" aria-hidden="true">~/now</p>
     <h1 class="page-title">O que estou fazendo agora?</h1>
-    <p class="now-updated mono">Atualizado em · {lastUpdated}</p>
+    <p class="now-updated mono">
+      {now.updatedPrefix} · {now.lastUpdatedDisplay}
+    </p>
   </header>
 
   <section class="now-section">
