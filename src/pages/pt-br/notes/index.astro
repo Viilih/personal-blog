@@ -1,51 +1,70 @@
 ---
 import { getCollection } from "astro:content";
-import GoBackButton from "components/GoBackButton.astro";
-import PostList from "components/PostList.astro";
-import BaseLayout from "layouts/BaseLayout.astro";
+import GoBackButton from "../../../components/GoBackButton.astro";
+import PostList from "../../../components/PostList.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
 
 const posts = await getCollection("pt-br-notes", (post) => !post.data.draft);
 
 const sortedPosts = posts
   .map((post) => ({ ...post, _type: "note" as const }))
-  .sort(
-    (a, b) =>
-      new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
-  );
+  .sort((a, b) => {
+    const dateA = new Date(a.data.pubDate).getTime();
+    const dateB = new Date(b.data.pubDate).getTime();
+    return dateB - dateA;
+  });
+
+const count = sortedPosts.length;
 ---
 
 <BaseLayout title="Anotações · Guilherme">
-  <div class="notes-container">
+  <section class="index-page">
     <GoBackButton />
-    <header class="notes-header">
-      <p class="notes-path" aria-hidden="true">~/notes</p>
+    <header class="index-page__header">
+      <p class="index-page__path" aria-hidden="true">~/notes</p>
       <h1 class="page-title">Anotações</h1>
-      <p class="page-lead">Anotações curtas e em evolução.</p>
+      <p class="page-lead">
+        Anotações curtas e em evolução — ideias e trechos ainda tomando forma.
+        Escritos mais longos ficam em
+        <a href="/pt-br/articles">Artigos</a>.
+      </p>
+      <p class="index-page__meta mono" aria-hidden="true">
+        {count} {count === 1 ? "entrada" : "entradas"}
+      </p>
     </header>
-
     {
-      sortedPosts.length === 0 ? (
-        <p class="no-notes">Nenhuma nota ainda.</p>
+      count === 0 ? (
+        <p class="index-page__empty">Nenhuma nota ainda.</p>
       ) : (
-        <PostList posts={sortedPosts} showType={false} />
+        <PostList posts={sortedPosts} showType={false} showDescription={true} />
       )
     }
-  </div>
+  </section>
 </BaseLayout>
 
 <style>
-  .notes-header {
+  .index-page__header {
     margin: 0.75rem 0 1.5rem;
   }
 
-  .notes-path {
+  .index-page__path {
     margin: 0 0 0.5rem;
     font-family: var(--font-mono);
     font-size: 0.8125rem;
     color: var(--prompt-color);
   }
 
-  .no-notes {
+  .index-page__header :global(.page-lead) {
+    margin-bottom: 0.75rem;
+  }
+
+  .index-page__meta {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .index-page__empty {
     color: var(--text-muted);
   }
 </style>
