@@ -3,6 +3,9 @@ import { getCollection } from "astro:content";
 import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Link from "components/Link.astro";
+import { useTranslations } from "../../i18n/utils";
+
+const t = useTranslations("pt-br");
 
 const blogPosts = await getCollection("pt-br", (post) => !post.data.draft);
 const notePosts = await getCollection("pt-br-notes", (post) => !post.data.draft);
@@ -38,7 +41,10 @@ const recentByType = typeOrder
   .filter((group) => group.posts.length > 0);
 ---
 
-<BaseLayout title="Guilherme Nascimento">
+<BaseLayout
+  title={t("seo.siteName")}
+  description={t("seo.home.description")}
+>
   <section class="home">
     <header class="home__hero">
       <p class="home__prompt" aria-hidden="true">

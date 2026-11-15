@@ -1,9 +1,15 @@
 ---
 import GoBackButton from "components/GoBackButton.astro";
+import { useTranslations } from "../../../i18n/utils";
 import BaseLayout from "layouts/BaseLayout.astro";
+
+const t = useTranslations("pt-br");
 ---
 
-<BaseLayout title="Learning · Guilherme">
+<BaseLayout
+  title={t("seo.learning.title")}
+  description={t("seo.learning.description")}
+>
   <GoBackButton />
   <header class="learning-header">
     <p class="learning-path" aria-hidden="true">~/learning</p>
