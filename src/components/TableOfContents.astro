@@ -1,4 +1,6 @@
 ---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
 interface Heading {
   depth: number;
   text: string;
@@ -8,26 +10,36 @@ interface Heading {
 
 interface Props {
   toc: Heading[];
+  /** Unique suffix when multiple TOCs are rendered (rail + inline). */
+  idSuffix?: string;
+  /** Emit the shared TOC script once (use on a single instance). */
+  includeScript?: boolean;
 }
 
-const { toc = [] } = Astro.props;
+const { toc = [], idSuffix = "main", includeScript = false } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 const validToc = toc.filter(
   (heading) => heading && heading.slug && heading.text,
 );
+
+const toggleId = `toc-toggle-${idSuffix}`;
+const contentId = `toc-content-${idSuffix}`;
 ---
 
 {
   validToc.length > 0 && (
-    <nav class="toc" aria-label="Table of contents">
+    <nav class="toc" data-toc={idSuffix} aria-label={t("toc.contents")}>
       <button
         class="toc-header"
-        id="toc-toggle"
+        type="button"
+        id={toggleId}
         aria-expanded="false"
-        aria-controls="toc-content"
+        aria-controls={contentId}
       >
-        <span class="toc-title">contents</span>
-        <span class="toc-count">({validToc.length})</span>
+        <span class="toc-title">{t("toc.contents")}</span>
+        <span class="toc-count">{validToc.length}</span>
         <svg
           class="toc-icon"
           aria-hidden="true"
@@ -37,7 +49,7 @@ const validToc = toc.filter(
           <path d="M325.607 79.393a15 15 0 0 0-21.213.001L165.004 218.787 25.607 79.393a15 15 0 0 0-21.213 21.214l150.004 150a15 15 0 0 0 21.212-.001l149.996-150a15 15 0 0 0 .001-21.213Z" />
         </svg>
       </button>
-      <ul class="toc-list" id="toc-content">
+      <ul class="toc-list" id={contentId}>
         {validToc.map((heading) => (
           <li>
             <a href={`#${heading.slug}`} class="toc-link">
@@ -64,21 +76,21 @@ const validToc = toc.filter(
 <style>
   .toc {
     position: sticky;
-    top: 2rem;
+    top: 1.75rem;
     background: transparent;
     padding: 0;
     width: 100%;
     border: none;
     box-shadow: none;
-    max-height: calc(100vh - 4rem);
+    max-height: calc(100vh - 3.5rem);
   }
 
   .toc-header {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
     width: 100%;
-    padding: 0 0 0.5rem;
+    padding: 0 0 0.55rem;
     border: 0;
     border-bottom: 1px solid var(--border);
     background: transparent;
@@ -88,25 +100,36 @@ const validToc = toc.filter(
     font-family: var(--font-mono);
   }
 
+  .toc-header:focus-visible {
+    outline: 1px solid var(--accent-color);
+    outline-offset: 3px;
+  }
+
   .toc-title {
     font-weight: 500;
     font-size: 0.75rem;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: lowercase;
     color: var(--toc-text-secondary);
   }
 
   .toc-count {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
     color: var(--toc-text-secondary);
+    padding: 0.05rem 0.35rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    line-height: 1.3;
   }
 
   .toc-icon {
     margin-left: auto;
     color: var(--toc-text-secondary);
     transition: transform var(--transition-speed) ease;
-    width: 0.7em;
-    height: 0.7em;
+    width: 0.65em;
+    height: 0.65em;
+    flex-shrink: 0;
   }
 
   .toc-icon.rotated {
@@ -120,7 +143,6 @@ const validToc = toc.filter(
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    margin-top: 0;
     transition:
       max-height var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
       opacity calc(var(--transition-speed) * 0.8) ease,
@@ -128,11 +150,11 @@ const validToc = toc.filter(
   }
 
   .toc-list.show {
-    max-height: 60vh;
+    max-height: min(60vh, 28rem);
     opacity: 1;
-    margin-top: 0.75rem;
+    margin-top: 0.65rem;
     overflow-y: auto;
-    padding-right: 0.25rem;
+    padding-right: 0.2rem;
     scrollbar-width: thin;
   }
 
@@ -140,10 +162,10 @@ const validToc = toc.filter(
   .toc-sublink {
     display: block;
     text-decoration: none;
-    line-height: 1.45;
+    line-height: 1.4;
     transition: color var(--transition-speed) ease;
-    padding: 0.25rem 0 0.25rem 0.65rem;
-    border-left: 2px solid transparent;
+    padding: 0.3rem 0 0.3rem 0.7rem;
+    border-left: 2px solid var(--border);
   }
 
   .toc-link {
@@ -155,7 +177,8 @@ const validToc = toc.filter(
   .toc-sublink {
     color: var(--toc-text-secondary);
     font-size: 0.78rem;
-    padding-left: 1.1rem;
+    padding-left: 1.15rem;
+    font-weight: 400;
   }
 
   .toc-link:hover,
@@ -173,23 +196,35 @@ const validToc = toc.filter(
   .toc-sublist {
     list-style: none;
     padding-left: 0;
-    margin: 0.15rem 0 0.35rem;
+    margin: 0.1rem 0 0.3rem;
   }
 
   @media (max-width: 1024px) {
     .toc {
       position: relative;
       top: 0;
-      margin: 0 0 1rem;
       max-height: none;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-color);
+    }
+
+    .toc-header {
+      padding-bottom: 0;
+      border-bottom: 0;
     }
 
     .toc-list.show {
-      max-height: 280px;
+      max-height: 240px;
+      margin-top: 0.55rem;
+      padding-top: 0.45rem;
+      border-top: 1px solid var(--border);
     }
   }
 </style>
 
+{includeScript && (
 <script is:inline>
   function throttle(func, limit) {
     let lastFunc;
@@ -214,12 +249,12 @@ const validToc = toc.filter(
     };
   }
 
-  function initializeTOC() {
-    const tocContainer = document.querySelector(".toc");
-    if (!tocContainer) return;
+  function initializeOneTOC(tocContainer) {
+    if (tocContainer.dataset.tocReady === "1") return;
+    tocContainer.dataset.tocReady = "1";
 
-    const tocToggle = tocContainer.querySelector("#toc-toggle");
-    const tocContent = tocContainer.querySelector("#toc-content");
+    const tocToggle = tocContainer.querySelector(".toc-header");
+    const tocContent = tocContainer.querySelector(".toc-list");
     const tocIcon = tocContainer.querySelector(".toc-icon");
     const tocLinks = Array.from(
       tocContainer.querySelectorAll(".toc-link, .toc-sublink"),
@@ -240,7 +275,9 @@ const validToc = toc.filter(
       tocIcon.classList.toggle("rotated", shouldBeOpen);
     };
 
-    toggle(true);
+    const prefersRail = window.matchMedia("(min-width: 1025px)").matches;
+    const isRail = tocContainer.dataset.toc === "rail";
+    toggle(prefersRail && isRail);
 
     tocToggle.addEventListener("click", () => toggle());
 
@@ -253,7 +290,7 @@ const validToc = toc.filter(
 
     const handleScroll = () => {
       let currentHeadingId = null;
-      const scrollPosition = window.scrollY + 60;
+      const scrollPosition = window.scrollY + 72;
 
       for (let i = articleHeadings.length - 1; i >= 0; i--) {
         if (articleHeadings[i].offsetTop <= scrollPosition) {
@@ -291,7 +328,7 @@ const validToc = toc.filter(
 
         if (targetElement) {
           const elementPosition = targetElement.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.scrollY;
+          const offsetPosition = elementPosition + window.scrollY - 12;
 
           window.scrollTo({
             top: offsetPosition,
@@ -300,11 +337,23 @@ const validToc = toc.filter(
 
           history.pushState(null, null, `#${targetId}`);
           setTimeout(() => handleScroll(), 50);
+
+          if (!window.matchMedia("(min-width: 1025px)").matches) {
+            toggle(false);
+          }
         }
       });
+    });
+  }
+
+  function initializeTOC() {
+    document.querySelectorAll(".toc").forEach((tocContainer) => {
+      tocContainer.dataset.tocReady = "";
+      initializeOneTOC(tocContainer);
     });
   }
 
   initializeTOC();
   document.addEventListener("astro:after-swap", initializeTOC);
 </script>
+)}
