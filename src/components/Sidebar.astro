@@ -12,12 +12,21 @@ const onHome = path === homePath || path === `${homePath}/`;
 const items = [
   { href: homePath, label: t("sidebar.home"), match: "home" },
   {
-    href: `${homePath}#writing`,
+    href: `/${lang}/writing`,
     label: t("sidebar.writing"),
     match: "writing",
   },
   { href: `/${lang}/now`, label: t("sidebar.now"), match: "now" },
 ] as const;
+
+function isWritingPath(pathname: string): boolean {
+  return (
+    pathname.includes("/writing") ||
+    pathname.includes("/articles") ||
+    pathname.includes("/notes") ||
+    pathname.includes("/blog")
+  );
+}
 
 function isActive(match: string): boolean {
   if (match === "home") {
@@ -26,7 +35,9 @@ function isActive(match: string): boolean {
   if (match === "now") {
     return path.includes("/now");
   }
-  // Hash target (#writing) is client-side; keep inactive in SSR.
+  if (match === "writing") {
+    return isWritingPath(path);
+  }
   return false;
 }
 ---
