@@ -27,6 +27,8 @@
   --shadow-soft: 0 0 0 1px var(--border);
   --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Home H1 only — loaded with font-display: swap via Google Fonts. */
+  --font-display: "Fraunces", "IBM Plex Sans", "Segoe UI", serif;
   --measure: min(65ch, 38rem);
   --shell-max: 1120px;
   --nav-width: 200px;
@@ -60,6 +62,7 @@
   --shadow-soft: 0 0 0 1px var(--border);
   --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Fraunces", "IBM Plex Sans", "Segoe UI", serif;
   --measure: min(65ch, 38rem);
   --shell-max: 1120px;
   --nav-width: 200px;
