@@ -254,9 +254,17 @@ const seoDescription =
     margin: 0 0 1.75rem;
   }
 
+  /* Sticky the rail column so it can travel the article-height grid row. */
   .doc__toc--rail {
-    position: relative;
+    position: sticky;
+    top: 1.75rem;
+    align-self: start;
     min-width: 0;
+    max-height: calc(100vh - 3.5rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    z-index: 1;
   }
 
   @media (max-width: 1024px) {
