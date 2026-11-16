@@ -17,7 +17,7 @@ export const site = {
   about: {
     en: "I'm a fullstack developer on a platform engineering team at Vivo, through Stefanini. I work mainly with React and TypeScript, plus Node.js / NestJS. Outside work I study systems topics for Ledger Pay — databases, locks, and idempotency — and I'm building this digital garden.",
     "pt-br":
-      "Sou desenvolvedor fullstack em um time de platform engineering na Vivo, via Stefanini. Trabalho principalmente com React e TypeScript, além de Node.js / NestJS. Fora do trabalho estudo sistemas para o Ledger Pay — bancos de dados, locks e idempotência — e estou construindo este digital garden.",
+      "Sou desenvolvedor fullstack num time de platform engineering da Vivo, pela Stefanini. Trabalho principalmente com React e TypeScript, além de Node.js / NestJS. Fora do trabalho, estudo temas de sistemas para o Ledger Pay — banco de dados, locks e idempotência — e estou montando este digital garden.",
   },
   contact: {
     email: "gnlnascimento@gmail.com",
