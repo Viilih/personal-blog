@@ -1,0 +1,11 @@
+---
+import WritingIndex from "../../../components/WritingIndex.astro";
+
+export function getStaticPaths() {
+  return [{ params: { type: "articles" } }, { params: { type: "notes" } }];
+}
+
+const type = Astro.params.type === "notes" ? "notes" : "articles";
+---
+
+<WritingIndex lang="en" filter={type} />

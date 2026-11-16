@@ -38,6 +38,15 @@ export const ui = {
     "seo.now.title": "Now",
     "seo.now.description":
       "What I'm doing now — work, studies, building, hobbies, and reading.",
+    "seo.writing.title": "Writing",
+    "seo.writing.description": "Articles and notes.",
+    "writing.filterLabel": "Filter",
+    "writing.filter.all": "All",
+    "writing.filter.articles": "Articles",
+    "writing.filter.notes": "Notes",
+    "writing.empty.all": "No writing yet.",
+    "writing.empty.articles": "No articles yet.",
+    "writing.empty.notes": "No notes available yet.",
     "seo.articles.title": "Articles",
     "seo.articles.description":
       "Longer technical writing — tutorials, deep dives, and project write-ups.",
@@ -81,6 +90,15 @@ export const ui = {
     "seo.now.title": "Agora",
     "seo.now.description":
       "O que estou fazendo agora — trabalho, estudos, projetos, hobbies e leitura.",
+    "seo.writing.title": "Escritos",
+    "seo.writing.description": "Artigos e notas.",
+    "writing.filterLabel": "Filtro",
+    "writing.filter.all": "Tudo",
+    "writing.filter.articles": "Artigos",
+    "writing.filter.notes": "Notas",
+    "writing.empty.all": "Nenhum escrito ainda.",
+    "writing.empty.articles": "Nenhum artigo ainda.",
+    "writing.empty.notes": "Nenhuma nota ainda.",
     "seo.articles.title": "Artigos",
     "seo.articles.description":
       "Escritos técnicos mais longos — tutoriais, aprofundamentos e relatos de projetos.",

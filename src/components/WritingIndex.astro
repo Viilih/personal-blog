@@ -1,0 +1,160 @@
+---
+import { getCollection } from "astro:content";
+import GoBackButton from "./GoBackButton.astro";
+import PostList from "./PostList.astro";
+import { useTranslations } from "../i18n/utils";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+export type WritingFilter = "all" | "articles" | "notes";
+
+interface Props {
+  lang: "en" | "pt-br";
+  filter: WritingFilter;
+}
+
+const { lang, filter } = Astro.props;
+const t = useTranslations(lang);
+
+const blogPosts =
+  lang === "en"
+    ? await getCollection("en", (post) => !post.data.draft)
+    : await getCollection("pt-br", (post) => !post.data.draft);
+const notePosts =
+  lang === "en"
+    ? await getCollection("en-notes", (post) => !post.data.draft)
+    : await getCollection("pt-br-notes", (post) => !post.data.draft);
+
+const allPosts = [
+  ...blogPosts.map((post) => ({ ...post, _type: "article" as const })),
+  ...notePosts.map((post) => ({ ...post, _type: "note" as const })),
+].sort((a, b) => {
+  const dateA = new Date(a.data.pubDate).getTime();
+  const dateB = new Date(b.data.pubDate).getTime();
+  return dateB - dateA;
+});
+
+const posts =
+  filter === "articles"
+    ? allPosts.filter((post) => post._type === "article")
+    : filter === "notes"
+      ? allPosts.filter((post) => post._type === "note")
+      : allPosts;
+
+const emptyKey =
+  filter === "articles"
+    ? "writing.empty.articles"
+    : filter === "notes"
+      ? "writing.empty.notes"
+      : "writing.empty.all";
+
+const writingBase = `/${lang}/writing`;
+const filters = [
+  { id: "all" as const, href: writingBase, label: t("writing.filter.all") },
+  {
+    id: "articles" as const,
+    href: `${writingBase}/articles`,
+    label: t("writing.filter.articles"),
+  },
+  {
+    id: "notes" as const,
+    href: `${writingBase}/notes`,
+    label: t("writing.filter.notes"),
+  },
+];
+---
+
+<BaseLayout
+  title={t("seo.writing.title")}
+  description={t("seo.writing.description")}
+>
+  <section class="index-page">
+    <GoBackButton />
+    <header class="index-page__header">
+      <p class="index-page__path" aria-hidden="true">~/writing</p>
+      <h1 class="page-title">{t("seo.writing.title")}</h1>
+      <nav class="writing-filter" aria-label={t("writing.filterLabel")}>
+        <ul class="writing-filter__list">
+          {
+            filters.map((item) => {
+              const isActive = item.id === filter;
+              return (
+                <li>
+                  <a
+                    href={item.href}
+                    class:list={[
+                      "writing-filter__link",
+                      { "is-active": isActive },
+                    ]}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </nav>
+    </header>
+    {
+      posts.length === 0 ? (
+        <p class="index-page__empty">{t(emptyKey)}</p>
+      ) : (
+        <PostList posts={posts} showType={false} />
+      )
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .index-page__header {
+    margin: 0.75rem 0 1.5rem;
+  }
+
+  .index-page__path {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--prompt-color);
+  }
+
+  .writing-filter {
+    margin-top: 1rem;
+  }
+
+  .writing-filter__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.15rem;
+  }
+
+  .writing-filter__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .writing-filter__link:hover {
+    color: var(--heading-color);
+    text-decoration: none;
+    background: var(--nav-active-bg);
+  }
+
+  .writing-filter__link.is-active {
+    color: var(--heading-color);
+    background: var(--nav-active-bg);
+  }
+
+  .index-page__empty {
+    color: var(--text-muted);
+  }
+</style>
