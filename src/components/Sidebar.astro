@@ -11,7 +11,6 @@ const onHome = path === homePath || path === `${homePath}/`;
 
 const items = [
   { href: homePath, label: t("sidebar.home"), match: "home" },
-  { href: `${homePath}#work`, label: t("sidebar.work"), match: "work" },
   {
     href: `${homePath}#writing`,
     label: t("sidebar.writing"),
@@ -32,7 +31,7 @@ function isActive(match: string): boolean {
   if (match === "now") {
     return path.includes("/now");
   }
-  // Hash targets (#work / #writing / #contact) are client-side; keep inactive in SSR.
+  // Hash targets (#writing / #contact) are client-side; keep inactive in SSR.
   return false;
 }
 ---

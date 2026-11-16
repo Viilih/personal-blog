@@ -1,10 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import PostList from "../../components/PostList.astro";
-import WorkCard from "../../components/WorkCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { site } from "../../data/site";
-import { workItems } from "../../data/work";
 import { useTranslations } from "../../i18n/utils";
 
 const t = useTranslations("pt-br");
@@ -58,26 +56,11 @@ const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
       <h1 class="home__name">{site.name}</h1>
       <p class="home__tagline">{roleLine}</p>
       <p class="home__actions">
-        <a class="home__btn home__btn--primary" href="#work">{t("home.viewWork")}</a>
-        <a class="home__btn" href="#contact">{t("home.contactCta")}</a>
+        <a class="home__btn home__btn--primary" href="#contact"
+          >{t("home.contactCta")}</a
+        >
       </p>
     </header>
-
-    <section id="work" class="content-section home__work">
-      <h2>{t("home.workHeading")}</h2>
-      <div class="home__work-list">
-        {
-          workItems.map((item) => (
-            <WorkCard
-              item={item}
-              lang={lang}
-              repoLabel={t("home.repo")}
-              demoLabel={t("home.demo")}
-            />
-          ))
-        }
-      </div>
-    </section>
 
     <section id="writing" class="content-section home__writing">
       <h2>{t("home.writingHeading")}</h2>
@@ -192,18 +175,10 @@ const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
     color: var(--accent-color);
   }
 
-  .home__work,
   .home__writing,
   .home__contact {
     margin-top: 2.5rem;
     scroll-margin-top: 1.5rem;
-  }
-
-  .home__work-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.75rem;
-    margin-top: 1rem;
   }
 
   .home__writing :global(.post-list) {
