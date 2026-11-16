@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import { unified } from "@astrojs/markdown-remark";
 import { remarkReadingTime } from "./plugins/remark-reading-time.mjs";
 import { remarkModifiedTime } from "./plugins/remark-modified-time.mjs";
 import rehypeKatex from "rehype-katex";
@@ -14,26 +15,30 @@ export default defineConfig({
     "/": "/en",
   },
   output: "static",
+  // Astro 7 defaults this to "jsx", which drops spaces between inline elements.
+  compressHTML: true,
   markdown: {
     syntaxHighlight: false,
-    remarkPlugins: [remarkReadingTime, remarkModifiedTime],
-    rehypePlugins: [
-      rehypeKatex,
+    processor: unified({
+      remarkPlugins: [remarkReadingTime, remarkModifiedTime],
+      rehypePlugins: [
+        rehypeKatex,
 
-      [
-        rehypePrettyCode,
-        {
-          theme: "vesper",
-          keepBackground: true,
-        },
+        [
+          rehypePrettyCode,
+          {
+            theme: "vesper",
+            keepBackground: true,
+          },
+        ],
+        [
+          rehypeExternalLinks,
+          {
+            content: { type: "text", value: "🔗" },
+          },
+        ],
       ],
-      [
-        rehypeExternalLinks,
-        {
-          content: { type: "text", value: "🔗" },
-        },
-      ],
-    ],
+    }),
   },
   i18n: {
     defaultLocale: "en",
