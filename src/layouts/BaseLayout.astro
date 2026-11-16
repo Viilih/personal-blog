@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import Footer from "../components/Footer.astro";
 import Sidebar from "../components/Sidebar.astro";
 import "../styles/global.css";
 import { getLangFromUrl, useTranslations } from "../i18n/utils";
@@ -93,6 +94,7 @@ const ogImage =
         <div class="shell__content">
           <slot />
         </div>
+        <Footer />
       </main>
     </div>
   </body>

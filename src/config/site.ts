@@ -1,4 +1,4 @@
-/** Site-wide identity and contact (home hero + #contact). */
+/** Site-wide identity and contact (home hero mailto + site footer). */
 export const site = {
   name: "Guilherme Nascimento",
   /** One-line role used with city on the home hero. */
