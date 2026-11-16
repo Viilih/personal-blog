@@ -251,7 +251,7 @@ builder.Services.AddDbContext <VoteSystemDbContext> (options => options.UseSqlSe
   b => b.MigrationsAssembly("votingSystem.Api")));
 ```
 
-Apenas um lembrete rápido—se você não está muito familiarizado com o .NET, você precisa configurar uma **ConnectionString** no seu `appsettings.json`. Aqui está um exemplo:
+Apenas um lembrete rápido: se você não está muito familiarizado com o .NET, você precisa configurar uma **ConnectionString** no seu `appsettings.json`. Aqui está um exemplo:
 
 ```json
 "ConnectionStrings": {
@@ -285,7 +285,7 @@ dotnet ef migrations add InitialMigration
 dotnet ef database update
 ```
 
-E é isso—temos nosso banco de dados configurado!
+E é isso: temos nosso banco de dados configurado!
 
 ### Implementação do repositório
 

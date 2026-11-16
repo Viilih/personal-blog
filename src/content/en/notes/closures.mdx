@@ -40,9 +40,9 @@ Now we're inside the execution context of the `outer` function! This is where th
 
 1. We create a variable `counter` with an initial value of 0. This `counter` lives in `outer`'s own local memory (which we call its variable environment or lexical environment).
 
-2. We **DECLARE** the `incrementCounter` function. Here's a crucial detail: when `incrementCounter` is declared, it "remembers" its surrounding environment – the one where `counter` lives! This "memory" is the very beginning of a closure.
+2. We **DECLARE** the `incrementCounter` function. Here's a crucial detail: when `incrementCounter` is declared, it "remembers" its surrounding environment, the one where `counter` lives! This "memory" is the very beginning of a closure.
 
-3. We return this `incrementCounter` function. When we do this, it's not just sending back the code; it's also taking a "backpack" – the lexical environment of the `outer()` function (where our `counter` variable is!) – and attaching it to `incrementCounter`. So, `anotherFunction` now holds the `incrementCounter` code plus that special backpack.
+3. We return this `incrementCounter` function. When we do this, it's not just sending back the code; it's also taking a "backpack", the lexical environment of the `outer()` function (where our `counter` variable is!), and attaching it to `incrementCounter`. So, `anotherFunction` now holds the `incrementCounter` code plus that special backpack.
 
 After the return, `outer`'s execution context is deleted, and the `outer()` function is popped off the call stack. But here's the kicker: because `anotherFunction` is still holding onto that "backpack" (the closure), the `counter` variable doesn't disappear! It sticks around, privately linked to `anotherFunction`.
 
@@ -60,7 +60,7 @@ Well, if we don't find it here, where's the next place we're going to search? Th
 
 This is exactly why that "backpack" is so vital! When we returned the `incrementCounter` function, it didn't just save its code; it also grabbed the lexical environment of the `outer()` function (where `counter` lives) and put it on its "back," working like that backpack we talked about.
 
-So, whenever we call `anotherFunction()`, and `incrementCounter` doesn't find `counter` in its immediate local memory, it doesn't go directly to the **GLOBAL** memory. Instead, it looks in that "backpack" – its closure – to find `counter` from its outer scope.
+So, whenever we call `anotherFunction()`, and `incrementCounter` doesn't find `counter` in its immediate local memory, it doesn't go directly to the **GLOBAL** memory. Instead, it looks in that "backpack" (its closure) to find `counter` from its outer scope.
 
 Whenever we keep calling `anotherFunction()`, we have a permanent, "private" counter data. Each execution increments that specific counter, thanks to the closure!
 

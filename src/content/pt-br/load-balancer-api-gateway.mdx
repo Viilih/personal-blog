@@ -25,13 +25,13 @@ Mas não é só sobre carga. O load balancer também é uma peça de resiliênci
 
 A forma como o load balancer decide pra qual servidor mandar cada requisição depende do algoritmo configurado. Os mais comuns são:
 
-**Round Robin** — O padrão do NGINX. Cada requisição vai pra um servidor diferente, em sequência. Servidor 1, Servidor 2, Servidor 3, volta pro 1. Simples e funciona bem quando as instâncias têm capacidade similar.
+**Round Robin**: O padrão do NGINX. Cada requisição vai pra um servidor diferente, em sequência. Servidor 1, Servidor 2, Servidor 3, volta pro 1. Simples e funciona bem quando as instâncias têm capacidade similar.
 
-**Least Connections** — Manda a requisição pro servidor que tem menos conexões ativas no momento. Útil quando as requisições têm tempos de processamento muito diferentes entre si.
+**Least Connections**: Manda a requisição pro servidor que tem menos conexões ativas no momento. Útil quando as requisições têm tempos de processamento muito diferentes entre si.
 
-**IP Hash** — Usa o IP do cliente pra decidir qual servidor vai atender. O mesmo cliente sempre cai no mesmo servidor. Isso é importante quando você precisa manter sessão (embora aplicações modernas tendam a resolver isso de outras formas).
+**IP Hash**: Usa o IP do cliente pra decidir qual servidor vai atender. O mesmo cliente sempre cai no mesmo servidor. Isso é importante quando você precisa manter sessão (embora aplicações modernas tendam a resolver isso de outras formas).
 
-**Weighted Round Robin** — Uma variação do Round Robin onde você define pesos. Se o Servidor A tem o dobro de capacidade do Servidor B, você configura ele pra receber o dobro de requisições.
+**Weighted Round Robin**: Uma variação do Round Robin onde você define pesos. Se o Servidor A tem o dobro de capacidade do Servidor B, você configura ele pra receber o dobro de requisições.
 
 No NGINX, trocar de algoritmo é questão de adicionar uma diretiva no bloco `upstream`. Eu mostro isso mais pra frente.
 
