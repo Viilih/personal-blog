@@ -33,21 +33,21 @@ export const ui = {
     "reading.minutes": "{n} min read",
     "seo.siteName": "Guilherme Nascimento",
     "seo.defaultDescription":
-      "Software engineer and digital garden — articles, notes, and what I'm doing now.",
+      "Software engineer and digital garden: articles, notes, and what I'm doing now.",
     "seo.home.description":
       "Software engineer · fullstack. Writing on React, TypeScript, Java, and computer science fundamentals.",
     "seo.now.title": "Now",
     "seo.now.description":
-      "What I'm doing now — work, studies, building, hobbies, and reading.",
+      "What I'm doing now: work, studies, building, hobbies, and reading.",
     "seo.writing.title": "Writing",
     "seo.writing.description": "Articles and notes.",
     "writing.empty": "No writing yet.",
     "seo.articles.title": "Articles",
     "seo.articles.description":
-      "Longer technical writing — tutorials, deep dives, and project write-ups.",
+      "Longer technical writing: tutorials, deep dives, and project write-ups.",
     "seo.notes.title": "Notes",
     "seo.notes.description":
-      "Short, evolving notes — ideas and snippets still taking shape.",
+      "Short, evolving notes: ideas and snippets still taking shape.",
     "seo.learning.title": "Learning",
     "seo.learning.description":
       "Thoughts and notes from the middle of learning something new.",
@@ -91,10 +91,10 @@ export const ui = {
     "writing.empty": "Ainda não há textos.",
     "seo.articles.title": "Artigos",
     "seo.articles.description":
-      "Textos técnicos mais longos — tutoriais, aprofundamentos e o que escrevo sobre projetos.",
+      "Textos técnicos mais longos: tutoriais, aprofundamentos e o que escrevo sobre projetos.",
     "seo.notes.title": "Notas",
     "seo.notes.description":
-      "Notas curtas, ainda em construção — ideias e trechos.",
+      "Notas curtas, ainda em construção: ideias e trechos.",
     "seo.learning.title": "Aprendizado",
     "seo.learning.description":
       "Ideias e notas no meio de aprender algo novo.",

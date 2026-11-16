@@ -21,13 +21,13 @@ export const currentlyBuilding = {
   en: {
     name: "Ledger Pay",
     summary:
-      "A personal payments project — studying databases, locks, and idempotency.",
+      "A personal payments project (studying databases, locks, and idempotency).",
     link: "https://github.com/Viilih/ledger-pay",
   },
   "pt-br": {
     name: "Ledger Pay",
     summary:
-      "Projeto pessoal de pagamentos — estudo banco de dados, locks e idempotência.",
+      "Projeto pessoal de pagamentos (estudo banco de dados, locks e idempotência).",
     link: "https://github.com/Viilih/ledger-pay",
   },
 } as const;
