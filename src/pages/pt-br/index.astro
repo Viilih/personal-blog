@@ -58,7 +58,9 @@ const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
       <p class="home__tagline">{roleLine}</p>
       <p class="home__about">{site.about[lang]}</p>
       <p class="home__actions">
-        <a class="home__btn home__btn--primary" href="#contact"
+        <a
+          class="home__btn home__btn--primary"
+          href={`mailto:${site.contact.email}`}
           >{t("home.contactCta")}</a
         >
       </p>
@@ -84,7 +86,6 @@ const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
 
     <footer id="contact" class="content-section home__contact">
       <h2>{t("home.contactHeading")}</h2>
-      <p class="home__contact-lead">{t("home.contactLead")}</p>
       <ul class="home__contact-list">
         <li>
           <a
@@ -271,12 +272,6 @@ const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
     letter-spacing: 0.04em;
     text-transform: lowercase;
     color: var(--prompt-color);
-  }
-
-  .home__contact-lead {
-    margin: 0 0 1rem;
-    max-width: 38rem;
-    color: var(--text-muted);
   }
 
   .home__contact-list {
