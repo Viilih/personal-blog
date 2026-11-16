@@ -6,24 +6,39 @@ import ThemeSlider from "./ThemeSlider.astro";
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const path = Astro.url.pathname;
+const homePath = `/${lang}`;
+const onHome = path === homePath || path === `${homePath}/`;
 
 const items = [
-  { href: `/${lang}`, label: t("sidebar.home"), match: "home" },
-  { href: `/${lang}/articles`, label: t("sidebar.articles"), match: "articles" },
-  { href: `/${lang}/notes`, label: t("sidebar.notes"), match: "notes" },
+  { href: homePath, label: t("sidebar.home"), match: "home" },
+  { href: `${homePath}#work`, label: t("sidebar.work"), match: "work" },
+  {
+    href: `${homePath}#writing`,
+    label: t("sidebar.writing"),
+    match: "writing",
+  },
   { href: `/${lang}/now`, label: t("sidebar.now"), match: "now" },
+  {
+    href: `${homePath}#contact`,
+    label: t("sidebar.contact"),
+    match: "contact",
+  },
 ] as const;
 
 function isActive(match: string): boolean {
   if (match === "home") {
-    return path === `/${lang}` || path === `/${lang}/`;
+    return onHome;
   }
-  return path.includes(`/${match}`);
+  if (match === "now") {
+    return path.includes("/now");
+  }
+  // Hash targets (#work / #writing / #contact) are client-side; keep inactive in SSR.
+  return false;
 }
 ---
 
 <nav class="site-nav">
-  <a class="site-nav__brand" href={`/${lang}`}>
+  <a class="site-nav__brand" href={homePath}>
     <span class="site-nav__prompt" aria-hidden="true">~/</span>
     <span class="site-nav__name">guilherme</span>
   </a>

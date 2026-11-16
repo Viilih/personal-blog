@@ -1,11 +1,14 @@
 ---
 import { getCollection } from "astro:content";
 import PostList from "../../components/PostList.astro";
+import WorkCard from "../../components/WorkCard.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Link from "components/Link.astro";
+import { site } from "../../data/site";
+import { workItems } from "../../data/work";
 import { useTranslations } from "../../i18n/utils";
 
 const t = useTranslations("pt-br");
+const lang = "pt-br" as const;
 
 const blogPosts = await getCollection("pt-br", (post) => !post.data.draft);
 const notePosts = await getCollection("pt-br-notes", (post) => !post.data.draft);
@@ -32,13 +35,15 @@ const typeLabels = {
   weekly: "semanal",
 } as const;
 
-const recentByType = typeOrder
+const writingByType = typeOrder
   .map((type) => ({
     type,
     label: typeLabels[type],
     posts: sortedPosts.filter((post) => post._type === type),
   }))
   .filter((group) => group.posts.length > 0);
+
+const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
 ---
 
 <BaseLayout
@@ -50,35 +55,34 @@ const recentByType = typeOrder
       <p class="home__prompt" aria-hidden="true">
         <span class="home__prompt-symbol">$</span> whoami
       </p>
-      <h1 class="home__name">Guilherme Nascimento</h1>
-      <p class="home__tagline">Engenheiro de software · fullstack</p>
-      <p class="home__lead">
-        Trabalho com React, TypeScript, Java, Spring Boot e Postgres. Estudo
-        fundamentos de ciência da computação, estruturas de dados e algoritmos.
-        Veja o que estou fazendo agora em <a href="/pt-br/now">/now</a>.
-      </p>
-      <p class="home__hobbies">
-        Fora do trabalho: mágica, astronomia, música e livros.
-      </p>
-      <p class="home__links">
-        Código e projetos no
-        <Link href="https://github.com/Viilih">GitHub</Link>.
+      <h1 class="home__name">{site.name}</h1>
+      <p class="home__tagline">{roleLine}</p>
+      <p class="home__actions">
+        <a class="home__btn home__btn--primary" href="#work">{t("home.viewWork")}</a>
+        <a class="home__btn" href="#contact">{t("home.contactCta")}</a>
       </p>
     </header>
 
-    <nav class="home__explore" aria-label="Explorar">
-      <span class="home__explore-label" aria-hidden="true">~/</span>
-      <a href="/pt-br/articles">artigos</a>
-      <span class="home__sep" aria-hidden="true">/</span>
-      <a href="/pt-br/notes">anotações</a>
-      <span class="home__sep" aria-hidden="true">/</span>
-      <a href="/pt-br/now">agora</a>
-    </nav>
+    <section id="work" class="content-section home__work">
+      <h2>{t("home.workHeading")}</h2>
+      <div class="home__work-list">
+        {
+          workItems.map((item) => (
+            <WorkCard
+              item={item}
+              lang={lang}
+              repoLabel={t("home.repo")}
+              demoLabel={t("home.demo")}
+            />
+          ))
+        }
+      </div>
+    </section>
 
-    <section class="content-section home__recent">
-      <h2>Recentes</h2>
+    <section id="writing" class="content-section home__writing">
+      <h2>{t("home.writingHeading")}</h2>
       {
-        recentByType.map((group) => (
+        writingByType.map((group) => (
           <div class="home__group">
             <h3 class="home__group-label">{group.label}</h3>
             <PostList posts={group.posts} showType={false} />
@@ -86,13 +90,39 @@ const recentByType = typeOrder
         ))
       }
     </section>
+
+    <footer id="contact" class="content-section home__contact">
+      <h2>{t("home.contactHeading")}</h2>
+      <ul class="home__contact-list">
+        <li>
+          <span class="home__contact-label mono">{t("home.email")}</span>
+          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+        </li>
+        <li>
+          <span class="home__contact-label mono">{t("home.linkedin")}</span>
+          <a
+            href={site.contact.linkedin}
+            target="_blank"
+            rel="noreferrer noopener">LinkedIn</a
+          >
+        </li>
+        <li>
+          <span class="home__contact-label mono">{t("home.github")}</span>
+          <a
+            href={site.contact.github}
+            target="_blank"
+            rel="noreferrer noopener">GitHub</a
+          >
+        </li>
+      </ul>
+    </footer>
   </section>
 </BaseLayout>
 
 <style>
   .home__hero {
     max-width: 38rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
   }
 
   .home__prompt {
@@ -114,61 +144,69 @@ const recentByType = typeOrder
   }
 
   .home__tagline {
-    margin: 0 0 1.25rem;
+    margin: 0 0 1.35rem;
     font-size: 1.05rem;
     color: var(--text-muted);
   }
 
-  .home__lead,
-  .home__hobbies,
-  .home__links {
-    margin: 0 0 0.85rem;
-    color: var(--color);
-  }
-
-  .home__hobbies {
-    color: var(--text-muted);
-  }
-
-  .home__links {
-    margin-bottom: 0;
-    color: var(--text-muted);
-  }
-
-  .home__explore {
+  .home__actions {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.65rem;
+    margin: 0;
+  }
+
+  .home__btn {
+    display: inline-flex;
     align-items: center;
-    gap: 0.4rem 0.5rem;
-    padding: 0.85rem 0;
-    margin-bottom: 0.5rem;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-  }
-
-  .home__explore-label {
-    color: var(--prompt-color);
-    font-weight: 500;
-  }
-
-  .home__explore a {
+    justify-content: center;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
     color: var(--heading-color);
     text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    background: transparent;
+    transition:
+      color var(--transition-speed) ease,
+      background-color var(--transition-speed) ease,
+      border-color var(--transition-speed) ease;
   }
 
-  .home__explore a:hover {
+  .home__btn:hover {
+    text-decoration: none;
+    border-color: var(--accent-color);
     color: var(--accent-color);
-    text-decoration: underline;
   }
 
-  .home__sep {
-    color: var(--text-muted);
-    opacity: 0.6;
+  .home__btn--primary {
+    background: var(--accent-soft);
+    border-color: transparent;
+    color: var(--heading-color);
   }
 
-  .home__recent :global(.post-list) {
+  .home__btn--primary:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  .home__work,
+  .home__writing,
+  .home__contact {
+    margin-top: 2.5rem;
+    scroll-margin-top: 1.5rem;
+  }
+
+  .home__work-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-top: 1rem;
+  }
+
+  .home__writing :global(.post-list) {
     border-top: none;
   }
 
@@ -188,5 +226,37 @@ const recentByType = typeOrder
     letter-spacing: 0.04em;
     text-transform: lowercase;
     color: var(--prompt-color);
+  }
+
+  .home__contact-list {
+    list-style: none;
+    margin: 0.85rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .home__contact-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.85rem;
+    align-items: baseline;
+  }
+
+  .home__contact-label {
+    min-width: 5.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .home__contact-list a {
+    color: var(--heading-color);
+    text-decoration: none;
+  }
+
+  .home__contact-list a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
   }
 </style>
