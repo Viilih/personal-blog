@@ -11,36 +11,17 @@ const lang = "en" as const;
 
 const blogPosts = await getCollection("en", (post) => !post.data.draft);
 const notePosts = await getCollection("en-notes", (post) => !post.data.draft);
-const weeklyPosts = await getCollection("en-weekly", (post) => !post.data.draft);
 
-const allPosts = [
+const recentWriting = [
   ...blogPosts.map((post) => ({ ...post, _type: "article" as const })),
   ...notePosts.map((post) => ({ ...post, _type: "note" as const })),
-  ...weeklyPosts.map((post) => ({ ...post, _type: "weekly" as const })),
-];
-
-const sortedPosts = allPosts
+]
   .sort((a, b) => {
     const dateA = new Date(a.data.pubDate).getTime();
     const dateB = new Date(b.data.pubDate).getTime();
     return dateB - dateA;
   })
-  .slice(0, 6);
-
-const typeOrder = ["article", "note", "weekly"] as const;
-const typeLabels = {
-  article: "articles",
-  note: "notes",
-  weekly: "weekly",
-} as const;
-
-const writingByType = typeOrder
-  .map((type) => ({
-    type,
-    label: typeLabels[type],
-    posts: sortedPosts.filter((post) => post._type === type),
-  }))
-  .filter((group) => group.posts.length > 0);
+  .slice(0, 3);
 
 const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
 ---
@@ -74,14 +55,10 @@ const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
 
     <section id="writing" class="content-section home__writing">
       <h2>{t("home.writingHeading")}</h2>
-      {
-        writingByType.map((group) => (
-          <div class="home__group">
-            <h3 class="home__group-label">{group.label}</h3>
-            <PostList posts={group.posts} showType={false} />
-          </div>
-        ))
-      }
+      <PostList posts={recentWriting} showType={false} />
+      <p class="home__all-writing">
+        <a href={`/${lang}/writing`}>{t("home.allWriting")}</a>
+      </p>
     </section>
 
     <footer id="contact" class="content-section home__contact">
@@ -256,22 +233,13 @@ const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
     border-top: none;
   }
 
-  .home__group {
-    margin-bottom: 1.25rem;
+  .home__all-writing {
+    margin: 0.85rem 0 0;
   }
 
-  .home__group:last-child {
-    margin-bottom: 0;
-  }
-
-  .home__group-label {
-    margin: 0 0 0.15rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+  .home__all-writing a {
+    font-size: 0.9375rem;
     font-weight: 500;
-    letter-spacing: 0.04em;
-    text-transform: lowercase;
-    color: var(--prompt-color);
   }
 
   .home__contact-list {
