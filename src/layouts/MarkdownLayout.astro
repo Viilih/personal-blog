@@ -73,9 +73,20 @@ function buildToc(headings: Heading[]) {
 
 const toc = buildToc(headings);
 const hasToc = toc.length > 0;
+
+/** Only use frontmatter description — never invent article copy. */
+const seoDescription =
+  typeof frontmatter.description === "string" &&
+  frontmatter.description.trim().length > 0
+    ? frontmatter.description.trim()
+    : undefined;
 ---
 
-<BaseLayout title={frontmatter.title}>
+<BaseLayout
+  title={frontmatter.title}
+  description={seoDescription}
+  ogType="article"
+>
   <div class:list={["doc", { "doc--with-toc": hasToc }]}>
     <article class="doc__article">
       <GoBackButton />

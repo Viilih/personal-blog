@@ -2,8 +2,10 @@
 import { getCollection } from "astro:content";
 import GoBackButton from "../../../components/GoBackButton.astro";
 import PostList from "../../../components/PostList.astro";
+import { useTranslations } from "../../../i18n/utils";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 
+const t = useTranslations("en");
 const posts = await getCollection("en-notes", (post) => !post.data.draft);
 
 const sortedPosts = posts
@@ -17,7 +19,10 @@ const sortedPosts = posts
 const count = sortedPosts.length;
 ---
 
-<BaseLayout title="Notes · Guilherme">
+<BaseLayout
+  title={t("seo.notes.title")}
+  description={t("seo.notes.description")}
+>
   <section class="index-page">
     <GoBackButton />
     <header class="index-page__header">

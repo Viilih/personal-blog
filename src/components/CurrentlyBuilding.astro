@@ -1,0 +1,76 @@
+---
+import { currentlyBuilding } from "../data/now";
+import type { NowLang } from "../data/now";
+
+interface Props {
+  lang: NowLang;
+  label: string;
+  linkLabel: string;
+}
+
+const { lang, label, linkLabel } = Astro.props;
+const item = currentlyBuilding[lang];
+const link = item.link?.trim() ? item.link.trim() : null;
+---
+
+<aside class="building" aria-labelledby="building-label">
+  <p id="building-label" class="building__label mono">{label}</p>
+  <p class="building__name">{item.name}</p>
+  <p class="building__summary">{item.summary}</p>
+  {
+    link && (
+      <p class="building__link">
+        <a href={link} target="_blank" rel="noreferrer noopener">
+          {linkLabel}
+        </a>
+      </p>
+    )
+  }
+</aside>
+
+<style>
+  .building {
+    max-width: 38rem;
+    margin: 0 0 0.5rem;
+    padding: 0.85rem 0 0.85rem 1rem;
+    border-left: 3px solid var(--accent-color);
+  }
+
+  .building__label {
+    margin: 0 0 0.45rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--prompt-color);
+  }
+
+  .building__name {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--heading-color);
+    letter-spacing: -0.02em;
+  }
+
+  .building__summary {
+    margin: 0;
+    color: var(--color);
+  }
+
+  .building__link {
+    margin: 0.55rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .building__link a {
+    color: var(--heading-color);
+    text-decoration: none;
+  }
+
+  .building__link a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+  }
+</style>

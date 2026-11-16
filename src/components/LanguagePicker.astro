@@ -4,24 +4,27 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 
 const currentPath = Astro.url.pathname;
 const currentLang = Astro.currentLocale ?? "en";
-const newLang = currentLang === "en" ? "pt-br" : "en";
 const cleanPath = currentPath.replace(/^\/(en|pt-br)/, "");
 ---
 
 <div class="language-picker">
   {
-    Object.entries(languages).map(([lang, label], index) => (
-      <>
-        {index > 0 && <div class="language-separator" />}
-        <a
-          href={getRelativeLocaleUrl(newLang, cleanPath)}
-          class={`language-link ${currentLang === lang ? "active" : ""}`}
-        >
-          {lang === "pt-br" ? "PT" : "EN"}
-          <span class="sr-only">{label}</span>
-        </a>
-      </>
-    ))
+    Object.entries(languages).map(([lang, label], index) => {
+      const isCurrent = currentLang === lang;
+      return (
+        <>
+          {index > 0 && <div class="language-separator" />}
+          <a
+            href={getRelativeLocaleUrl(lang, cleanPath)}
+            class:list={["language-link", { active: isCurrent }]}
+            aria-current={isCurrent ? "true" : undefined}
+          >
+            {lang === "pt-br" ? "PT" : "EN"}
+            <span class="sr-only">{label}</span>
+          </a>
+        </>
+      );
+    })
   }
 </div>
 

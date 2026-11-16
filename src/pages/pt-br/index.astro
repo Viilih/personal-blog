@@ -1,8 +1,13 @@
 ---
 import { getCollection } from "astro:content";
+import CurrentlyBuilding from "../../components/CurrentlyBuilding.astro";
 import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Link from "components/Link.astro";
+import { site } from "../../config/site";
+import { useTranslations } from "../../i18n/utils";
+
+const t = useTranslations("pt-br");
+const lang = "pt-br" as const;
 
 const blogPosts = await getCollection("pt-br", (post) => !post.data.draft);
 const notePosts = await getCollection("pt-br-notes", (post) => !post.data.draft);
@@ -29,50 +34,48 @@ const typeLabels = {
   weekly: "semanal",
 } as const;
 
-const recentByType = typeOrder
+const writingByType = typeOrder
   .map((type) => ({
     type,
     label: typeLabels[type],
     posts: sortedPosts.filter((post) => post._type === type),
   }))
   .filter((group) => group.posts.length > 0);
+
+const roleLine = `${site.role[lang]} · ${site.city[lang]}`;
 ---
 
-<BaseLayout title="Guilherme Nascimento">
+<BaseLayout
+  title={t("seo.siteName")}
+  description={t("seo.home.description")}
+>
   <section class="home">
     <header class="home__hero">
       <p class="home__prompt" aria-hidden="true">
         <span class="home__prompt-symbol">$</span> whoami
       </p>
-      <h1 class="home__name">Guilherme Nascimento</h1>
-      <p class="home__tagline">Engenheiro de software · fullstack</p>
-      <p class="home__lead">
-        Trabalho com React, TypeScript, Java, Spring Boot e Postgres. Estudo
-        fundamentos de ciência da computação, estruturas de dados e algoritmos.
-        Veja o que estou fazendo agora em <a href="/pt-br/now">/now</a>.
-      </p>
-      <p class="home__hobbies">
-        Fora do trabalho: mágica, astronomia, música e livros.
-      </p>
-      <p class="home__links">
-        Código e projetos no
-        <Link href="https://github.com/Viilih">GitHub</Link>.
+      <h1 class="home__name">{site.name}</h1>
+      <p class="home__tagline">{roleLine}</p>
+      <p class="home__about">{site.about[lang]}</p>
+      <p class="home__actions">
+        <a
+          class="home__btn home__btn--primary"
+          href={`mailto:${site.contact.email}`}
+          >{t("home.contactCta")}</a
+        >
       </p>
     </header>
 
-    <nav class="home__explore" aria-label="Explorar">
-      <span class="home__explore-label" aria-hidden="true">~/</span>
-      <a href="/pt-br/articles">articles</a>
-      <span class="home__sep" aria-hidden="true">/</span>
-      <a href="/pt-br/notes">notes</a>
-      <span class="home__sep" aria-hidden="true">/</span>
-      <a href="/pt-br/now">now</a>
-    </nav>
+    <CurrentlyBuilding
+      lang={lang}
+      label={t("home.buildingLabel")}
+      linkLabel={t("home.buildingLink")}
+    />
 
-    <section class="content-section home__recent">
-      <h2>Recentes</h2>
+    <section id="writing" class="content-section home__writing">
+      <h2>{t("home.writingHeading")}</h2>
       {
-        recentByType.map((group) => (
+        writingByType.map((group) => (
           <div class="home__group">
             <h3 class="home__group-label">{group.label}</h3>
             <PostList posts={group.posts} showType={false} />
@@ -80,6 +83,82 @@ const recentByType = typeOrder
         ))
       }
     </section>
+
+    <footer id="contact" class="content-section home__contact">
+      <h2>{t("home.contactHeading")}</h2>
+      <ul class="home__contact-list">
+        <li>
+          <a
+            class="home__contact-link"
+            href={`mailto:${site.contact.email}`}
+            aria-label={`${t("home.email")}: ${site.contact.email}`}
+          >
+            <svg
+              class="home__contact-icon"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z"
+              ></path>
+            </svg>
+            <span>{site.contact.email}</span>
+          </a>
+        </li>
+        <li>
+          <a
+            class="home__contact-link"
+            href={site.contact.linkedin}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label={t("home.linkedin")}
+          >
+            <svg
+              class="home__contact-icon"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 18.34H5.67v-8.16h2.67v8.16zM7 9.05c-.86 0-1.55-.7-1.55-1.56S6.14 5.93 7 5.93s1.55.7 1.55 1.56S7.86 9.05 7 9.05zm11.34 9.29h-2.67v-4.36c0-1.04-.02-2.38-1.45-2.38-1.45 0-1.67 1.13-1.67 2.3v4.44H9.88v-8.16h2.56v1.11h.04c.36-.68 1.23-1.4 2.53-1.4 2.7 0 3.33 1.78 3.33 4.09v4.36z"
+              ></path>
+            </svg>
+            <span>{t("home.linkedin")}</span>
+          </a>
+        </li>
+        <li>
+          <a
+            class="home__contact-link"
+            href={site.contact.github}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label={t("home.github")}
+          >
+            <svg
+              class="home__contact-icon"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05A9.3 9.3 0 0 1 12 6.84c.85.01 1.71.12 2.51.35 1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.95.68 1.92 0 1.38-.01 2.49-.01 2.83 0 .26.18.58.69.48A10.03 10.03 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"
+              ></path>
+            </svg>
+            <span>{t("home.github")}</span>
+          </a>
+        </li>
+      </ul>
+    </footer>
   </section>
 </BaseLayout>
 
@@ -103,66 +182,77 @@ const recentByType = typeOrder
 
   .home__name {
     margin: 0 0 0.5rem;
+    font-family: var(--font-display);
     font-size: clamp(2rem, 4vw, 2.5rem);
-    letter-spacing: -0.03em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   .home__tagline {
-    margin: 0 0 1.25rem;
+    margin: 0 0 0.85rem;
     font-size: 1.05rem;
     color: var(--text-muted);
   }
 
-  .home__lead,
-  .home__hobbies,
-  .home__links {
-    margin: 0 0 0.85rem;
+  .home__about {
+    max-width: 60ch;
+    margin: 0 0 1.35rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
     color: var(--color);
   }
 
-  .home__hobbies {
-    color: var(--text-muted);
-  }
-
-  .home__links {
-    margin-bottom: 0;
-    color: var(--text-muted);
-  }
-
-  .home__explore {
+  .home__actions {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.65rem;
+    margin: 0;
+  }
+
+  .home__btn {
+    display: inline-flex;
     align-items: center;
-    gap: 0.4rem 0.5rem;
-    padding: 0.85rem 0;
-    margin-bottom: 0.5rem;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-  }
-
-  .home__explore-label {
-    color: var(--prompt-color);
-    font-weight: 500;
-  }
-
-  .home__explore a {
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
     color: var(--heading-color);
     text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    background: transparent;
+    transition:
+      color var(--transition-speed) ease,
+      background-color var(--transition-speed) ease,
+      border-color var(--transition-speed) ease;
   }
 
-  .home__explore a:hover {
+  .home__btn:hover {
+    text-decoration: none;
+    border-color: var(--accent-color);
     color: var(--accent-color);
-    text-decoration: underline;
   }
 
-  .home__sep {
-    color: var(--text-muted);
-    opacity: 0.6;
+  .home__btn--primary {
+    background: var(--accent-soft);
+    border-color: transparent;
+    color: var(--heading-color);
   }
 
-  .home__recent :global(.post-list) {
+  .home__btn--primary:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  .home__writing,
+  .home__contact {
+    margin-top: 2.5rem;
+    scroll-margin-top: 1.5rem;
+  }
+
+  .home__writing :global(.post-list) {
     border-top: none;
   }
 
@@ -182,5 +272,49 @@ const recentByType = typeOrder
     letter-spacing: 0.04em;
     text-transform: lowercase;
     color: var(--prompt-color);
+  }
+
+  .home__contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .home__contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    padding: 0.35rem 0.15rem;
+    color: var(--heading-color);
+    text-decoration: none;
+  }
+
+  .home__contact-link:hover {
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+
+  .home__contact-link:hover span {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .home__contact-icon {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .home__contact-list {
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .home__contact-link {
+      width: 100%;
+    }
   }
 </style>

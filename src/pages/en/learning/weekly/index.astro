@@ -1,9 +1,11 @@
 ---
 import { getCollection } from "astro:content";
 import GoBackButton from "components/GoBackButton.astro";
+import { useTranslations } from "../../../../i18n/utils";
 import BaseLayout from "layouts/BaseLayout.astro";
 import PostList from "../../../../components/PostList.astro";
 
+const t = useTranslations("en");
 const posts = await getCollection("en-weekly", (post) => !post.data.draft);
 
 const sortedPosts = posts
@@ -15,7 +17,10 @@ const sortedPosts = posts
   .map((post) => ({ ...post, _type: "weekly" as const }));
 ---
 
-<BaseLayout title="Weekly · Guilherme">
+<BaseLayout
+  title={t("seo.weekly.title")}
+  description={t("seo.weekly.description")}
+>
   <GoBackButton />
   <header class="weekly-header">
     <p class="weekly-path" aria-hidden="true">~/learning/weekly</p>

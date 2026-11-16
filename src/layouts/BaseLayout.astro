@@ -2,10 +2,50 @@
 import { ClientRouter } from "astro:transitions";
 import Sidebar from "../components/Sidebar.astro";
 import "../styles/global.css";
-import { getLangFromUrl } from "../i18n/utils";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+interface Props {
+  /** Page title segment, or full site name for home. */
+  title?: string;
+  /** Legacy alias for title. */
+  pageTitle?: string;
+  /** Meta / OG description. Falls back to locale default. */
+  description?: string;
+  /** Absolute or site-relative OG image. Defaults to /og.png. */
+  image?: string;
+  /** Open Graph type. Defaults to website. */
+  ogType?: "website" | "article";
+}
 
 const lang = getLangFromUrl(Astro.url);
-const title = Astro.props.title || Astro.props.pageTitle || "Guilherme Nascimento";
+const t = useTranslations(lang);
+
+const siteName = t("seo.siteName");
+const defaultDescription = t("seo.defaultDescription");
+
+const rawTitle = (Astro.props.title || Astro.props.pageTitle || siteName).trim();
+const title =
+  rawTitle === siteName || rawTitle.endsWith(`· ${siteName}`)
+    ? rawTitle
+    : `${rawTitle} · ${siteName}`;
+
+const description = (Astro.props.description || defaultDescription).trim();
+const ogType = Astro.props.ogType ?? "website";
+
+const ogLocale = lang === "pt-br" ? "pt_BR" : "en_US";
+const ogLocaleAlternate = lang === "pt-br" ? "en_US" : "pt_BR";
+
+/** Absolute only when `site` is set in astro.config — avoid baking localhost into static HTML. */
+const canonicalURL = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : null;
+
+const defaultImagePath = "/og.png";
+const imageProp = (Astro.props.image || defaultImagePath).trim();
+const ogImage =
+  Astro.site && imageProp.startsWith("/")
+    ? new URL(imageProp, Astro.site).href
+    : imageProp;
 ---
 
 <!doctype html>
@@ -14,11 +54,32 @@ const title = Astro.props.title || Astro.props.pageTitle || "Guilherme Nasciment
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.png" />
+    <meta name="description" content={description} />
+    <meta name="author" content={siteName} />
+    {canonicalURL && <link rel="canonical" href={canonicalURL} />}
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonicalURL && <meta property="og:url" content={canonicalURL} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlternate} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
     <ClientRouter />

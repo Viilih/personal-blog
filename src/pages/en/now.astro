@@ -2,12 +2,17 @@
 import GoBackButton from "components/GoBackButton.astro";
 import Link from "components/Link.astro";
 import { nowMeta } from "../../data/now";
+import { useTranslations } from "../../i18n/utils";
 import BaseLayout from "layouts/BaseLayout.astro";
 
+const t = useTranslations("en");
 const now = nowMeta.en;
 ---
 
-<BaseLayout title="Now · Guilherme">
+<BaseLayout
+  title={t("seo.now.title")}
+  description={t("seo.now.description")}
+>
   <GoBackButton />
   <header class="now-header">
     <p class="now-path" aria-hidden="true">~/now</p>
