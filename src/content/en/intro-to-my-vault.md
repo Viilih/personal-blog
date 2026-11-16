@@ -6,7 +6,7 @@ draft: false
 
 ## What is this blog?
 
-This is a public space where I share my thoughts and publish content that might be useful (or not) to me, and hopefully to you too.
+This is a public space where I share my thoughts and publish content that might be useful (or not) to me—and hopefully to you too.
 
 ## What this blog going to talk about?
 
@@ -16,7 +16,7 @@ Maybe advice for myself and some of my hobbies.
 
 ## Who am I?
 
-I'm a full stack developer on a platform engineering team at Vivo, through Stefanini, working mostly with React, TypeScript, Node.js/NestJS, and Java/Spring Boot. Outside work, I study backend reliability (concurrency, race conditions) and data structures and algorithms, and I write about what I learn in this digital garden.
+I'm a software engineer based in Brazil who likes astronomy, magic and music. As i write more posts hopefully I will get into more different topics in tech filed in general, not only frontend and backend development, but into more different areas (AI maybe? LLMs? Compilers? who knows).However only the time will tell this as it flies by.
 
 If you, my dear reader, want to know more about me you can check my [website](https://guilherme-dev-pi.vercel.app/)
 

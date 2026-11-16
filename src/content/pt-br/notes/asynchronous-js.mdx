@@ -37,7 +37,7 @@ Mas isso ainda não dá conta das novas situações que aparecem por aí.
 
 ## Além do JavaScript: As Funcionalidades do Navegador
 
-Pra lidar com essas situações, a gente precisa de mais do que só o JavaScript: precisamos de recursos além da linguagem! É aí que entram esses novos componentes:
+Pra lidar com essas situações, a gente precisa de mais do que só o JavaScript — precisamos de recursos além da linguagem! É aí que entram esses novos componentes:
 
 - **APIs do Navegador**
 - **Promises**
@@ -47,9 +47,9 @@ JavaScript normalmente roda dentro do navegador! E é por isso que conseguimos a
 
 **Funcionalidades do navegador:**
 
-- Requisições de rede (`fetch`/`xhr`)
-- Manipulação do DOM (`document`)
-- Temporizadores (`setTimeout`)
+- Requisições de rede – (`fetch`/`xhr`)
+- Manipulação do DOM – (`document`)
+- Temporizadores – (`setTimeout`)
 
 ## Algumas perguntas "simples"
 
@@ -101,13 +101,13 @@ console.log("Hi outside the function");
 
 ### Passo a passo
 
-**Primeiro**, declaramos a função `printHello`: nada demais.
+**Primeiro**, declaramos a função `printHello` – nada demais.
 
 **Depois**, declaramos `blockFor1Sec`, que vai bloquear a thread por 1 segundo com algum loop gigantesco.
 
 **Em seguida**, chamamos uma funcionalidade do navegador através da função `setTimeout`. Isso diz pro navegador: "depois de 0 milissegundos, execute a função `printHello`".
 
-**Detalhe importante:** `setTimeout` não é uma função do JavaScript: é uma **Web API** fornecida pelo navegador! Quando o JS encontra o `setTimeout`, ele delega essa tarefa pro navegador e já segue pra próxima linha de código.
+**Detalhe importante:** `setTimeout` não é uma função do JavaScript – é uma **Web API** fornecida pelo navegador! Quando o JS encontra o `setTimeout`, ele delega essa tarefa pro navegador e já segue pra próxima linha de código.
 
 Mas... a função `printHello` vai rodar logo depois? **NÃO!** A gente vai entender por quê daqui a pouco, mas já guarda essa informação 💝
 
@@ -121,7 +121,7 @@ Quando `blockFor1Sec` termina, ela sai da call stack. E agora sim vamos executar
 
 Você pode estar pensando:
 
-- **Por que `printHello` não foi direto pra call stack depois do `setTimeout`?** Porque `setTimeout` é uma **Web API**, não faz parte do JavaScript puro! Quando usamos Web APIs (como `setTimeout`, `fetch`, eventos do DOM etc.), o navegador cuida delas separadamente da thread principal do JS. Quando a tarefa termina, o navegador coloca a callback (`printHello`) na **callback queue**, e não direto na call stack.
+- **Por que `printHello` não foi direto pra call stack depois do `setTimeout`?** Porque `setTimeout` é uma **Web API**, não faz parte do JavaScript puro! Quando usamos Web APIs (como `setTimeout`, `fetch`, eventos do DOM etc.), o navegador cuida delas separadamente da thread principal do JS. Quando a tarefa termina, o navegador coloca a callback (`printHello`) na **callback queue** – e não direto na call stack.
 
 - **Então quando a gente pode tirar `printHello` da callback queue e jogar na call stack?** Só quando a call stack estiver completamente vazia! O sistema fica o tempo todo perguntando:
 
@@ -147,6 +147,6 @@ O **Event Loop** é o "controlador de tráfego" do JavaScript, coordenando tudo 
 3. **Move** a primeira função da callback queue pra call stack (somente quando estiver vazia)
 4. **Repete** esse processo pra sempre
 
-**Por que isso é importante?** Porque o JavaScript é single-threaded, mas o navegador não é! Ele consegue lidar com várias tarefas ao mesmo tempo (timers, requisições de rede etc.) enquanto o JS vai rodando seu código. O event loop garante que, quando essas tarefas do navegador terminarem, suas callbacks sejam executadas na hora certa, ou seja, quando a thread principal estiver livre.
+**Por que isso é importante?** Porque o JavaScript é single-threaded, mas o navegador não é! Ele consegue lidar com várias tarefas ao mesmo tempo (timers, requisições de rede etc.) enquanto o JS vai rodando seu código. O event loop garante que, quando essas tarefas do navegador terminarem, suas callbacks sejam executadas na hora certa – ou seja, quando a thread principal estiver livre.
 
 **Simplificando:** O event loop é o que permite o JavaScript ser não bloqueante mesmo sendo single-threaded. Ele faz a ponte entre o jeito síncrono do JavaScript e o mundo assíncrono das Web APIs.

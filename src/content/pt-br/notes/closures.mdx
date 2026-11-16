@@ -40,9 +40,9 @@ Agora estamos dentro do contexto de execução da função `outer`! É aqui que 
 
 1. Criamos uma variável `counter` com valor inicial 0. Esse `counter` vive na memória local da `outer` (que chamamos de variable environment ou lexical enviroment).
 
-2. **DECLARAMOS** a função `incrementCounter`. Aqui está um detalhe crucial: quando `incrementCounter` é declarada, ela "lembra" do ambiente que a cerca, aquele onde `counter` vive! Essa "memória" é o começo de um closure.
+2. **DECLARAMOS** a função `incrementCounter`. Aqui está um detalhe crucial: quando `incrementCounter` é declarada, ela "lembra" do ambiente que a cerca – aquele onde `counter` vive! Essa "memória" é o começo de um closure.
 
-3. Retornamos essa função `incrementCounter`. Quando fazemos isso, não estamos só mandando o código de volta; ela também está levando uma "mochila", o lexical environment da função `outer()` (onde nossa variável `counter` está!), e anexando à `incrementCounter`. Então, `anotherFunction` agora tem o código da `incrementCounter` mais essa mochila especial.
+3. Retornamos essa função `incrementCounter`. Quando fazemos isso, não estamos só mandando o código de volta; ela também está levando uma "mochila" – o lexical environment da função `outer()` (onde nossa variável `counter` está!) – e anexando à `incrementCounter`. Então, `anotherFunction` agora tem o código da `incrementCounter` mais essa mochila especial.
 
 Depois do return, o contexto de execução da `outer` é deletado, e a função `outer()` sai da call stack. Mas aqui está o pulo do gato: como `anotherFunction` ainda está segurando essa "mochila" (o closure), a variável `counter` não desaparece! Ela fica por aí, privadamente ligada à `anotherFunction`.
 
@@ -60,7 +60,7 @@ Bom, se não encontramos aqui, qual é o próximo lugar que vamos procurar? A me
 
 É exatamente por isso que essa "mochila" é tão vital! Quando retornamos a função `incrementCounter`, ela não só salvou seu código; ela também pegou o lexical environment da função `outer()` (onde `counter` vive) e colocou nas suas "costas", funcionando como aquela mochila que falamos.
 
-Então, sempre que chamamos `anotherFunction()`, e `incrementCounter` não encontra `counter` na sua memória local imediata, ela não vai direto pra memória **GLOBAL**. Em vez disso, ela olha naquela "mochila" (seu closure) pra encontrar `counter` do seu escopo externo.
+Então, sempre que chamamos `anotherFunction()`, e `incrementCounter` não encontra `counter` na sua memória local imediata, ela não vai direto pra memória **GLOBAL**. Em vez disso, ela olha naquela "mochila" – seu closure – pra encontrar `counter` do seu escopo externo.
 
 Sempre que continuamos chamando `anotherFunction()`, temos dados de contador permanentes e "privados". Cada execução incrementa aquele contador específico, graças ao closure!
 
