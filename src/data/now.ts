@@ -6,7 +6,7 @@ export const nowMeta = {
   },
   "pt-br": {
     lastUpdatedDisplay: "9 de novembro de 2026",
-    updatedPrefix: "Atualizado em",
+    updatedPrefix: "Última atualização",
   },
 } as const;
 
@@ -27,7 +27,7 @@ export const currentlyBuilding = {
   "pt-br": {
     name: "Ledger Pay",
     summary:
-      "Um projeto pessoal de pagamentos — estudando bancos de dados, locks e idempotência.",
+      "Projeto pessoal de pagamentos — estudo banco de dados, locks e idempotência.",
     link: "https://github.com/Viilih/ledger-pay",
   },
 } as const;
