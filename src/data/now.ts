@@ -14,19 +14,20 @@ export type NowLang = keyof typeof nowMeta;
 
 /**
  * Discreet “Currently building” highlight on the home page.
- * Copy sourced from /now Building. Omit `link` (or leave empty) to hide the project link.
+ * Copy sourced from /now Building + Studies (Ledger Pay / systems).
+ * Omit `link` (or leave empty) to hide the project link.
  */
 export const currentlyBuilding = {
   en: {
-    name: "LedgerPay",
+    name: "Ledger Pay",
     summary:
-      "Work in progress: a double-entry ledger in Java 21, Spring Boot 4, and PostgreSQL.",
-    link: "",
+      "A personal payments project — studying databases, locks, and idempotency.",
+    link: "https://github.com/Viilih/ledger-pay",
   },
   "pt-br": {
-    name: "LedgerPay",
+    name: "Ledger Pay",
     summary:
-      "Em andamento: um ledger de partidas dobradas em Java 21, Spring Boot 4 e PostgreSQL.",
-    link: "",
+      "Um projeto pessoal de pagamentos — estudando bancos de dados, locks e idempotência.",
+    link: "https://github.com/Viilih/ledger-pay",
   },
 } as const;
