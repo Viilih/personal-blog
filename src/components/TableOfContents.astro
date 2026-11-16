@@ -35,13 +35,13 @@ const contentId = `toc-content-${idSuffix}`;
         class="toc-header"
         type="button"
         id={toggleId}
-        aria-expanded="false"
+        aria-expanded={idSuffix === "rail" ? "true" : "false"}
         aria-controls={contentId}
       >
         <span class="toc-title">{t("toc.contents")}</span>
         <span class="toc-count">{validToc.length}</span>
         <svg
-          class="toc-icon"
+          class:list={["toc-icon", { rotated: idSuffix === "rail" }]}
           aria-hidden="true"
           viewBox="0 0 330 330"
           fill="currentColor"
@@ -49,7 +49,7 @@ const contentId = `toc-content-${idSuffix}`;
           <path d="M325.607 79.393a15 15 0 0 0-21.213.001L165.004 218.787 25.607 79.393a15 15 0 0 0-21.213 21.214l150.004 150a15 15 0 0 0 21.212-.001l149.996-150a15 15 0 0 0 .001-21.213Z" />
         </svg>
       </button>
-      <ul class="toc-list" id={contentId}>
+      <ul class:list={["toc-list", { show: idSuffix === "rail" }]} id={contentId}>
         {validToc.map((heading) => (
           <li>
             <a href={`#${heading.slug}`} class="toc-link">
@@ -75,14 +75,11 @@ const contentId = `toc-content-${idSuffix}`;
 
 <style>
   .toc {
-    position: sticky;
-    top: 1.75rem;
     background: transparent;
     padding: 0;
     width: 100%;
     border: none;
     box-shadow: none;
-    max-height: calc(100vh - 3.5rem);
   }
 
   .toc-header {
@@ -202,8 +199,7 @@ const contentId = `toc-content-${idSuffix}`;
   @media (max-width: 1024px) {
     .toc {
       position: relative;
-      top: 0;
-      max-height: none;
+      top: auto;
       padding: 0.75rem 0.85rem;
       border: 1px solid var(--border);
       border-radius: 6px;
