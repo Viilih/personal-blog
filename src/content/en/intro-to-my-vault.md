@@ -6,7 +6,7 @@ draft: false
 
 ## What is this blog?
 
-This is a public space where I share my thoughts and publish content that might be useful (or not) to me—and hopefully to you too.
+This is a public space where I share my thoughts and publish content that might be useful (or not) to me, and hopefully to you too.
 
 ## What this blog going to talk about?
 
@@ -16,7 +16,7 @@ Maybe advice for myself and some of my hobbies.
 
 ## Who am I?
 
-I'm a software engineer based in Brazil, focused on backend systems (Java, Spring Boot, PostgreSQL, payments and ledgers), with a fullstack background (React, TypeScript, .NET, NestJS) and an interest in AI engineering (agents, LLMs, RAG, MCP).
+I'm a full stack developer on a platform engineering team at Vivo, through Stefanini, working mostly with React, TypeScript, Node.js/NestJS, and Java/Spring Boot. Outside work, I study backend reliability (concurrency, race conditions) and data structures and algorithms, and I write about what I learn in this digital garden.
 
 If you, my dear reader, want to know more about me you can check my [website](https://guilherme-dev-pi.vercel.app/)
 

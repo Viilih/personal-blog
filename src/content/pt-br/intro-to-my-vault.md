@@ -6,7 +6,7 @@ draft: false
 
 ## O que é este blog?
 
-Este é um espaço público onde compartilho meus pensamentos e publico conteúdos que podem ser úteis (ou não) para mim — e, com sorte, para você também.
+Este é um espaço público onde compartilho meus pensamentos e publico conteúdos que podem ser úteis (ou não) para mim, e, com sorte, para você também.
 
 ## Sobre o que este blog vai falar?
 
@@ -16,7 +16,7 @@ Talvez até alguns conselhos para mim mesmo e coisas sobre meus hobbies.
 
 ## Quem sou eu?
 
-Sou um engenheiro de software baseado no Brasil, focado em sistemas backend (Java, Spring Boot, PostgreSQL, pagamentos e ledgers), com base fullstack (React, TypeScript, .NET, NestJS) e interesse em AI engineering (agentes, LLMs, RAG, MCP).
+Sou desenvolvedor full stack em um time de platform engineering na Vivo, pela Stefanini, trabalhando principalmente com React, TypeScript, Node.js/NestJS e Java/Spring Boot. Fora do trabalho, estudo confiabilidade de backend (concorrência, race conditions) e estruturas de dados e algoritmos, e escrevo sobre o que aprendo neste digital garden.
 
 Se você, meu caro leitor, quiser saber mais sobre mim, pode conferir meu [site](https://guilherme-dev-pi.vercel.app/).
 

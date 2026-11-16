@@ -9,14 +9,13 @@ label_pt: Novembro de 2026
 <!--
 Single source for /en/now and /pt-br/now.
 Edit the ::en and ::pt-br sections. Supported: ## headings, paragraphs, "- " lists, and [label](https://...) links.
-LedgerPay (https://github.com/Viilih/ledger-pay) is private; the link only works once the repository is public.
 -->
 
 ::en
 
 ## Building
 
-[LedgerPay](https://github.com/Viilih/ledger-pay) · in progress: a ledger flow built with Java 21, Spring Boot 4, PostgreSQL, Flyway and GitHub Actions.
+Work in progress: a double-entry ledger in Java 21, Spring Boot 4, and PostgreSQL.
 
 ## Practice
 
@@ -30,7 +29,7 @@ System design and AI engineering (agents, LLMs, RAG, and MCP).
 
 ## Construindo
 
-[LedgerPay](https://github.com/Viilih/ledger-pay) · em andamento: um fluxo de ledger com Java 21, Spring Boot 4, PostgreSQL, Flyway e GitHub Actions.
+Em andamento: um ledger de partidas dobradas em Java 21, Spring Boot 4 e PostgreSQL.
 
 ## Prática
 
