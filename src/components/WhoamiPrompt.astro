@@ -1,0 +1,645 @@
+---
+import { whoamiDeck } from "../data/whoami";
+import type { WhoamiLang } from "../data/whoami";
+
+interface Props {
+  lang: WhoamiLang;
+}
+
+const { lang } = Astro.props;
+const deck = whoamiDeck[lang];
+const initialCard = deck.cards[0];
+const serializedDeck = JSON.stringify({
+  cards: deck.cards,
+  colorChange: deck.colorChange,
+});
+---
+
+<div class="whoami-stage">
+  <button
+    type="button"
+    class="whoami-card"
+    data-whoami-card
+    data-clicks="0"
+    data-flipped="false"
+    data-tone={initialCard.tone}
+    data-open-label="$ whoami"
+    data-close-label={deck.closeLabel}
+    data-whoami-deck={serializedDeck}
+    aria-label="$ whoami"
+    aria-pressed="false"
+  >
+    <span class="whoami-card__face whoami-card__face--front" data-whoami-front>
+      <span class="whoami-prompt__symbol">$</span>
+      <span class="whoami-prompt__cmd">whoami</span>
+      <span class="whoami-prompt__pips" aria-hidden="true">
+        <span class="whoami-prompt__pip"></span>
+        <span class="whoami-prompt__pip"></span>
+      </span>
+    </span>
+
+    <span
+      class="whoami-card__face whoami-card__face--back"
+      data-whoami-back
+      aria-hidden="true"
+    >
+      <span class="whoami-card__corner whoami-card__corner--tl" aria-hidden="true">
+        <span class="whoami-card__rank" data-whoami-rank>{initialCard.rank}</span>
+        <span class="whoami-card__suit" data-whoami-suit>{initialCard.suit}</span>
+      </span>
+      <span class="whoami-card__watermark" data-whoami-watermark aria-hidden="true"
+        >{initialCard.suit}</span
+      >
+      <span class="whoami-card__reveal" data-whoami-reveal
+        >“{initialCard.reveal}”</span
+      >
+      <span class="whoami-card__corner whoami-card__corner--br" aria-hidden="true">
+        <span class="whoami-card__rank" data-whoami-rank>{initialCard.rank}</span>
+        <span class="whoami-card__suit" data-whoami-suit>{initialCard.suit}</span>
+      </span>
+    </span>
+  </button>
+
+  <span
+    class="sr-only"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    data-whoami-live
+  ></span>
+</div>
+
+<script>
+  import type { WhoamiCard, WhoamiDeckConfig } from "../data/whoami";
+
+  const CLICKS_TO_REVEAL = 3;
+  const STEP_STORAGE_KEY = "whoami-reveal-step";
+
+  let activeThemeObserver: MutationObserver | null = null;
+
+  function readRevealStep(deckLength: number): number {
+    try {
+      const raw = sessionStorage.getItem(STEP_STORAGE_KEY);
+      const parsed = raw ? Number.parseInt(raw, 10) : 0;
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        return parsed % deckLength;
+      }
+    } catch {
+      // Ignore storage errors in restricted browsing contexts.
+    }
+    return 0;
+  }
+
+  function writeRevealStep(step: number) {
+    try {
+      sessionStorage.setItem(STEP_STORAGE_KEY, String(step));
+    } catch {
+      // Ignore storage errors in restricted browsing contexts.
+    }
+  }
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function initWhoamiCards() {
+    if (activeThemeObserver) {
+      activeThemeObserver.disconnect();
+      activeThemeObserver = null;
+    }
+
+    const cards = document.querySelectorAll<HTMLButtonElement>(
+      "[data-whoami-card]",
+    );
+
+    cards.forEach((card) => {
+      if (card.dataset.whoamiInit === "true") return;
+      card.dataset.whoamiInit = "true";
+
+      const rawDeck = card.dataset.whoamiDeck;
+      if (!rawDeck) return;
+
+      let deck: Pick<WhoamiDeckConfig, "cards" | "colorChange">;
+      try {
+        deck = JSON.parse(rawDeck);
+      } catch {
+        return;
+      }
+
+      const stage = card.closest(".whoami-stage");
+      const liveRegion = stage?.querySelector<HTMLElement>("[data-whoami-live]");
+      const frontFace = card.querySelector<HTMLElement>("[data-whoami-front]");
+      const backFace = card.querySelector<HTMLElement>("[data-whoami-back]");
+      const rankEls = card.querySelectorAll<HTMLElement>("[data-whoami-rank]");
+      const suitEls = card.querySelectorAll<HTMLElement>("[data-whoami-suit]");
+      const watermarkEl = card.querySelector<HTMLElement>(
+        "[data-whoami-watermark]",
+      );
+      const revealEl = card.querySelector<HTMLElement>("[data-whoami-reveal]");
+
+      let clicks = 0;
+      let colorChangeTimer: number | null = null;
+      let colorChangeResetTimer: number | null = null;
+
+      const applyCard = (nextCard: WhoamiCard, announce: boolean) => {
+        card.dataset.tone = nextCard.tone;
+        rankEls.forEach((el) => {
+          el.textContent = nextCard.rank;
+        });
+        suitEls.forEach((el) => {
+          el.textContent = nextCard.suit;
+        });
+        if (watermarkEl) {
+          watermarkEl.textContent = nextCard.suit;
+        }
+        if (revealEl) {
+          revealEl.textContent = `“${nextCard.reveal}”`;
+        }
+        if (announce && liveRegion) {
+          liveRegion.textContent = nextCard.announcement;
+        }
+      };
+
+      const setFlipped = (flipped: boolean, revealCard?: WhoamiCard) => {
+        card.dataset.flipped = String(flipped);
+        card.setAttribute("aria-pressed", String(flipped));
+
+        const openLabel = card.dataset.openLabel ?? "$ whoami";
+        const closeLabel = card.dataset.closeLabel ?? openLabel;
+        card.setAttribute("aria-label", flipped ? closeLabel : openLabel);
+
+        if (flipped) {
+          card.setAttribute("title", closeLabel);
+        } else {
+          card.removeAttribute("title");
+        }
+
+        frontFace?.setAttribute("aria-hidden", String(flipped));
+        backFace?.setAttribute("aria-hidden", String(!flipped));
+
+        if (flipped && revealCard) {
+          applyCard(revealCard, true);
+        } else if (!flipped && liveRegion) {
+          liveRegion.textContent = "";
+        }
+      };
+
+      const clearColorChangeTimers = () => {
+        if (colorChangeTimer !== null) {
+          window.clearTimeout(colorChangeTimer);
+          colorChangeTimer = null;
+        }
+        if (colorChangeResetTimer !== null) {
+          window.clearTimeout(colorChangeResetTimer);
+          colorChangeResetTimer = null;
+        }
+        card.removeAttribute("data-color-change");
+      };
+
+      const triggerColorChange = (theme: "light" | "dark") => {
+        const nextCard = deck.colorChange[theme];
+        if (!nextCard) return;
+
+        clearColorChangeTimers();
+
+        if (prefersReducedMotion()) {
+          card.dataset.colorChange = "true";
+          applyCard(nextCard, true);
+          colorChangeResetTimer = window.setTimeout(() => {
+            card.removeAttribute("data-color-change");
+          }, 260);
+          return;
+        }
+
+        // Force reflow so rapid theme toggles replay the snap cleanly.
+        void card.offsetWidth;
+        card.dataset.colorChange = "true";
+
+        colorChangeTimer = window.setTimeout(() => {
+          applyCard(nextCard, true);
+        }, 150);
+
+        colorChangeResetTimer = window.setTimeout(() => {
+          card.removeAttribute("data-color-change");
+        }, 440);
+      };
+
+      const reset = () => {
+        clearColorChangeTimers();
+        clicks = 0;
+        card.dataset.clicks = "0";
+        setFlipped(false);
+      };
+
+      card.addEventListener("click", () => {
+        if (card.dataset.flipped === "true") {
+          reset();
+          return;
+        }
+
+        clicks += 1;
+
+        if (clicks >= CLICKS_TO_REVEAL) {
+          clicks = CLICKS_TO_REVEAL;
+          card.dataset.clicks = String(clicks);
+
+          const step = readRevealStep(deck.cards.length);
+          const nextCard = deck.cards[step];
+          writeRevealStep((step + 1) % deck.cards.length);
+
+          setFlipped(true, nextCard);
+        } else {
+          card.dataset.clicks = String(clicks);
+        }
+      });
+
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && card.dataset.flipped === "true") {
+          event.preventDefault();
+          reset();
+        }
+      });
+
+      let lastTheme = document.documentElement.getAttribute("data-theme");
+      activeThemeObserver = new MutationObserver(() => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        if (
+          currentTheme !== lastTheme &&
+          (currentTheme === "light" || currentTheme === "dark")
+        ) {
+          lastTheme = currentTheme;
+          if (card.dataset.flipped === "true") {
+            triggerColorChange(currentTheme);
+          }
+        }
+      });
+
+      activeThemeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", initWhoamiCards);
+  document.addEventListener("astro:before-swap", () => {
+    if (activeThemeObserver) {
+      activeThemeObserver.disconnect();
+      activeThemeObserver = null;
+    }
+  });
+</script>
+
+<style>
+  .whoami-stage {
+    margin: 0 0 0.75rem;
+    perspective: 900px;
+  }
+
+  .whoami-card {
+    --card-suit-color: var(--accent-color);
+    --card-frame-color: color-mix(in srgb, var(--accent-color) 24%, var(--border));
+
+    appearance: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    display: block;
+    position: relative;
+    width: 6.25rem;
+    max-width: 100%;
+    height: 1.45rem;
+    border-radius: 10px;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    will-change: transform;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.68s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+      height 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+      margin-bottom 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .whoami-card[data-tone="ink"] {
+    --card-suit-color: var(--heading-color);
+    --card-frame-color: color-mix(in srgb, var(--heading-color) 18%, var(--border));
+  }
+
+  .whoami-card:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  .whoami-card[data-flipped="true"]:focus-visible {
+    border-radius: 10px;
+  }
+
+  .whoami-card[data-clicks="1"] {
+    animation: whoami-nudge-1 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .whoami-card[data-clicks="2"] {
+    animation: whoami-nudge-2 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .whoami-card[data-flipped="true"] {
+    width: 21rem;
+    height: 8.25rem;
+    margin-bottom: 0.4rem;
+    transform: rotateY(180deg);
+  }
+
+  .whoami-card[data-flipped="true"]:hover {
+    transform: rotateY(180deg) translateY(-2px);
+  }
+
+  .whoami-card[data-flipped="true"][data-color-change="true"] {
+    animation: whoami-color-change 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .whoami-card__face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    pointer-events: none;
+  }
+
+  .whoami-card__face--front {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.38rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    transform: rotateY(0deg);
+    transition: color var(--transition-speed) ease;
+  }
+
+  .whoami-card:hover .whoami-card__face--front {
+    color: var(--color);
+  }
+
+  .whoami-prompt__symbol {
+    color: var(--prompt-color);
+    font-weight: 500;
+  }
+
+  .whoami-prompt__pips {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin-left: 0.1rem;
+  }
+
+  .whoami-prompt__pip {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--prompt-color);
+    opacity: 0;
+    transform: scale(0.4);
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .whoami-card[data-clicks="1"] .whoami-prompt__pip:nth-child(1) {
+    opacity: 0.65;
+    transform: scale(1);
+  }
+
+  .whoami-card[data-clicks="2"] .whoami-prompt__pip:nth-child(1),
+  .whoami-card[data-clicks="2"] .whoami-prompt__pip:nth-child(2) {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+
+  .whoami-card__face--back {
+    display: grid;
+    place-items: center;
+    padding: 1.25rem 2.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-color);
+    overflow: hidden;
+    transform: rotateY(180deg);
+    box-shadow:
+      0 12px 28px -14px rgba(28, 25, 23, 0.24),
+      0 2px 6px -2px rgba(28, 25, 23, 0.08);
+    transition:
+      border-color var(--transition-speed) ease,
+      box-shadow var(--transition-speed) ease,
+      background-color var(--transition-speed) ease;
+  }
+
+  :global(:root[data-theme="dark"]) .whoami-card__face--back {
+    box-shadow:
+      0 14px 32px -12px rgba(0, 0, 0, 0.6),
+      0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  }
+
+  .whoami-card[data-flipped="true"]:hover .whoami-card__face--back {
+    border-color: color-mix(in srgb, var(--card-suit-color) 42%, var(--border));
+  }
+
+  .whoami-card__face--back::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--card-frame-color);
+    pointer-events: none;
+    transition: border-color 0.25s ease;
+  }
+
+  .whoami-card__corner {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05rem;
+    color: var(--card-suit-color);
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.25s ease;
+  }
+
+  .whoami-card__corner--tl {
+    top: 0.65rem;
+    left: 0.72rem;
+  }
+
+  .whoami-card__corner--br {
+    bottom: 0.65rem;
+    right: 0.72rem;
+    transform: rotate(180deg);
+  }
+
+  .whoami-card__rank {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .whoami-card__suit {
+    font-size: 0.72rem;
+    line-height: 1;
+  }
+
+  .whoami-card__watermark {
+    position: absolute;
+    font-size: 4.75rem;
+    line-height: 1;
+    color: var(--card-suit-color);
+    opacity: 0.06;
+    pointer-events: none;
+    transition: color 0.25s ease;
+  }
+
+  .whoami-card__reveal {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-style: italic;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--heading-color);
+    text-wrap: balance;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @keyframes whoami-nudge-1 {
+    0% {
+      transform: translateY(0) rotate(0deg);
+    }
+    40% {
+      transform: translateY(-1.5px) rotate(-1.2deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+
+  @keyframes whoami-nudge-2 {
+    0% {
+      transform: rotateY(0deg) rotateX(0deg) translateY(0);
+    }
+    45% {
+      transform: rotateY(18deg) rotateX(4deg) translateY(-2px);
+    }
+    100% {
+      transform: rotateY(0deg) rotateX(0deg) translateY(0);
+    }
+  }
+
+  @keyframes whoami-color-change {
+    0% {
+      transform: rotateY(180deg) scale(1);
+    }
+    42% {
+      transform: rotateY(224deg) rotateX(5deg) scale(1.03);
+    }
+    100% {
+      transform: rotateY(180deg) scale(1);
+    }
+  }
+
+  @keyframes whoami-color-fade {
+    0% {
+      opacity: 0.45;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .whoami-card[data-flipped="true"] {
+      height: 8.75rem;
+    }
+
+    .whoami-card__face--back {
+      padding: 1.25rem 2.35rem;
+    }
+
+    .whoami-card__reveal {
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .whoami-card {
+      transform-style: flat;
+      will-change: auto;
+      transition: none;
+    }
+
+    .whoami-card[data-clicks="1"],
+    .whoami-card[data-clicks="2"] {
+      animation: none;
+    }
+
+    .whoami-card[data-flipped="true"],
+    .whoami-card[data-flipped="true"]:hover {
+      transform: none;
+    }
+
+    .whoami-card[data-flipped="true"][data-color-change="true"] {
+      animation: whoami-color-fade 0.25s ease;
+    }
+
+    .whoami-card__face {
+      backface-visibility: visible;
+      -webkit-backface-visibility: visible;
+    }
+
+    .whoami-card__face--front {
+      transform: none;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.22s ease;
+    }
+
+    .whoami-card__face--back {
+      transform: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: none;
+    }
+
+    .whoami-card[data-flipped="true"] .whoami-card__face--front {
+      opacity: 0;
+      visibility: hidden;
+      transition: none;
+    }
+
+    .whoami-card[data-flipped="true"] .whoami-card__face--back {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.28s ease;
+    }
+  }
+</style>

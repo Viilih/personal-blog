@@ -1,0 +1,318 @@
+---
+interface Props {
+  lang: "en" | "pt-br";
+}
+
+const { lang } = Astro.props;
+
+const copy =
+  lang === "pt-br"
+    ? {
+        triggerLabel: "Abrir pista de mágica",
+        prefix: "Pista: tente clicar 3 vezes no ",
+        suffix: " na página inicial.",
+      }
+    : {
+        triggerLabel: "Open magic hint",
+        prefix: "Hint: try clicking ",
+        suffix: " 3 times on the home page.",
+      };
+
+const popupId = `magic-clue-popup-${lang}`;
+---
+
+<span class="magic-clue" data-magic-clue>
+  <button
+    type="button"
+    class="magic-clue__trigger"
+    data-magic-clue-trigger
+    aria-expanded="false"
+    aria-controls={popupId}
+    aria-label={copy.triggerLabel}
+  >
+    ♦
+  </button>
+
+  <span
+    id={popupId}
+    class="magic-clue__popup"
+    data-magic-clue-popup
+    role="status"
+    aria-live="polite"
+    hidden
+  >
+    <span class="magic-clue__suit" aria-hidden="true">♦</span>
+    <span class="magic-clue__text">
+      {copy.prefix}<code class="magic-clue__cmd">$ whoami</code>{copy.suffix}
+    </span>
+  </span>
+</span>
+
+<script>
+  let cleanupClueListeners: (() => void) | null = null;
+
+  function initMagicClues() {
+    if (cleanupClueListeners) {
+      cleanupClueListeners();
+      cleanupClueListeners = null;
+    }
+
+    const roots = document.querySelectorAll<HTMLElement>("[data-magic-clue]");
+    if (roots.length === 0) return;
+
+    const controllers: Array<() => void> = [];
+
+    roots.forEach((root) => {
+      if (root.dataset.magicClueInit === "true") return;
+      root.dataset.magicClueInit = "true";
+
+      const trigger = root.querySelector<HTMLButtonElement>(
+        "[data-magic-clue-trigger]",
+      );
+      const popup = root.querySelector<HTMLElement>("[data-magic-clue-popup]");
+      if (!trigger || !popup) return;
+
+      let pinned = false;
+      let hovered = false;
+      let focused = false;
+      let closeTimer: number | null = null;
+
+      const clearCloseTimer = () => {
+        if (closeTimer !== null) {
+          window.clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+      };
+
+      const sync = () => {
+        const isOpen = pinned || hovered || focused;
+        root.dataset.open = String(isOpen);
+        trigger.setAttribute("aria-expanded", String(isOpen));
+        popup.hidden = !isOpen;
+      };
+
+      const close = () => {
+        clearCloseTimer();
+        pinned = false;
+        hovered = false;
+        focused = false;
+        sync();
+      };
+
+      controllers.push(close);
+
+      trigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        clearCloseTimer();
+
+        if (pinned) {
+          close();
+        } else {
+          controllers.forEach((fn) => fn());
+          pinned = true;
+          sync();
+        }
+      });
+
+      root.addEventListener("pointerenter", (event) => {
+        if (event.pointerType !== "mouse") return;
+        clearCloseTimer();
+        hovered = true;
+        sync();
+      });
+
+      root.addEventListener("pointerleave", (event) => {
+        if (event.pointerType !== "mouse") return;
+        clearCloseTimer();
+        closeTimer = window.setTimeout(() => {
+          hovered = false;
+          sync();
+        }, 120);
+      });
+
+      root.addEventListener("focusin", () => {
+        if (!trigger.matches(":focus-visible")) return;
+        clearCloseTimer();
+        focused = true;
+        sync();
+      });
+
+      root.addEventListener("focusout", (event) => {
+        const nextTarget = event.relatedTarget as Node | null;
+        if (nextTarget && root.contains(nextTarget)) return;
+        focused = false;
+        sync();
+      });
+    });
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      const clickedInside = Array.from(roots).some((root) =>
+        target ? root.contains(target) : false,
+      );
+      if (!clickedInside) {
+        controllers.forEach((fn) => fn());
+      }
+    };
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        controllers.forEach((fn) => fn());
+      }
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+    document.addEventListener("keydown", handleKeydown);
+
+    cleanupClueListeners = () => {
+      document.removeEventListener("click", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeydown);
+    };
+  }
+
+  document.addEventListener("astro:page-load", initMagicClues);
+  document.addEventListener("astro:before-swap", () => {
+    if (cleanupClueListeners) {
+      cleanupClueListeners();
+      cleanupClueListeners = null;
+    }
+  });
+</script>
+
+<style>
+  .magic-clue {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: baseline;
+  }
+
+  .magic-clue__trigger {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0 0.25rem;
+    margin-left: 0.2rem;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--accent-color);
+    opacity: 0.72;
+    transform-style: preserve-3d;
+    transition:
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity var(--transition-speed) ease;
+  }
+
+  .magic-clue__trigger:hover,
+  .magic-clue__trigger:focus-visible,
+  .magic-clue[data-open="true"] .magic-clue__trigger {
+    opacity: 1;
+    transform: rotateY(180deg) scale(1.15);
+  }
+
+  .magic-clue__trigger:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .magic-clue__popup {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.55rem);
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: max-content;
+    max-width: min(17.5rem, calc(100vw - 2.5rem));
+    padding: 0.65rem 0.85rem;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--accent-color) 30%, var(--border));
+    background: var(--surface-color);
+    color: var(--color);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    box-shadow:
+      0 10px 24px -12px rgba(28, 25, 23, 0.28),
+      0 2px 6px -2px rgba(28, 25, 23, 0.1);
+    animation: magic-clue-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .magic-clue__popup[hidden] {
+    display: none;
+  }
+
+  :global(:root[data-theme="dark"]) .magic-clue__popup {
+    box-shadow:
+      0 12px 28px -10px rgba(0, 0, 0, 0.65),
+      0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  }
+
+  .magic-clue__suit {
+    color: var(--accent-color);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    flex-shrink: 0;
+  }
+
+  .magic-clue__cmd {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--prompt-color);
+    background: var(--code-background-color);
+    border: 1px solid var(--border);
+    padding: 0.05em 0.32em;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  @keyframes magic-clue-pop {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(4px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .magic-clue__popup {
+      left: auto;
+      right: -1.25rem;
+      transform: none;
+      animation: magic-clue-pop-mobile 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
+  @keyframes magic-clue-pop-mobile {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .magic-clue__trigger {
+      transition: opacity var(--transition-speed) ease;
+    }
+
+    .magic-clue__trigger:hover,
+    .magic-clue__trigger:focus-visible,
+    .magic-clue[data-open="true"] .magic-clue__trigger {
+      transform: none;
+    }
+
+    .magic-clue__popup {
+      animation: none;
+    }
+  }
+</style>

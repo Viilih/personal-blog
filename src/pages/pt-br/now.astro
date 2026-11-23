@@ -1,6 +1,7 @@
 ---
 import GoBackButton from "components/GoBackButton.astro";
 import Link from "components/Link.astro";
+import MagicClue from "components/MagicClue.astro";
 import { nowMeta } from "../../data/now";
 import { useTranslations } from "../../i18n/utils";
 import BaseLayout from "layouts/BaseLayout.astro";
@@ -75,6 +76,9 @@ const now = nowMeta["pt-br"];
       <li>Guitarra e violão</li>
       <li>Jiu-jítsu (faixa azul)</li>
       <li>Surfe</li>
+      <li>
+        Mágica com baralho <MagicClue lang="pt-br" />
+      </li>
     </ul>
   </section>
 
