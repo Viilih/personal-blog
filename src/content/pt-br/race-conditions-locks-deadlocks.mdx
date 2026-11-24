@@ -1,0 +1,94 @@
+---
+title: "Race conditions, locks e deadlocks: o que aprendi construindo um ledger"
+description: "Como duas transferências simultâneas num ledger podem deixar a conta negativa, e como locks pessimistas com uma ordem fixa de travamento evitam essa race condition e o deadlock."
+pubDate: 2026-11-24
+draft: false
+tags: ["locks", "concurrency", "postgresql", "java", "spring boot", "backend"]
+---
+
+import NotionImage from "../../components/ImageNotio.astro";
+import RaceConditionImage from '../../images/excalidraw/race-conditions-locks-deadlocks/race-condition.png'
+import LocksFlowImage from '../../images/excalidraw/race-conditions-locks-deadlocks/locks-flow.png'
+
+### Introdução
+
+Neste artigo eu vou falar sobre locks: um jeito de impedir que dois processos alterem o mesmo recurso ao mesmo tempo.
+
+No final, você deve entender um pouco melhor como eles funcionam (e, com sorte, um pouco de locks distribuídos também).
+
+### Contexto
+
+Estou construindo o [https://github.com/Viilih/ledger-pay](https://github.com/Viilih/ledger-pay), um app de pagamentos com um ledger no centro (o nome meio que entrega 😅). Quando cheguei nas transferências entre contas, dei de cara com um problema clássico: ***uma race condition.***
+
+O cenário é este: a conta tem $50. Chegam duas transferências ao mesmo tempo, uma de $30 e outra de $40. As duas requisições leem o saldo, as duas veem $50 e as duas passam na checagem de "tem saldo suficiente?". Cada uma insere o seu débito, e a conta termina em -$20.
+
+<NotionImage
+  src={RaceConditionImage}
+  alt="Diagrama de uma race condition no LedgerPay: dois processos leem o saldo de $50 ao mesmo tempo, os dois passam na checagem de saldo e os dois inserem débitos, deixando a conta em -$20."
+/>
+
+Isso é uma race condition: dois processos leem e agem sobre o mesmo dado ao mesmo tempo, e nenhum espera o outro.
+
+### A solução: locks
+
+A correção é um lock.
+
+Um lock impede que outros processos alterem um recurso (aqui, uma linha do banco) enquanto um processo está trabalhando nele. Então, enquanto o processo A segura o lock de uma linha, o processo B tem que esperar, e a race condition some.
+
+Considerei duas opções:
+
+- **Lock pessimista:** a transação trava a linha quando lê ela com `SELECT ... FOR UPDATE`, e as outras transações que querem alterar essa linha esperam até o lock ser liberado.
+- **Lock otimista:** não bloqueia ninguém. Na hora de salvar, ele confere se alguém alterou a linha nesse meio tempo (normalmente por uma coluna de versão ou timestamp). Se alguém alterou, a escrita falha e o seu código tem que tentar de novo.
+
+Fui de pessimista porque, num ledger, duas transferências batendo na mesma conta não é raro, e fazer retry de transferência traz uma complexidade que eu não queria nesse momento. No geral, a escolha depende de quão prováveis são os conflitos.
+
+### Como funciona no LedgerPay
+
+No LedgerPay, uma transferência trava as duas contas antes de fazer qualquer outra coisa. O método do repository fica assim:
+
+```java
+@Lock(LockModeType.PESSIMISTIC_WRITE)
+Optional<Account> findByIdForUpdate(Long id);
+```
+
+Por baixo dos panos, isso vira um `SELECT … FOR UPDATE`.
+
+O lock mora no banco porque ele é o único lugar compartilhado por todas as instâncias da aplicação. Um bloco `synchronized` em Java só protegeria uma instância.
+
+Dentro do `transfer()`, que roda numa única transação, o fluxo é:
+
+1. Rejeitar o óbvio primeiro: mesma conta dos dois lados, valor \<= 0, ids faltando.
+2. Travar as duas contas.
+3. Conferir status e moeda.
+4. Somar as entries pra ter o saldo atual (não existe coluna de saldo, o saldo é sempre a soma das entries).
+5. Se tiver saldo suficiente, inserir a transação mais uma entry de DEBIT e uma de CREDIT.
+6. Commit (ou rollback, se algo falhar), que libera o lock.
+
+Voltando ao exemplo dos $50: a transferência A pega o lock, lê $50, debita $30 e faz commit. A transferência B ficou esperando esse tempo todo. Quando finalmente pega o lock, ela lê $20, falha na checagem dos $40 e é rejeitada. Nada de -$20.
+
+<NotionImage
+  src={LocksFlowImage}
+  alt="Diagrama do fluxo correto com locks no LedgerPay: o processo A obtém o lock da linha, debita $30 dos $50 e faz commit, enquanto o processo B espera e depois é rejeitado porque $40 é maior que os $20 restantes."
+/>
+
+### A ordem dos locks
+
+Travar as duas contas resolveu a race condition, mas criou um problema novo.
+
+Imagina duas transferências ao mesmo tempo: uma da conta 10 pra conta 20, e outra da 20 pra 10. A primeira trava a conta 10 e espera a 20. A segunda trava a conta 20 e espera a 10. Agora cada uma está esperando um lock que a outra segura, e nenhuma vai soltar nunca. Isso é o que a gente chama de deadlock.
+
+A correção é bem simples: travar sempre na mesma ordem. No LedgerPay, eu sempre travo o menor id primeiro e depois o maior. Assim, as duas transferências tentam travar a conta 10 primeiro, uma delas espera, e o ciclo nunca se forma.
+
+### Além disso (locks distribuídos)
+
+Tudo isso funciona porque existe um banco só, e o lock mora nele. Se você precisa coordenar algo entre serviços que não compartilham um banco, o lock tem que morar em outro lugar. Uma opção comum é o Redis: quem cria a chave primeiro fica com o lock, e o TTL garante que uma instância que caiu não segure o lock pra sempre.
+
+O problema é que, se a operação demorar mais que o TTL, o lock expira no meio e duas instâncias acham que são donas dele. Fencing tokens resolvem isso: cada lock vem com um número crescente, e o storage rejeita escritas que chegam com um número mais antigo. Isso dá um post inteiro sozinho, então vou parar por aqui.
+
+### Pra fechar
+
+No LedgerPay, o lock pessimista foi a escolha simples e previsível. Eu só consideraria o lock otimista se os conflitos na mesma conta fossem raros, e mesmo assim eu precisaria de uma coluna de versão na conta que toda transferência atualizasse, já que hoje nada mais mexe nessa linha.
+
+Bom, é isso. Espero que você tenha aprendido algo útil sobre locks!
+
+Se cuida e bebe água!
