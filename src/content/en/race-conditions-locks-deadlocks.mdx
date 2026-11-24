@@ -1,0 +1,94 @@
+---
+title: "Race conditions, locks and deadlocks: what I learned building a ledger"
+description: "How two simultaneous ledger transfers can overdraft an account, and how pessimistic locks with a fixed lock order prevent that race and the deadlock."
+pubDate: 2026-11-24
+draft: false
+tags: ["locks", "concurrency", "postgresql", "java", "spring boot", "backend"]
+---
+
+import NotionImage from "../../components/ImageNotio.astro";
+import RaceConditionImage from '../../images/excalidraw/race-conditions-locks-deadlocks/race-condition.png'
+import LocksFlowImage from '../../images/excalidraw/race-conditions-locks-deadlocks/locks-flow.png'
+
+### Introduction
+
+In this article I'm writing about locks: a way to stop two processes from changing the same resource at the same time.
+
+By the end, you should know a bit more about how they work (and hopefully about distributed locks too).
+
+### Context
+
+I'm building [https://github.com/Viilih/ledger-pay](https://github.com/Viilih/ledger-pay), a payments app with a ledger at its core (the name kind of gives it away 😅). When I got to transfers between accounts, I ran into a classic problem: ***a race condition.***
+
+Here's the setup: the account has $50. Two transfers arrive at the same time, one for $30 and one for $40. Both requests read the balance, both see $50, and both pass the "enough funds?" check. Each one inserts its debit, and the account ends up at -$20.
+
+<NotionImage
+  src={RaceConditionImage}
+  alt="Diagram of a race condition on LedgerPay: two processes read a $50 balance at the same time, both pass the funds check, and both insert debits, leaving the account at -$20."
+/>
+
+That's a race condition: two processes read and act on the same data at the same time, and neither waits for the other.
+
+### The solution: locks
+
+The fix is a lock.
+
+A lock stops other processes from changing a resource (here, a database row) while one process is working on it. So while process A holds the lock on a row, process B has to wait, and the race condition goes away.
+
+I considered two options:
+
+- **Pessimistic lock:** the transaction locks the row when it reads it with `SELECT ... FOR UPDATE`, so other transactions that want to change it wait until it's released.
+- **Optimistic lock:** doesn't block anyone. When saving, it checks whether someone else changed the row in the meantime (usually through a version or timestamp column), and if so, the write fails and your code has to retry it.
+
+I went with pessimistic because in a ledger, two transfers hitting the same account isn't rare, and retrying a transfer adds complexity I didn't want at this stage. In general, the choice comes down to how likely conflicts are.
+
+### How it works in LedgerPay
+
+In LedgerPay, a transfer locks both accounts before doing anything else. The repository method looks like this:
+
+```java
+@Lock(LockModeType.PESSIMISTIC_WRITE)
+Optional<Account> findByIdForUpdate(Long id);
+```
+
+Under the hood, that becomes a `SELECT … FOR UPDATE`.
+
+The lock lives in the database because it's the one place every app instance shares. A `synchronized` block in Java would only protect a single instance.
+
+Inside `transfer()`, which runs in a single transaction, the flow is:
+
+1. Reject the obvious stuff first: same account on both sides, amount \<= 0, missing ids.
+2. Lock both accounts.
+3. Check status and currency.
+4. Sum the entries to get the current balance (there's no balance column, the balance is always the sum of entries).
+5. If there are enough funds, insert the transaction plus a DEBIT and a CREDIT entry.
+6. Commit (or rollback, if anything fails), which releases the lock.
+
+Back to the $50 example: transfer A grabs the lock, reads $50, debits $30 and commits. Transfer B was waiting the whole time. When it finally gets the lock, it reads $20, fails the $40 check, and gets rejected. No more -$20.
+
+<NotionImage
+  src={LocksFlowImage}
+  alt="Diagram of the correct lock flow on LedgerPay: Process A acquires the row lock, debits $30 from $50, and commits, while Process B waits and is then rejected because $40 is more than the remaining $20."
+/>
+
+### The order of the locks
+
+Locking both accounts fixed the race condition, but it created a new problem.
+
+Imagine two transfers at the same time: one from account 10 to account 20, and another from 20 to 10. The first one locks account 10 and waits for 20. The second one locks account 20 and waits for 10. Now each one is waiting for a lock the other holds, and neither will ever let go. That's what we call a deadlock.
+
+The fix is pretty simple: always lock in the same order. In LedgerPay, I always lock the smaller id first, then the larger one. So both transfers try to lock account 10 first, one of them waits, and the cycle never forms.
+
+### Furthermore (distributed locks)
+
+All of this works because there's one database, and the lock lives there. If you need to coordinate something across services that don't share a database, the lock has to live somewhere else. A common option is Redis: whoever creates the key first holds the lock, and the TTL makes sure a crashed instance doesn't hold it forever.
+
+The catch is that if the operation takes longer than the TTL, the lock expires in the middle and two instances think they own it. Fencing tokens fix that: every lock comes with an increasing number, and the storage rejects writes carrying an older one. That's a whole post on its own, so I'll stop here for now.
+
+### Wrapping up
+
+For LedgerPay, a pessimistic lock was the simple, predictable choice. I'd only consider optimistic locking if conflicts on the same account were rare, and even then I'd need a version column on the account that every transfer updates, since nothing else touches that row today.
+
+Well, that's it. I hope you learned something useful about locks!
+
+Stay safe and drink water!
